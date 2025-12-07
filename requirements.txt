@@ -1,0 +1,10 @@
+# Core dependencies for Lixplore CLI
+
+# PubMed search via NCBI Entrez API
+biopython>=1.84
+
+# HTTP requests for API calls (Crossref, DOAJ, EuropePMC, arXiv)
+requests>=2.31.0
+
+# Optional: Alternative literature study library
+litstudy>=1.0.6
