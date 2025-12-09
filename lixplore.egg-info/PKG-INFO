@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: lixplore
+Version: 1.0.0
+Summary: Lixplore - Academic Literature Search CLI Tool
+Author: Your Name
+Author-email: your_email@example.com
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.7
+Requires-Dist: biopython>=1.84
+Requires-Dist: requests>=2.31.0
+Requires-Dist: litstudy>=1.0.6
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

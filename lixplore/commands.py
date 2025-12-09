@@ -35,6 +35,10 @@ def add_commands(parser: argparse.ArgumentParser):
         help="Search across all sources (PubMed, Crossref, DOAJ, EuropePMC, arXiv)"
     )
     parser.add_argument(
+        "-s", "--sources", type=str,
+        help="Combined source selection (e.g., 'PX' for PubMed+arXiv, 'PCE' for PubMed+Crossref+EuropePMC, 'A' for all)"
+    )
+    parser.add_argument(
         "-q", "--query", type=str,
         help="Query string to search"
     )
@@ -99,11 +103,39 @@ def run_main(args):
     # Determine which sources to search
     sources_to_search = []
 
-    if args.all:
-        # Search all sources
+    # Source letter mapping
+    source_map = {
+        'P': 'pubmed',
+        'C': 'crossref',
+        'J': 'doaj',
+        'E': 'europepmc',
+        'X': 'arxiv',
+        'A': 'all'
+    }
+
+    # Check for combined sources flag (-s/--sources)
+    if hasattr(args, 'sources') and args.sources:
+        sources_str = args.sources.upper()
+
+        # If 'A' is in the string, search all sources
+        if 'A' in sources_str:
+            sources_to_search = ["pubmed", "crossref", "doaj", "europepmc", "arxiv"]
+        else:
+            # Parse each character
+            for char in sources_str:
+                if char in source_map and source_map[char] != 'all':
+                    source = source_map[char]
+                    if source not in sources_to_search:
+                        sources_to_search.append(source)
+                elif char not in [' ', ',']:  # Ignore spaces and commas
+                    print(f"Warning: Unknown source code '{char}' - ignoring")
+
+    # Check for -A/--all flag
+    elif args.all:
         sources_to_search = ["pubmed", "crossref", "doaj", "europepmc", "arxiv"]
+
+    # Fall back to individual source flags
     else:
-        # Collect individual source flags
         if args.pubmed:
             sources_to_search.append("pubmed")
         if args.crossref:
@@ -118,13 +150,17 @@ def run_main(args):
     # Check if at least one source is selected
     if not sources_to_search:
         print("Error: Please specify at least one source to search:")
+        print("  -s PX           Combined sources (P=PubMed, C=Crossref, J=DOAJ, E=EuropePMC, X=arXiv, A=All)")
         print("  -P or --pubmed      Search PubMed")
         print("  -C or --crossref    Search Crossref")
         print("  -J or --doaj        Search DOAJ")
         print("  -E or --europepmc   Search EuropePMC")
         print("  -X or --arxiv       Search arXiv")
         print("  -A or --all         Search all sources")
-        print("\nYou can combine multiple sources, e.g.: -P -C -E")
+        print("\nExamples:")
+        print("  lixplore -s PX -q 'search term'      # PubMed + arXiv")
+        print("  lixplore -s PCE -q 'search term'     # PubMed + Crossref + EuropePMC")
+        print("  lixplore -P -C -E -q 'search term'   # Same as above (old syntax)")
         return
 
     results = []

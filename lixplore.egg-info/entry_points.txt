@@ -1,0 +1,2 @@
+[console_scripts]
+lixplore = lixplore.cli:main
