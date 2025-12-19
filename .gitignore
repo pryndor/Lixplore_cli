@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Lixplore specific - User generated files
+exports/
+results.json
+.lixplore_cache.json
+.crossref
+.semantischolar
+config.json
+
+# Test files and debugging
+tmp_rovodev_*
+*.tmp
+test.py
+test1.py
+test_*.py
+troubleshoot.py
+pub.py
+
+# Old documentation (superseded)
+FLAGS_REFERENCE.md
+TROUBLESHOOTING_REPORT.md
+
+# Distribution / packaging
+*.whl
+*.tar.gz
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Logs
+*.log
+
+# Documentation builds
+docs/_build/
+
+# OS specific
+Thumbs.db
+
+# Keep structure but ignore contents
+exports/*
+!exports/.gitignore

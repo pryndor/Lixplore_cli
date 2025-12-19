@@ -1,0 +1,331 @@
+.TH LIXPLORE 1 "December 2024" "lixplore 1.0" "User Commands"
+.SH NAME
+lixplore \- Academic literature search and export tool
+.SH SYNOPSIS
+.B lixplore
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B lixplore
+is a command-line tool for searching academic literature across multiple databases 
+(PubMed, Crossref, DOAJ, EuropePMC, arXiv) and exporting results in various formats 
+(CSV, Excel, JSON, BibTeX, RIS, EndNote, XML).
+
+All exports are automatically organized into format-specific folders within the 
+.I exports/
+directory.
+
+.SH OPTIONS
+.SS "Source Selection"
+.TP
+.BR \-P ", " \-\-pubmed
+Search PubMed (biomedical and life sciences literature)
+.TP
+.BR \-C ", " \-\-crossref
+Search Crossref (scholarly works with DOIs)
+.TP
+.BR \-J ", " \-\-doaj
+Search DOAJ (Directory of Open Access Journals)
+.TP
+.BR \-E ", " \-\-europepmc
+Search EuropePMC (Europe PubMed Central)
+.TP
+.BR \-x ", " \-\-arxiv
+Search arXiv (preprint repository for physics, math, CS, etc.)
+.TP
+.BR \-A ", " \-\-all
+Search ALL sources at once
+.TP
+.BR \-s " \fICODES\fR, " \-\-sources " \fICODES\fR"
+Combined source selection using codes: P=PubMed, C=Crossref, J=DOAJ, 
+E=EuropePMC, X=arXiv, A=All
+.br
+Example: \fB-s PX\fR for PubMed+arXiv, \fB-s PCE\fR for PubMed+Crossref+EuropePMC
+
+.SS "Search Parameters"
+.TP
+.BR \-q " \fITEXT\fR, " \-\-query " \fITEXT\fR"
+Search query string. Supports Boolean operators for advanced queries:
+.RS
+.IP \(bu 2
+\fBAND\fR - Both terms required (e.g., "cancer AND treatment")
+.IP \(bu 2
+\fBOR\fR - Either term (e.g., "cancer OR tumor")
+.IP \(bu 2
+\fBNOT\fR - Exclude term (e.g., "diabetes NOT type1")
+.IP \(bu 2
+\fBParentheses\fR - Group terms (e.g., "(cancer OR tumor) AND treatment")
+.RE
+.IP
+Examples: \fB-q "cancer treatment"\fR | \fB-q "cancer AND treatment"\fR | \fB-q "(cancer OR tumor) AND treatment"\fR
+.TP
+.BR \-au " \fINAME\fR, " \-\-author " \fINAME\fR"
+Search by author name
+.br
+Example: \fB-au "Smith J"\fR
+.TP
+.BR \-DOI " \fIDOI\fR, " \-\-doi " \fIDOI\fR"
+Search for a specific article by DOI
+.br
+Example: \fB-DOI "10.1038/nature12345"\fR
+.TP
+.BR \-m " \fIN\fR, " \-\-max_results " \fIN\fR"
+Maximum number of results to fetch per source (default: 10)
+.br
+Example: \fB-m 50\fR
+
+.SS "Filtering & Processing"
+.TP
+.BR \-d " \fIFROM TO\fR, " \-\-date " \fIFROM TO\fR"
+Filter by publication date range in YYYY-MM-DD format
+.br
+Example: \fB-d 2020-01-01 2024-12-31\fR
+.TP
+.BR \-D ", " \-\-deduplicate
+Remove duplicate results when searching multiple sources (recommended with \fB-A\fR or \fB-s\fR)
+.TP
+.BR \-\-sort " \fIORDER\fR"
+Sort results by specified order. Options:
+.RS
+.IP \(bu 2
+\fBrelevant\fR - Default, original API order (most relevant first)
+.IP \(bu 2
+\fBnewest\fR - Latest publications first (by year, descending)
+.IP \(bu 2
+\fBoldest\fR - Earliest publications first (by year, ascending)
+.IP \(bu 2
+\fBjournal\fR - Alphabetical by journal name
+.IP \(bu 2
+\fBauthor\fR - Alphabetical by first author's last name
+.RE
+.IP
+Example: \fB--sort newest\fR
+
+.SS "Display Options"
+.TP
+.BR \-a ", " \-\-abstract
+Display abstracts along with titles in the results
+.TP
+.BR \-N " \fIN\fR [\fIN\fR ...], " \-\-number " \fIN\fR [\fIN\fR ...]"
+View detailed information for specific article(s) by number
+.br
+Example: \fB-N 1\fR or \fB-N 1 2 3\fR
+.TP
+.BR \-R " \fIN\fR [\fIN\fR ...], " \-\-review " \fIN\fR [\fIN\fR ...]"
+Open article(s) in separate terminal window for detailed review. Works in two modes:
+.br
+1. Combined with search: \fB-P -q "query" -R 1 2 3\fR
+.br
+2. Standalone (from cached results): \fBlixplore -R 1 2 3\fR
+.br
+In the review window, press \fBq\fR or \fBCtrl+C\fR to close.
+.br
+Example: \fB-R 1\fR or \fB-R 1 2 3\fR
+.TP
+.BR \-st " \fIN\fR, " \-\-stat " \fIN\fR"
+Get statistics for the specified count (default: 50)
+
+.SS "Export & Output"
+.TP
+.BR \-X " \fIFORMAT\fR, " \-\-export " \fIFORMAT\fR"
+Export results to specified format. Available formats:
+.RS
+.IP \(bu 2
+\fBcsv\fR - CSV format (Excel, Google Sheets)
+.IP \(bu 2
+\fBxlsx\fR - Microsoft Excel format with formatting
+.IP \(bu 2
+\fBjson\fR - JSON structured data
+.IP \(bu 2
+\fBbibtex\fR - BibTeX format for LaTeX citations
+.IP \(bu 2
+\fBris\fR - RIS format (Zotero, Mendeley, RefWorks)
+.IP \(bu 2
+\fBenw\fR - EndNote Tagged format (recommended for EndNote)
+.IP \(bu 2
+\fBendnote\fR - EndNote XML format
+.IP \(bu 2
+\fBxml\fR - Generic XML format
+.RE
+.IP
+Files are automatically saved to \fIexports/\fR folder
+.TP
+.BR \-o " \fIFILE\fR, " \-\-output " \fIFILE\fR"
+Custom output filename for export (default: auto-generated with timestamp)
+.br
+Example: \fB-o my_results.csv\fR
+.TP
+.BR \-Z ", " \-\-zotero
+Export results to Zotero reference manager
+
+.SS "Utility"
+.TP
+.BR \-H ", " \-\-history
+Show search history
+.TP
+.BR \-h ", " \-\-help
+Display help message and exit
+
+.SH EXAMPLES
+.TP
+.B Basic search:
+.nf
+lixplore -P -q "cancer treatment" -m 10
+.fi
+.TP
+.B Multi-source search with export:
+.nf
+lixplore -s PX -q "machine learning" -m 20 -X xlsx -o ml_papers.xlsx
+.fi
+.TP
+.B Search all sources with deduplication:
+.nf
+lixplore -A -q "COVID-19" -m 50 -D -X csv
+.fi
+.TP
+.B Search with date filter and abstracts:
+.nf
+lixplore -P -q "diabetes" -d 2020-01-01 2024-12-31 -m 15 -a
+.fi
+.TP
+.B Search by author:
+.nf
+lixplore -P -au "Smith J" -m 10 -a
+.fi
+.TP
+.B Boolean operators in queries:
+.nf
+# AND operator (both terms required)
+lixplore -P -q "cancer AND treatment" -m 10
+
+# OR operator (either term)
+lixplore -P -q "cancer OR tumor" -m 10
+
+# NOT operator (exclude term)
+lixplore -P -q "diabetes NOT type1" -m 10
+
+# Complex query with parentheses
+lixplore -P -q "(cancer OR tumor) AND (treatment OR therapy)" -m 20
+.fi
+.TP
+.B Export to EndNote:
+.nf
+lixplore -P -q "neuroscience" -m 30 -X enw -o neuro_papers.enw
+.fi
+.TP
+.B Review articles in separate terminal (two-step workflow):
+.nf
+# Step 1: Search and cache results
+lixplore -P -q "paracetamol" -m 10
+
+# Step 2: Review specific articles from cache
+lixplore -R 1 5 9
+
+# In review window: Press 'q' or Ctrl+C to close
+.fi
+.TP
+.B Review during search (one-step):
+.nf
+lixplore -P -q "diabetes" -m 20 -R 1 3 5
+.fi
+.TP
+.B Sort results and export selected:
+.nf
+# Get newest papers, export top 10
+lixplore -P -q "cancer" -m 50 --sort newest -S first:10 -X xlsx
+
+# Get oldest papers
+lixplore -P -q "history" -m 50 --sort oldest -X csv
+.fi
+.TP
+.B Smart selection patterns:
+.nf
+# Export odd-numbered articles
+lixplore -P -q "research" -m 50 -S odd -X csv
+
+# Export articles 10-20
+lixplore -P -q "science" -m 50 -S 10-20 -X xlsx
+
+# Export first 15 and last 5
+lixplore -P -q "study" -m 50 -S first:15 last:5 -X enw
+.fi
+
+.SH EXPORT LOCATIONS
+All exports are automatically saved to organized folders:
+.TP
+.I exports/csv/
+CSV files
+.TP
+.I exports/excel/
+Microsoft Excel files (.xlsx)
+.TP
+.I exports/json/
+JSON files
+.TP
+.I exports/bibtex/
+BibTeX files (.bib)
+.TP
+.I exports/ris/
+RIS files
+.TP
+.I exports/endnote_tagged/
+EndNote Tagged format files (.enw)
+.TP
+.I exports/endnote_xml/
+EndNote XML files
+.TP
+.I exports/xml/
+Generic XML files
+
+.SH FILES
+.TP
+.I ~/.lixplore_cache.json
+Cache file for search results (7-day retention)
+.TP
+.I ./exports/
+Directory containing all exported files, organized by format
+
+.SH ENVIRONMENT
+No specific environment variables are required.
+
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Error (no sources specified, no query provided, etc.)
+
+.SH BUGS
+Report bugs at: https://github.com/yourusername/lixplore/issues
+
+.SH AUTHOR
+Written by the Lixplore development team.
+
+.SH COPYRIGHT
+Copyright \(co 2024 Lixplore Contributors.
+.br
+This is free software; see the source for copying conditions.
+
+.SH SEE ALSO
+.BR pubmed (1),
+.BR arxiv (1),
+.BR crossref (1)
+
+.SH NOTES
+When searching multiple sources, using the \fB-D\fR flag is recommended to remove 
+duplicate results. The tool caches results for 7 days to improve performance on 
+repeated searches.
+
+.B Review Window Controls:
+When using \fB-R\fR flag, articles open in separate terminal windows. To close a 
+review window, press \fBq\fR (quit) or \fBCtrl+C\fR (interrupt). The window will 
+not close with other keys, preventing accidental closes while reading.
+
+.B Two-Step Review Workflow:
+Search results are automatically cached, allowing you to review articles in a 
+separate command without re-searching. This is useful for browsing titles first, 
+then reviewing detailed information for selected articles.
+
+For more detailed information and tutorials, visit the project documentation at:
+.br
+https://github.com/yourusername/lixplore

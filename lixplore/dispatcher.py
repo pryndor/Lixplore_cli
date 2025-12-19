@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from lixplore.sources import pubmed, crossref, doaj, europepmc, arxiv
-from lixplore.utils.terminal import open_in_new_terminal
+from lixplore.utils.terminal import open_in_new_terminal, open_article_in_terminal
+from lixplore.utils.export import export_results
 import json
 import os
 from difflib import SequenceMatcher
@@ -245,9 +246,59 @@ def show_history():
     print("Search history not yet implemented")
 
 
+def export_to_format(results, format, filename=None):
+    """
+    Export results to specified format.
+    
+    Args:
+        results: List of article dictionaries
+        format: Export format ('csv', 'json', 'bibtex', 'ris')
+        filename: Optional output filename
+    """
+    export_results(results, format, filename)
+
+
+def review_articles(results, article_numbers):
+    """
+    Open selected articles in separate terminal windows for detailed review.
+    
+    Args:
+        results: List of article dictionaries
+        article_numbers: List of article numbers to review (1-based index)
+    """
+    if not results:
+        print("No results to review.")
+        return
+    
+    for num in article_numbers:
+        if 1 <= num <= len(results):
+            article = results[num - 1]
+            print(f"Opening article #{num} in separate terminal window...")
+            open_article_in_terminal(article, num)
+        else:
+            print(f"Warning: Article #{num} is out of range (1-{len(results)})")
+
+
 def save_results(results):
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
+
+
+def load_cached_results():
+    """
+    Load previously cached search results.
+    
+    Returns:
+        List of article dictionaries or None if no cache exists
+    """
+    if os.path.exists(CACHE_FILE):
+        try:
+            with open(CACHE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading cached results: {e}")
+            return None
+    return None
 
 
 def load_results():

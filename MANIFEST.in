@@ -1,0 +1,24 @@
+# Include documentation
+include README.md
+include LICENSE
+include requirements.txt
+include CHANGELOG.md
+
+# Include documentation files
+recursive-include docs *.md *.1
+
+# Exclude unnecessary files
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude *.so
+
+# Exclude test files
+prune tests
+prune exports
+
+# Exclude cache and temp files
+exclude .lixplore_cache.json
+exclude results.json
+exclude .crossref
+exclude .semantischolar
