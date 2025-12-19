@@ -7,8 +7,8 @@ import os
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-# Read requirements from requirements.txt
-with open('requirements.txt') as f:
+# Read requirements from requirements.txt (UTF-8 to be Windows-safe)
+with open('requirements.txt', encoding='utf-8') as f:
     requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
 setup(
@@ -25,7 +25,7 @@ setup(
         'Source': 'https://github.com/yourusername/lixplore',
         'Documentation': 'https://github.com/yourusername/lixplore#readme',
     },
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests', 'tests.*')),
     include_package_data=True,
     install_requires=requirements,
     entry_points={
@@ -50,6 +50,7 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Operating System :: OS Independent',
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS',
