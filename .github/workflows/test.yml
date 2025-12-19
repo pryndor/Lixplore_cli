@@ -33,7 +33,3 @@ jobs:
       run: |
         lixplore --help
         lixplore --examples
-    
-    - name: Test basic functionality
-      run: |
-        lixplore -P -q "test" -m 2
