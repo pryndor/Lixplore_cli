@@ -7,6 +7,19 @@ import tempfile
 import os
 
 
+def _supports_unicode_output() -> bool:
+    import sys
+    try:
+        "📄".encode(sys.stdout.encoding or "utf-8")
+        return True
+    except Exception:
+        return False
+
+
+def _label(unicode_ok: bool, emoji: str, ascii_label: str) -> str:
+    return f"{emoji} {ascii_label}:" if unicode_ok else f"{ascii_label.upper()}:"
+
+
 def format_article_for_review(article: dict, article_number: int = None) -> str:
     """
     Format article data for detailed review in a separate terminal.
@@ -18,6 +31,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     Returns:
         Formatted text for display
     """
+    unicode_ok = _supports_unicode_output()
     lines = []
     lines.append("=" * 80)
     if article_number:
@@ -29,14 +43,14 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     
     # Title
     if article.get('title'):
-        lines.append("📄 TITLE:")
+        lines.append(_label(unicode_ok, "📄", "Title"))
         lines.append("-" * 80)
         lines.append(article['title'])
         lines.append("")
     
     # Authors
     if article.get('authors'):
-        lines.append("👥 AUTHORS:")
+        lines.append(_label(unicode_ok, "👥", "Authors"))
         lines.append("-" * 80)
         if isinstance(article['authors'], list):
             for i, author in enumerate(article['authors'], 1):
@@ -46,7 +60,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
         lines.append("")
     
     # Publication Info
-    lines.append("📚 PUBLICATION INFO:")
+    lines.append(_label(unicode_ok, "📚", "Publication Info"))
     lines.append("-" * 80)
     if article.get('journal'):
         lines.append(f"  Journal: {article['journal']}")
@@ -58,7 +72,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     
     # DOI and URL
     if article.get('doi') or article.get('url'):
-        lines.append("🔗 LINKS:")
+        lines.append(_label(unicode_ok, "🔗", "Links"))
         lines.append("-" * 80)
         if article.get('doi'):
             lines.append(f"  DOI: {article['doi']}")
@@ -69,7 +83,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     
     # Abstract
     if article.get('abstract'):
-        lines.append("📝 ABSTRACT:")
+        lines.append(_label(unicode_ok, "📝", "Abstract"))
         lines.append("-" * 80)
         # Wrap abstract text for better readability
         abstract = article['abstract']

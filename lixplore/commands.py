@@ -74,7 +74,7 @@ For more information, visit: https://github.com/yourusername/lixplore
 
     # ===== SOURCE SELECTION =====
     source_group = parser.add_argument_group(
-        '🔍 SOURCE SELECTION',
+        '[SOURCE SELECTION]',
         'Choose which academic databases to search'
     )
     
@@ -109,7 +109,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     
     # ===== SEARCH PARAMETERS =====
     search_group = parser.add_argument_group(
-        '🔎 SEARCH PARAMETERS',
+        '[SEARCH PARAMETERS]',
         'Define what and how to search'
     )
     
@@ -132,7 +132,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     
     # ===== FILTERING & PROCESSING =====
     filter_group = parser.add_argument_group(
-        '🎯 FILTERING & PROCESSING',
+        '[FILTERING & PROCESSING]',
         'Filter and process search results'
     )
     
@@ -152,7 +152,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     
     # ===== DISPLAY OPTIONS =====
     display_group = parser.add_argument_group(
-        '📊 DISPLAY OPTIONS',
+        '[DISPLAY OPTIONS]',
         'Control how results are displayed'
     )
     
@@ -175,7 +175,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     
     # ===== EXPORT & OUTPUT =====
     export_group = parser.add_argument_group(
-        '💾 EXPORT & OUTPUT',
+        '[EXPORT & OUTPUT]',
         'Export results in various formats'
     )
     
@@ -200,7 +200,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     
     # ===== UTILITY =====
     utility_group = parser.add_argument_group(
-        'ℹ️  UTILITY',
+        '[UTILITY]',
         'Additional utility options'
     )
     
@@ -335,9 +335,20 @@ def parse_selection(selection_args, total_results):
     return sorted(list(selected))
 
 
-def show_examples():
-    """Display tldr-style quick examples."""
-    print("""
+def _supports_unicode_output() -> bool:
+    """Return True if stdout can encode common Unicode characters (emojis/box)."""
+    import sys
+    test_string = "📚═"
+    try:
+        test_string.encode(sys.stdout.encoding or "utf-8")
+        return True
+    except Exception:
+        return False
+
+
+def _examples_text(unicode_ok: bool) -> str:
+    if unicode_ok:
+        return """
 ╔═══════════════════════════════════════════════════════════════════════╗
 ║                    LIXPLORE - Quick Examples                          ║
 ╚═══════════════════════════════════════════════════════════════════════╝
@@ -479,7 +490,157 @@ def show_examples():
 💡 TIP: Use 'man lixplore' for detailed manual page
 
 For more information: lixplore --help
-""")
+"""
+    else:
+        return """
+=======================================================================
+                         LIXPLORE - Quick Examples                      
+=======================================================================
+
+BASIC SEARCH
+  Search PubMed for a query:
+    $ lixplore -P -q "cancer treatment" -m 10
+
+  Search with abstracts:
+    $ lixplore -P -q "diabetes" -m 5 -a
+
+MULTI-SOURCE SEARCH
+  Search PubMed + arXiv:
+    $ lixplore -s PX -q "machine learning" -m 20
+
+  Search all sources with deduplication:
+    $ lixplore -A -q "COVID-19" -m 50 -D
+
+EXPORT RESULTS
+  Export to Excel:
+    $ lixplore -P -q "neuroscience" -m 15 -X xlsx -o brain_research.xlsx
+
+  Export to EndNote Tagged:
+    $ lixplore -P -q "quantum physics" -m 20 -X enw -o physics.enw
+
+  Export to CSV:
+    $ lixplore -P -q "climate change" -m 30 -X csv
+
+  Export to BibTeX:
+    $ lixplore -P -q "artificial intelligence" -m 25 -X bibtex
+
+ADVANCED SEARCH
+  Search with date filter:
+    $ lixplore -P -q "vaccine development" -d 2020-01-01 2024-12-31 -m 15
+
+  Search by author:
+    $ lixplore -P -au "Smith J" -m 10 -a
+
+  Search by DOI:
+    $ lixplore -DOI "10.1038/nature12345"
+
+BOOLEAN OPERATORS (Advanced Query Syntax)
+  AND operator (both terms required):
+    $ lixplore -P -q "cancer AND treatment" -m 10
+
+  OR operator (either term):
+    $ lixplore -P -q "cancer OR tumor" -m 10
+
+  NOT operator (exclude term):
+    $ lixplore -P -q "diabetes NOT type1" -m 10
+
+  Complex queries with parentheses:
+    $ lixplore -P -q "(cancer OR tumor) AND (treatment OR therapy)" -m 20
+
+  Combine with other features:
+    $ lixplore -A -q "COVID-19 AND vaccine" -m 50 -D --sort newest -X xlsx
+
+COMBINED FEATURES
+  Multi-source search with export and deduplication:
+    $ lixplore -s PCE -q "gene therapy" -m 30 -D -X xlsx -o genes.xlsx
+
+  Search with date filter, abstracts, and export:
+    $ lixplore -P -q "cancer immunotherapy" -d 2023-01-01 2024-12-31 -a -m 20 -X json
+
+REVIEW ARTICLES (Two-Step Workflow)
+  Step 1 - Search and cache results:
+    $ lixplore -P -q "diabetes" -m 10
+
+  Step 2 - Review specific articles:
+    $ lixplore -R 2           # Review article #2
+    $ lixplore -R 1 5 9       # Review multiple articles
+
+  One-step (search + review):
+    $ lixplore -P -q "aspirin" -m 10 -R 1 3 5
+
+  In review window:
+    Press 'q' or Ctrl+C to close (won't close with other keys)
+
+SMART SELECTION (Export Specific Articles)
+  Export odd-numbered articles:
+    $ lixplore -P -q "research" -m 50 -S odd -X csv
+
+  Export even-numbered articles:
+    $ lixplore -P -q "study" -m 50 -S even -X xlsx
+
+  Export first 10 articles:
+    $ lixplore -P -q "cancer" -m 50 -S first:10 -X enw
+
+  Export last 5 articles:
+    $ lixplore -P -q "science" -m 30 -S last:5 -X csv
+
+  Export specific range:
+    $ lixplore -P -q "biology" -m 50 -S 10-20 -X xlsx
+
+  Mixed selection (combine patterns):
+    $ lixplore -P -q "chemistry" -m 50 -S 1 3 5-10 odd -X csv
+
+SORT RESULTS
+  Sort by newest (latest first):
+    $ lixplore -P -q "COVID-19" -m 50 --sort newest
+
+  Sort by oldest (historical research):
+    $ lixplore -P -q "diabetes" -m 50 --sort oldest
+
+  Sort by journal (alphabetical):
+    $ lixplore -A -q "AI" -m 50 -D --sort journal
+
+  Sort by author (alphabetical):
+    $ lixplore -P -q "physics" -m 50 --sort author
+
+  Combine sort + selection + export:
+    $ lixplore -P -q "cancer" -m 50 --sort newest -S first:10 -X xlsx
+
+SOURCE CODES (for -s flag)
+  P = PubMed       C = Crossref      J = DOAJ
+  E = EuropePMC    X = arXiv         A = All sources
+
+EXPORT FORMATS
+  csv      - CSV (Excel, Google Sheets)
+  xlsx     - Excel with formatting
+  json     - JSON structured data
+  bibtex   - BibTeX for LaTeX
+  ris      - RIS (Zotero, Mendeley)
+  enw      - EndNote Tagged (recommended)
+  endnote  - EndNote XML
+  xml      - Generic XML
+
+Export locations: All files saved to exports/ folder
+ (organized by format: exports/csv/, exports/excel/, etc.)
+
+TIP: Use -D flag when searching multiple sources to remove duplicates
+TIP: Use -a flag to see abstracts in results
+TIP: Use -R for detailed review in separate windows (press 'q' to close)
+TIP: Use -S with keywords (odd, even, first:N, last:N) for smart selection
+TIP: Use --sort newest to get latest research first
+TIP: Results are cached - review later with: lixplore -R 1 2 3
+TIP: Combine features: --sort newest -S first:10 -X xlsx
+TIP: Use --help for complete documentation
+TIP: Use 'man lixplore' for detailed manual page
+
+For more information: lixplore --help
+"""
+
+
+def show_examples():
+    """Display tldr-style quick examples."""
+    unicode_ok = _supports_unicode_output()
+    print(_examples_text(unicode_ok))
 
 
 def run_main(args):
