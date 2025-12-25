@@ -1,0 +1,15 @@
+{
+  "name": "IEEE",
+  "description": "Export format for IEEE publication submissions",
+  "format": "bibtex",
+  "citation_style": "ieee",
+  "fields": ["title", "authors", "journal", "year", "doi"],
+  "field_order": ["authors", "title", "journal", "year", "doi"],
+  "author_format": "F. Last",
+  "max_authors": 6,
+  "abbreviate_journal": true,
+  "include_abstract": false,
+  "sort": "relevant",
+  "deduplicate": "auto",
+  "enrich": ["crossref"]
+}

@@ -106,6 +106,10 @@ For more information, visit: https://github.com/yourusername/lixplore
         "-s", "--sources", type=str, metavar="CODES",
         help="Combined source selection using codes: P=PubMed, C=Crossref, J=DOAJ, E=EuropePMC, X=arXiv, A=All. Example: -s PX for PubMed+arXiv, -s PCJE for multiple"
     )
+    source_group.add_argument(
+        "--custom-api", type=str, metavar="NAME",
+        help="Use a custom API source (Springer, BASE, etc.). Must be configured in ~/.lixplore/apis/ or ~/.lixplore/custom_apis.json. Example: --custom-api springer"
+    )
     
     # ===== SEARCH PARAMETERS =====
     search_group = parser.add_argument_group(
@@ -141,15 +145,35 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="Filter by publication date range in YYYY-MM-DD format. Example: -d 2020-01-01 2024-12-31"
     )
     filter_group.add_argument(
-        "-D", "--deduplicate", action="store_true",
-        help="Remove duplicate results when searching multiple sources (recommended with -A or -s)"
+        "-D", "--deduplicate", nargs="?", const="auto", metavar="STRATEGY",
+        choices=["auto", "doi_only", "title_only", "strict", "loose"],
+        help="Remove duplicate results. Strategies: auto (default, multi-level), doi_only (DOI matching only), title_only (title similarity only), strict (high threshold 0.95), loose (low threshold 0.75). Example: -D or -D strict"
+    )
+    filter_group.add_argument(
+        "--dedup-threshold", type=float, default=0.85, metavar="FLOAT",
+        help="Title similarity threshold for deduplication (0.0-1.0). Default: 0.85. Example: --dedup-threshold 0.9"
+    )
+    filter_group.add_argument(
+        "--dedup-keep", type=str,
+        choices=["first", "most_complete", "prefer_doi"],
+        default="most_complete", metavar="STRATEGY",
+        help="Which duplicate to keep: first (chronological), most_complete (most metadata), prefer_doi (prefer entries with DOI). Default: most_complete"
+    )
+    filter_group.add_argument(
+        "--dedup-merge", action="store_true",
+        help="Merge metadata from duplicates instead of discarding. Combines best data from all duplicates."
     )
     filter_group.add_argument(
         "--sort", type=str, choices=["relevant", "newest", "oldest", "journal", "author"],
         default="relevant", metavar="ORDER",
         help="Sort results by: relevant (default/original order), newest (latest first), oldest (earliest first), journal (alphabetical), author (by first author). Example: --sort newest"
     )
-    
+    filter_group.add_argument(
+        "--enrich", nargs="*", metavar="API",
+        choices=["crossref", "pubmed", "arxiv", "all"],
+        help="Enrich metadata using external APIs. Use without arguments for all, or specify: crossref, pubmed, arxiv. Automatically validates and finds missing DOIs. Example: --enrich or --enrich crossref pubmed"
+    )
+
     # ===== DISPLAY OPTIONS =====
     display_group = parser.add_argument_group(
         '[DISPLAY OPTIONS]',
@@ -161,6 +185,10 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="Display abstracts along with titles in the results"
     )
     display_group.add_argument(
+        "-i", "--interactive", action="store_true",
+        help="Launch interactive TUI mode for browsing results (requires 'rich' library for enhanced display, falls back to simple mode)"
+    )
+    display_group.add_argument(
         "-N", "--number", type=int, nargs="+", default=[], metavar="N",
         help="View detailed information for specific article(s) by number. Example: -N 1 or -N 1 2 3"
     )
@@ -169,8 +197,20 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="Open article(s) in separate terminal window for detailed review. Two modes: 1) With search: -P -q 'query' -R 1 2, or 2) Standalone: lixplore -R 1 2 (uses cached results). Close window with 'q' or Ctrl+C. Example: -R 1 or -R 1 2 3"
     )
     display_group.add_argument(
-        "-st", "--stat", type=int, default=50, metavar="N",
-        help="Get statistics for the specified count (default: 50)"
+        "--stat", action="store_true",
+        help="Show comprehensive statistics dashboard with visualizations (publication trends, top journals, top authors, source distribution)"
+    )
+    display_group.add_argument(
+        "--stat-top", type=int, default=10, metavar="N",
+        help="Number of top items to show in statistics rankings (default: 10)"
+    )
+    display_group.add_argument(
+        "-p", "--page", type=int, default=1, metavar="N",
+        help="Page number to display when results exceed page size (default: 1). Example: -p 2"
+    )
+    display_group.add_argument(
+        "--page-size", type=int, default=20, metavar="N",
+        help="Number of results to display per page (default: 20). Example: --page-size 50"
     )
     
     # ===== EXPORT & OUTPUT =====
@@ -180,10 +220,9 @@ For more information, visit: https://github.com/yourusername/lixplore
     )
     
     export_group.add_argument(
-        "-X", "--export", type=str, 
-        choices=["csv", "json", "bibtex", "ris", "endnote", "enw", "xlsx", "xml"],
+        "-X", "--export", type=str,
         metavar="FORMAT",
-        help="Export results to specified format: csv, json, bibtex, ris, endnote (XML), enw (EndNote Tagged), xlsx (Excel), xml. Files saved to exports/ folder"
+        help="Export results to format(s). Single format: csv, json, bibtex, ris, endnote (XML), enw (EndNote Tagged), xlsx (Excel), xml. Multiple formats (comma-separated): csv,ris,bibtex. Files saved to exports/ folder. Example: -X csv or -X csv,ris,bibtex"
     )
     export_group.add_argument(
         "-o", "--output", type=str, metavar="FILE",
@@ -194,10 +233,56 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="Select article(s) to export. Supports: numbers (1 3 5), ranges (1-10), keywords (odd, even, first:N, last:N, top:N). Examples: -S 1 3 5 | -S odd | -S even | -S 1-10 | -S first:5 | -S last:3 | -S top:10. Without this flag, all results are exported."
     )
     export_group.add_argument(
-        "-Z", "--zotero", action="store_true",
-        help="Export results to Zotero reference manager"
+        "--export-fields", type=str, nargs="+", metavar="FIELD",
+        help="Select specific fields to export. Available fields: title, authors, abstract, journal, year, doi, url, source. Example: --export-fields title authors year doi"
     )
-    
+    export_group.add_argument(
+        "--zip", action="store_true",
+        help="Compress exported file(s) to ZIP format. Example: -X csv --zip"
+    )
+    export_group.add_argument(
+        "-c", "--citations", type=str,
+        choices=["apa", "mla", "chicago", "ieee"],
+        metavar="STYLE",
+        help="Export as formatted citations. Styles: apa, mla, chicago, ieee. Example: -c apa or --citations apa"
+    )
+    export_group.add_argument(
+        "--save-profile", type=str, metavar="NAME",
+        help="Save current export settings as a reusable profile. Example: --save-profile my_nature_export"
+    )
+    export_group.add_argument(
+        "--load-profile", type=str, metavar="NAME",
+        help="Load previously saved export profile. Example: --load-profile my_nature_export"
+    )
+    export_group.add_argument(
+        "--template", type=str, metavar="NAME",
+        help="Use predefined export template. Available: nature, science, ieee. Example: --template nature. Use --list-templates to see all"
+    )
+    export_group.add_argument(
+        "--download-pdf", action="store_true",
+        help="Download full-text PDFs for search results. Tries PMC, arXiv, DOI resolution, and optionally SciHub. PDFs saved to ~/Lixplore_PDFs/"
+    )
+    export_group.add_argument(
+        "--pdf-numbers", type=int, nargs="+", metavar="N",
+        help="Download PDFs only for specific article numbers. Example: --pdf-numbers 1 3 5"
+    )
+    export_group.add_argument(
+        "--use-scihub", action="store_true",
+        help="Use SciHub as fallback for PDF download (requires --set-scihub-mirror configuration). Use at your own discretion."
+    )
+    export_group.add_argument(
+        "--add-to-zotero", action="store_true",
+        help="Add search results to Zotero library (requires Zotero API configuration)"
+    )
+    export_group.add_argument(
+        "--zotero-collection", type=str, metavar="KEY",
+        help="Zotero collection key to add items to (use with --add-to-zotero)"
+    )
+    export_group.add_argument(
+        "--export-for-mendeley", action="store_true",
+        help="Export results as RIS file for Mendeley Desktop import"
+    )
+
     # ===== UTILITY =====
     utility_group = parser.add_argument_group(
         '[UTILITY]',
@@ -209,8 +294,48 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="Show search history"
     )
     utility_group.add_argument(
+        "--refresh", action="store_true",
+        help="Bypass cache and fetch fresh results (ignore cached data)"
+    )
+    utility_group.add_argument(
         "--examples", action="store_true",
         help="Show quick examples (tldr-style) and exit"
+    )
+    utility_group.add_argument(
+        "--list-profiles", action="store_true",
+        help="List all saved export profiles"
+    )
+    utility_group.add_argument(
+        "--delete-profile", type=str, metavar="NAME",
+        help="Delete saved export profile"
+    )
+    utility_group.add_argument(
+        "--list-templates", action="store_true",
+        help="List all available export templates"
+    )
+    utility_group.add_argument(
+        "--list-custom-apis", action="store_true",
+        help="List all configured custom API sources"
+    )
+    utility_group.add_argument(
+        "--create-api-examples", action="store_true",
+        help="Create example custom API configurations (Springer, BASE, etc.)"
+    )
+    utility_group.add_argument(
+        "--set-scihub-mirror", type=str, metavar="URL",
+        help="Configure SciHub mirror URL for PDF downloads. Example: --set-scihub-mirror https://sci-hub.se"
+    )
+    utility_group.add_argument(
+        "--show-pdf-dir", action="store_true",
+        help="Show PDF download directory location"
+    )
+    utility_group.add_argument(
+        "--configure-zotero", nargs=2, metavar=("API_KEY", "USER_ID"),
+        help="Configure Zotero API access. Get API key from https://www.zotero.org/settings/keys"
+    )
+    utility_group.add_argument(
+        "--show-zotero-collections", action="store_true",
+        help="List Zotero collections with their keys"
     )
 
     parser.set_defaults(func=run_main)
@@ -652,14 +777,130 @@ def run_main(args):
         return
 
     # If user only wants history
+    # Handle template and profile management commands
+    from lixplore.utils import profiles
+    from lixplore.utils import template_engine
+    from lixplore.utils import custom_apis
+
+    # Handle PDF downloader configuration commands
+    from lixplore.utils import pdf_downloader
+
+    if args.set_scihub_mirror:
+        pdf_downloader.set_scihub_mirror(args.set_scihub_mirror)
+        return
+
+    if args.show_pdf_dir:
+        print(f"PDF download directory: {pdf_downloader.PDF_DIR}")
+        if os.path.exists(pdf_downloader.PDF_DIR):
+            # Count PDFs
+            pdf_count = sum(1 for root, dirs, files in os.walk(pdf_downloader.PDF_DIR)
+                          for f in files if f.endswith('.pdf'))
+            print(f"Total PDFs downloaded: {pdf_count}")
+        else:
+            print("(Directory does not exist yet - will be created on first download)")
+        return
+
+    # Handle reference manager configuration commands
+    from lixplore.utils import reference_managers
+
+    if args.configure_zotero:
+        api_key, user_id = args.configure_zotero
+        reference_managers.configure_zotero(api_key, user_id)
+        return
+
+    if args.show_zotero_collections:
+        reference_managers.show_zotero_collections()
+        return
+
+    # Handle custom API management commands
+    if args.list_custom_apis:
+        api_list = custom_apis.list_custom_apis()
+        if api_list:
+            print("Configured custom API sources:")
+            for api in api_list:
+                config = custom_apis.load_custom_api_config(api)
+                if config:
+                    print(f"  • {api}")
+                    if 'description' in config:
+                        print(f"      {config['description']}")
+                    if 'requires_auth' in config and config['requires_auth']:
+                        print(f"      ⚠️  Requires authentication")
+        else:
+            print("No custom APIs configured.")
+            print("Run: lixplore --create-api-examples to create example configurations")
+        return
+
+    if args.create_api_examples:
+        custom_apis.create_example_configs()
+        return
+
+    if args.list_templates:
+        template_names = template_engine.list_templates()
+        if template_names:
+            print("Available export templates:")
+            for name in template_names:
+                template = template_engine.load_template(name.replace(' (user)', ''))
+                if template:
+                    print(f"  • {name}")
+                    if 'description' in template:
+                        print(f"      {template['description']}")
+                    if 'format' in template:
+                        print(f"      Format: {template['format']}")
+        else:
+            print("No templates found.")
+        return
+
+    if args.list_profiles:
+        profile_names = profiles.list_profiles()
+        if profile_names:
+            print("Saved export profiles:")
+            for name in profile_names:
+                profile = profiles.load_profile(name)
+                print(f"  • {name}")
+                if 'export_format' in profile:
+                    print(f"      Format: {profile['export_format']}")
+                if 'citation_style' in profile:
+                    print(f"      Citation: {profile['citation_style']}")
+        else:
+            print("No saved profiles found.")
+            print("Save a profile with: --save-profile <name>")
+        return
+
+    if args.delete_profile:
+        if profiles.delete_profile(args.delete_profile):
+            print(f"✓ Profile '{args.delete_profile}' deleted successfully")
+        return
+
+    # Load template if specified
+    if args.template:
+        template = template_engine.load_template(args.template)
+        if template:
+            print(f"✓ Loading template: {args.template}")
+            args = template_engine.apply_template_to_args(args, template)
+        else:
+            print(f"Error: Template '{args.template}' not found")
+            print("Use --list-templates to see available templates")
+            return
+
+    # Load profile if specified (profiles override templates)
+    if args.load_profile:
+        profile = profiles.load_profile(args.load_profile)
+        if profile:
+            print(f"✓ Loading profile: {args.load_profile}")
+            args = profiles.apply_profile_to_args(args, profile)
+        else:
+            print(f"Error: Profile '{args.load_profile}' not found")
+            print("Use --list-profiles to see available profiles")
+            return
+
     if args.history:
         dispatcher.show_history()
         return
-    
+
     # If user only wants to review cached results (no new search)
     if args.review and not any([args.pubmed, args.crossref, args.doaj, args.europepmc, args.arxiv, args.all, args.sources, args.query]):
-        # Load cached results and review
-        cached_results = dispatcher.load_cached_results()
+        # Load cached results and review (ignore --refresh flag for standalone review)
+        cached_results = dispatcher.load_cached_results(check_expiry=True, force_refresh=False)
         if cached_results:
             print(f"Loading cached results ({len(cached_results)} articles)...")
             print("\nCached results:")
@@ -674,6 +915,14 @@ def run_main(args):
 
     # Determine which sources to search
     sources_to_search = []
+    use_custom_api = False
+    custom_api_name = None
+
+    # Check for custom API first (takes precedence)
+    if hasattr(args, 'custom_api') and args.custom_api:
+        use_custom_api = True
+        custom_api_name = args.custom_api
+        # Custom API is handled separately, not added to sources_to_search
 
     # Source letter mapping
     source_map = {
@@ -719,20 +968,21 @@ def run_main(args):
         if args.arxiv:
             sources_to_search.append("arxiv")
 
-    # Check if at least one source is selected
-    if not sources_to_search:
+    # Check if at least one source is selected (either standard or custom)
+    if not sources_to_search and not use_custom_api:
         print("Error: Please specify at least one source to search:")
         print("  -s PX           Combined sources (P=PubMed, C=Crossref, J=DOAJ, E=EuropePMC, X=arXiv, A=All)")
         print("  -P or --pubmed      Search PubMed")
         print("  -C or --crossref    Search Crossref")
         print("  -J or --doaj        Search DOAJ")
         print("  -E or --europepmc   Search EuropePMC")
-        print("  -X or --arxiv       Search arXiv")
+        print("  -x or --arxiv       Search arXiv")
         print("  -A or --all         Search all sources")
+        print("  --custom-api NAME   Search custom API (Springer, BASE, etc.)")
         print("\nExamples:")
-        print("  lixplore -s PX -q 'search term'      # PubMed + arXiv")
-        print("  lixplore -s PCE -q 'search term'     # PubMed + Crossref + EuropePMC")
-        print("  lixplore -P -C -E -q 'search term'   # Same as above (old syntax)")
+        print("  lixplore -s PX -q 'search term'          # PubMed + arXiv")
+        print("  lixplore -s PCE -q 'search term'         # PubMed + Crossref + EuropePMC")
+        print("  lixplore --custom-api springer -q 'term' # Custom API (requires configuration)")
         return
 
     results = []
@@ -761,8 +1011,15 @@ def run_main(args):
         "europepmc": "EuropePMC",
         "arxiv": "arXiv"
     }
-    selected_names = [source_names[src] for src in sources_to_search]
-    print(f"Sources: {', '.join(selected_names)}")
+
+    # Show standard sources if any
+    if sources_to_search:
+        selected_names = [source_names[src] for src in sources_to_search]
+        print(f"Sources: {', '.join(selected_names)}")
+
+    # Show custom API if selected
+    if use_custom_api:
+        print(f"Custom API: {custom_api_name}")
 
     # 🔹 Execute search on selected sources
     for src in sources_to_search:
@@ -774,52 +1031,111 @@ def run_main(args):
         )
         results.extend(src_results)
 
-    if len(sources_to_search) > 1:
+    # 🔹 Execute search on custom API if selected
+    if use_custom_api:
+        print(f"  Searching {custom_api_name} (custom API)...")
+        custom_results = custom_apis.call_custom_api(custom_api_name, query, args.max_results)
+        results.extend(custom_results)
+
+    if (len(sources_to_search) > 1) or (len(sources_to_search) > 0 and use_custom_api):
         print(f"Total results before deduplication: {len(results)}")
 
     # 🔹 Post-processing
     if args.deduplicate and results:
         print("Removing duplicates")
-        results = dispatcher.deduplicate(results)
-    
+        results = dispatcher.deduplicate_advanced(
+            results,
+            strategy=args.deduplicate,
+            title_threshold=args.dedup_threshold,
+            keep_preference=args.dedup_keep,
+            merge_metadata=args.dedup_merge
+        )
+
+    # 🔹 Enrich metadata if requested
+    if args.enrich is not None and results:
+        from lixplore.utils.enrichment import enrich_results
+        # If --enrich used without arguments, use all APIs
+        apis = args.enrich if args.enrich else ['all']
+        results = enrich_results(results, apis, show_progress=True)
+
     # 🔹 Sort results if requested
     if results and args.sort and args.sort != "relevant":
         results = sort_results(results, args.sort)
         print(f"Results sorted by: {args.sort}")
 
-    if args.zotero and results:
-        print("Exporting results to Zotero")
-        dispatcher.export_zotero(results)
-    
     # 🔹 Export to file format if requested
     if args.export and results:
+        # Check if multiple formats specified (comma-separated)
+        formats = [f.strip() for f in args.export.split(',')]
+
+        # Validate formats
+        valid_formats = ["csv", "json", "bibtex", "ris", "endnote", "enw", "xlsx", "xml"]
+        invalid_formats = [f for f in formats if f not in valid_formats]
+        if invalid_formats:
+            print(f"Error: Invalid export format(s): {', '.join(invalid_formats)}")
+            print(f"Valid formats: {', '.join(valid_formats)}")
+            return
+
         # Filter results if specific articles selected
         if args.select:
             # Parse selection arguments (supports: numbers, ranges, keywords)
             selected_numbers = parse_selection(args.select, len(results))
-            
+
             if selected_numbers:
                 selected_results = [results[num - 1] for num in selected_numbers]
                 print(f"Selected articles: {', '.join(f'#{n}' for n in selected_numbers)}")
                 print(f"Exporting {len(selected_results)} selected article(s)...")
-                dispatcher.export_to_format(selected_results, args.export, args.output)
+
+                # Use batch export if multiple formats, otherwise single export
+                if len(formats) > 1:
+                    # Extract base filename from output (remove extension)
+                    output_base = args.output.rsplit('.', 1)[0] if args.output else None
+                    dispatcher.batch_export(selected_results, formats, output_base, args.export_fields, args.zip)
+                else:
+                    dispatcher.export_to_format(selected_results, formats[0], args.output, args.export_fields, args.zip)
             else:
                 print("No valid articles selected for export.")
         else:
             # Export all results
-            dispatcher.export_to_format(results, args.export, args.output)
-    
-    # 🔹 Review articles in separate terminal if requested
-    if args.review and results:
-        dispatcher.review_articles(results, args.review)
+            if len(formats) > 1:
+                # Batch export: Extract base filename from output (remove extension)
+                output_base = args.output.rsplit('.', 1)[0] if args.output else None
+                dispatcher.batch_export(results, formats, output_base, args.export_fields, args.zip)
+            else:
+                # Single format export
+                dispatcher.export_to_format(results, formats[0], args.output, args.export_fields, args.zip)
+
+    # 🔹 Export as formatted citations if requested
+    if args.citations and results:
+        from lixplore.utils.export import export_to_citations, compress_export
+        print(f"Generating {args.citations.upper()} style citations...")
+        exported_path = export_to_citations(results, args.citations, args.output, args.export_fields)
+        if args.zip and exported_path:
+            compress_export(exported_path, remove_original=False)
+
+    # 🔹 Save profile if requested (after export completes)
+    if args.save_profile:
+        config = profiles.create_profile_from_args(args)
+        if config:  # Only save if there are settings to save
+            if profiles.save_profile(args.save_profile, config):
+                print(f"✓ Profile '{args.save_profile}' saved successfully")
+                print(f"  Settings saved: {', '.join(config.keys())}")
+            else:
+                print(f"Error: Could not save profile '{args.save_profile}'")
+        else:
+            print("Warning: No export settings to save in profile")
 
     # 🔹 Show results (titles + optional inline abstracts)
+    # Display results BEFORE review so users don't see them again after closing review windows
     if results:
         print(f"\nFound {len(results)} results:")
         dispatcher.show_results(results, args)
-        
+
         # Save results to cache for later review
-        dispatcher.save_results(results)
+        all_sources = sources_to_search.copy()
+        if use_custom_api:
+            all_sources.append(f"custom:{custom_api_name}")
+        dispatcher.save_results(results, query=query, sources=all_sources)
 
         # If user requested detailed view(s) via -N, print them inline
         if args.number:
@@ -834,6 +1150,41 @@ def run_main(args):
                     print(json.dumps(results[idx], indent=2, ensure_ascii=False))
                 else:
                     print(f"Selection out of range: {n} (valid 1..{len(results)})")
+
+        # 🔹 Download PDFs if requested
+        if args.download_pdf:
+            pdf_numbers = args.pdf_numbers if args.pdf_numbers else None
+            pdf_downloader.download_multiple_pdfs(
+                results,
+                article_numbers=pdf_numbers,
+                use_scihub=args.use_scihub
+            )
+
+        # 🔹 Add to Zotero if requested
+        if args.add_to_zotero:
+            collection_key = args.zotero_collection if hasattr(args, 'zotero_collection') and args.zotero_collection else None
+            reference_managers.add_to_zotero(results, collection_key=collection_key)
+
+        # 🔹 Export for Mendeley if requested
+        if args.export_for_mendeley:
+            reference_managers.export_for_mendeley(results)
+
+        # 🔹 Show statistics dashboard if requested
+        if args.stat:
+            from lixplore.utils.statistics import generate_statistics_report
+            stats_report = generate_statistics_report(results, top_n=args.stat_top)
+            print(stats_report)
+
+        # 🔹 Launch interactive mode if requested
+        if args.interactive:
+            from lixplore.utils.interactive_tui import launch_interactive_mode
+            launch_interactive_mode(results)
+            return  # Interactive mode handles everything
+
+        # 🔹 Review articles in separate terminal if requested
+        # This comes AFTER showing results so user sees the list, then reviews, then returns without duplication
+        if args.review:
+            dispatcher.review_articles(results, args.review)
     else:
         print("No results found.")
 

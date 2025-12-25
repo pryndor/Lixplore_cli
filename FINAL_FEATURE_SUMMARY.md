@@ -76,7 +76,6 @@ lixplore -P -q "(cancer OR tumor) AND treatment" -m 20
 | `-X, --export` | Export format (8 formats) | `lixplore -P -q "test" -X xlsx` |
 | `-o, --output` | Custom filename | `lixplore -P -q "test" -X csv -o results.csv` |
 | `-S, --select` ✨ | Smart selection | `lixplore -P -q "test" -m 50 -S odd -X csv` |
-| `-Z, --zotero` | Export to Zotero | `lixplore -P -q "test" -Z` |
 
 **Export Formats (8):**
 1. `csv` - CSV format

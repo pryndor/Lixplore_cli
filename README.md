@@ -5,6 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/lixplore.svg)](https://badge.fury.io/py/lixplore)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/lixplore)
 
 Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) with Boolean operators, smart selection, and export to 8 formats including EndNote, Excel, and BibTeX.
 
@@ -12,15 +13,99 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 
 ## ✨ Features
 
-- 🔍 **Multi-Source Search** - Search 5 academic databases simultaneously
+### Core Features
+- 🔍 **Multi-Source Search** - Search 5 academic databases simultaneously (PubMed, arXiv, Crossref, DOAJ, EuropePMC)
 - 🔤 **Boolean Operators** - Advanced queries with AND, OR, NOT, parentheses
 - 📊 **Smart Sorting** - Sort by relevance, newest, oldest, journal, or author
 - 🔢 **Smart Selection** - Export odd/even, ranges, first/last N articles
 - 💾 **8 Export Formats** - CSV, Excel, JSON, BibTeX, RIS, EndNote, XML
 - 📖 **Review Mode** - View articles in separate terminal windows
-- 🎯 **Deduplication** - Remove duplicates across multiple sources
+- 🎯 **Deduplication** - Advanced duplicate removal with multiple strategies
 - 📁 **Organized Exports** - Auto-organized folders by format type
-- 📚 **Complete Documentation** - Man page, help, examples, TLDR
+
+### Advanced Features
+- 📥 **PDF Downloads** - Automatic PDF downloads from PMC, arXiv, Unpaywall, and SciHub (optional)
+- 📚 **Reference Manager Integration** - Direct Zotero API integration and Mendeley RIS export
+- 📊 **Statistics Dashboard** - Comprehensive analytics with visualizations (publication trends, top journals, top authors)
+- 🎨 **Interactive TUI Mode** - Browse, select, and export with an interactive terminal UI
+- 📝 **Citation Export** - Format citations in APA, MLA, Chicago, IEEE styles
+- 🔧 **Custom API Integration** - Plugin architecture for any REST API (Springer, BASE, etc.)
+- 💡 **Metadata Enrichment** - Auto-enrich results from multiple APIs (Crossref, PubMed, arXiv)
+- 💾 **Smart Caching** - 7-day cache with automatic expiration
+- 📄 **Pagination** - Browse large result sets with automatic pagination
+- 🎯 **Export Profiles** - Save and reuse export configurations
+- 📋 **Export Templates** - Predefined templates (Nature, Science, IEEE)
+- 🗜️ **Export Compression** - ZIP compression for batch exports
+
+### Documentation
+- 📚 **Complete Documentation** - Man page, help, examples, TLDR guide
+- 🎓 **Feature Guide** - Comprehensive documentation for all features
+- 💡 **Quick Examples** - Built-in examples with `--examples` flag
+
+---
+
+## 🆕 What's New in Version 2.0
+
+Lixplore has been massively upgraded with powerful new features:
+
+### 📥 PDF Download Integration
+Download full-text PDFs automatically with smart fallback chain:
+- PubMed Central (open access)
+- arXiv (preprints)
+- DOI Resolution via Unpaywall
+- SciHub fallback (optional, user-configured)
+
+```bash
+lixplore -P -q "open access" -m 10 --download-pdf
+```
+
+### 📚 Reference Manager Integration
+Direct integration with your favorite reference managers:
+- **Zotero**: API integration with collection support
+- **Mendeley**: RIS export for easy import
+
+```bash
+lixplore -P -q "research" -m 10 --add-to-zotero
+```
+
+### 📊 Statistics Dashboard
+Comprehensive analytics with beautiful ASCII visualizations:
+- Publication trends by year
+- Top journals and authors
+- Source distribution
+- Metadata completeness
+
+```bash
+lixplore -P -q "AI" -m 100 --stat
+```
+
+### 🎨 Interactive TUI Mode
+Browse results with a rich interactive terminal interface:
+- Navigate pages with keyboard
+- Select articles visually
+- Export selected items
+- View detailed information
+
+```bash
+lixplore -P -q "machine learning" -m 50 -i
+```
+
+### 🔧 Custom API Integration
+Add ANY API source via simple JSON configuration:
+- No code modification needed
+- Supports Springer, BASE, and more
+- Plugin architecture for extensibility
+
+```bash
+lixplore --custom-api springer -q "quantum physics" -m 20
+```
+
+### 💡 Smart Enhancements
+- **Metadata Enrichment**: Auto-fill missing data from multiple APIs
+- **Export Profiles**: Save and reuse export configurations
+- **Citation Formatting**: Export as APA, MLA, Chicago, IEEE
+- **Batch Export**: Export to multiple formats simultaneously
+- **Deduplication Strategies**: Multiple algorithms with customization
 
 ---
 
@@ -298,6 +383,39 @@ sudo cp docs/lixplore.1 /usr/local/share/man/man1/
 sudo mandb -q
 man lixplore
 ```
+
+---
+
+## ☕ Support the Project
+
+If you find Lixplore useful for your research, consider supporting its development!
+
+<a href="https://www.buymeacoffee.com/lixplore" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
+</a>
+
+**Why support?**
+- ✨ Keeps the project actively maintained and updated
+- 🚀 Helps add new features and integrations
+- 📚 Supports free, open-source academic tools
+- 🌍 Makes research more accessible to everyone
+
+> *"If you value independent research tools and open access to literature, consider buying me a coffee ☕—it helps keep development and research going!"*
+
+Your support enables:
+- Regular updates and bug fixes
+- New API integrations (IEEE Xplore, Scopus, Web of Science)
+- Advanced features (LLM integration, citation networks, collaboration tools)
+- Better documentation and tutorials
+- Faster response to issues and feature requests
+
+**Other ways to support:**
+- ⭐ Star the repository on GitHub
+- 🐛 Report bugs and issues
+- 💡 Suggest new features
+- 📖 Improve documentation
+- 🔀 Contribute code via pull requests
+- 📢 Share Lixplore with your research community
 
 ---
 

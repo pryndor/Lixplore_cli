@@ -7,6 +7,7 @@ Export utilities for Lixplore - support multiple academic formats
 import csv
 import json
 import os
+import zipfile
 from datetime import datetime
 from typing import List, Dict
 import xml.etree.ElementTree as ET
@@ -33,7 +34,8 @@ EXPORT_FOLDERS = {
     'endnote': 'endnote_xml',        # EndNote XML format
     'enw': 'endnote_tagged',          # EndNote tagged format (.enw)
     'xlsx': 'excel',                  # Excel format (.xlsx)
-    'xml': 'xml'                      # Generic XML format
+    'xml': 'xml',                     # Generic XML format
+    'citations': 'citations'          # Citation formats (APA, MLA, Chicago, IEEE)
 }
 
 
@@ -124,91 +126,144 @@ def generate_filename(base_name: str, extension: str, format: str = None) -> str
     return os.path.join(export_dir, filename)
 
 
-def export_to_csv(results: List[Dict], filename: str = None) -> str:
+def filter_fields(results: List[Dict], fields: List[str] = None) -> List[Dict]:
+    """
+    Filter article dictionaries to only include specified fields.
+
+    Args:
+        results: List of article dictionaries
+        fields: List of field names to keep (None = keep all)
+
+    Returns:
+        List of filtered article dictionaries
+    """
+    if not fields:
+        return results
+
+    # Available fields in articles
+    available_fields = ['title', 'authors', 'abstract', 'journal', 'year', 'doi', 'url', 'source']
+
+    # Validate field names
+    invalid_fields = [f for f in fields if f not in available_fields]
+    if invalid_fields:
+        print(f"Warning: Invalid field names ignored: {', '.join(invalid_fields)}")
+
+    # Filter to valid fields only
+    valid_fields = [f for f in fields if f in available_fields]
+
+    if not valid_fields:
+        print("Warning: No valid fields specified, keeping all fields")
+        return results
+
+    # Filter each result
+    filtered_results = []
+    for result in results:
+        filtered = {field: result.get(field) for field in valid_fields}
+        filtered_results.append(filtered)
+
+    return filtered_results
+
+
+def export_to_csv(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to CSV format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "csv", "csv")
     elif not os.path.isabs(filename):
         # If relative path provided, put it in csv subfolder
         filename = os.path.join(get_export_directory("csv"), filename)
-    
-    # Define CSV columns
-    fieldnames = [
-        "title", "authors", "abstract", "journal", "year", 
-        "doi", "url", "source"
-    ]
-    
+
+    # Define CSV columns (use filtered fields if specified, otherwise all)
+    if fields:
+        fieldnames = [f for f in fields if f in ['title', 'authors', 'abstract', 'journal', 'year', 'doi', 'url', 'source']]
+    else:
+        fieldnames = ["title", "authors", "abstract", "journal", "year", "doi", "url", "source"]
+
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, extrasaction='ignore')
         writer.writeheader()
-        
+
         for result in results:
             # Convert authors list to string
             row = result.copy()
             if isinstance(row.get('authors'), list):
                 row['authors'] = "; ".join(row['authors'])
             writer.writerow(row)
-    
+
     print(f"✓ Exported {len(results)} results to: {filename}")
     return filename
 
 
-def export_to_json(results: List[Dict], filename: str = None) -> str:
+def export_to_json(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to JSON format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "json", "json")
     elif not os.path.isabs(filename):
         # If relative path provided, put it in json subfolder
         filename = os.path.join(get_export_directory("json"), filename)
-    
+
     with open(filename, 'w', encoding='utf-8') as jsonfile:
         json.dump(results, jsonfile, indent=2, ensure_ascii=False)
-    
+
     print(f"✓ Exported {len(results)} results to: {filename}")
     return filename
 
 
-def export_to_bibtex(results: List[Dict], filename: str = None) -> str:
+def export_to_bibtex(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to BibTeX format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "bib", "bibtex")
     elif not os.path.isabs(filename):
@@ -262,21 +317,26 @@ def export_to_bibtex(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_to_ris(results: List[Dict], filename: str = None) -> str:
+def export_to_ris(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to RIS format (Research Information Systems).
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "ris", "ris")
     elif not os.path.isabs(filename):
@@ -328,25 +388,30 @@ def export_to_ris(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_to_xlsx(results: List[Dict], filename: str = None) -> str:
+def export_to_xlsx(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to Excel (XLSX) format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not XLSX_AVAILABLE:
         print("Error: openpyxl is not installed. Install it with: pip install openpyxl")
         return None
-    
+
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "xlsx", "xlsx")
     elif not os.path.isabs(filename):
@@ -406,21 +471,26 @@ def export_to_xlsx(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_to_endnote_xml(results: List[Dict], filename: str = None) -> str:
+def export_to_endnote_xml(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to EndNote XML format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results_endnote", "xml", "endnote")
     elif not os.path.isabs(filename):
@@ -512,22 +582,27 @@ def export_to_endnote_xml(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_to_enw(results: List[Dict], filename: str = None) -> str:
+def export_to_enw(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to EndNote Tagged Format (.enw).
     This is the native EndNote import format using text tags.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "enw", "enw")
     elif not os.path.isabs(filename):
@@ -579,21 +654,26 @@ def export_to_enw(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_to_xml(results: List[Dict], filename: str = None) -> str:
+def export_to_xml(results: List[Dict], filename: str = None, fields: List[str] = None) -> str:
     """
     Export results to generic XML format.
-    
+
     Args:
         results: List of article dictionaries
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     if not results:
         print("No results to export.")
         return None
-    
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
     if not filename:
         filename = generate_filename("lixplore_results", "xml", "xml")
     elif not os.path.isabs(filename):
@@ -631,36 +711,123 @@ def export_to_xml(results: List[Dict], filename: str = None) -> str:
     return filename
 
 
-def export_results(results: List[Dict], format: str, filename: str = None) -> str:
+def export_to_citations(results: List[Dict], style: str, filename: str = None, fields: List[str] = None) -> str:
+    """
+    Export results as formatted citations.
+
+    Args:
+        results: List of article dictionaries
+        style: Citation style ('apa', 'mla', 'chicago', 'ieee')
+        filename: Output filename (optional)
+        fields: List of field names to export (None = all fields)
+
+    Returns:
+        Path to exported file
+    """
+    if not results:
+        print("No results to export.")
+        return None
+
+    # Apply field filtering if specified
+    if fields:
+        results = filter_fields(results, fields)
+
+    if not filename:
+        filename = generate_filename(f"lixplore_citations_{style}", "txt", "citations")
+    elif not os.path.isabs(filename):
+        # If relative path provided, put it in citations subfolder
+        filename = os.path.join(get_export_directory("citations"), filename)
+
+    # Import citation formatting functions
+    from lixplore.utils.citations import format_citations
+
+    try:
+        # Format citations
+        citations = format_citations(results, style)
+
+        # Write to file
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(f"# {style.upper()} Style Citations\n")
+            f.write(f"# Generated by Lixplore - {len(results)} articles\n\n")
+            for citation in citations:
+                f.write(citation + '\n\n')
+
+        print(f"✓ Exported {len(results)} citations ({style.upper()} style) to: {filename}")
+        return filename
+
+    except ValueError as e:
+        print(f"Error: {e}")
+        return None
+
+
+def compress_export(filepath: str, remove_original: bool = False) -> str:
+    """
+    Compress exported file to ZIP format.
+
+    Args:
+        filepath: Path to file to compress
+        remove_original: Delete original file after compression (default: False)
+
+    Returns:
+        Path to compressed file
+    """
+    if not filepath or not os.path.exists(filepath):
+        print(f"Error: File not found: {filepath}")
+        return None
+
+    # Create ZIP filename (same name with .zip extension)
+    zip_path = filepath + '.zip'
+
+    try:
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # Add file to ZIP with just the basename (not full path)
+            zipf.write(filepath, os.path.basename(filepath))
+
+        print(f"✓ Compressed to: {zip_path}")
+
+        # Optionally remove original file
+        if remove_original:
+            os.remove(filepath)
+            print(f"✓ Removed original file: {filepath}")
+
+        return zip_path
+
+    except Exception as e:
+        print(f"Error compressing file: {e}")
+        return None
+
+
+def export_results(results: List[Dict], format: str, filename: str = None, fields: List[str] = None) -> str:
     """
     Main export function that routes to appropriate exporter.
-    
+
     Args:
         results: List of article dictionaries
         format: Export format ('csv', 'json', 'bibtex', 'ris', 'endnote', 'enw', 'xlsx', 'xml')
         filename: Output filename (optional)
-    
+        fields: List of field names to export (None = all fields)
+
     Returns:
         Path to exported file
     """
     format = format.lower()
-    
+
     if format == 'csv':
-        return export_to_csv(results, filename)
+        return export_to_csv(results, filename, fields)
     elif format == 'json':
-        return export_to_json(results, filename)
+        return export_to_json(results, filename, fields)
     elif format == 'bibtex':
-        return export_to_bibtex(results, filename)
+        return export_to_bibtex(results, filename, fields)
     elif format == 'ris':
-        return export_to_ris(results, filename)
+        return export_to_ris(results, filename, fields)
     elif format == 'xlsx':
-        return export_to_xlsx(results, filename)
+        return export_to_xlsx(results, filename, fields)
     elif format == 'endnote':
-        return export_to_endnote_xml(results, filename)
+        return export_to_endnote_xml(results, filename, fields)
     elif format == 'enw':
-        return export_to_enw(results, filename)
+        return export_to_enw(results, filename, fields)
     elif format == 'xml':
-        return export_to_xml(results, filename)
+        return export_to_xml(results, filename, fields)
     else:
         print(f"Error: Unsupported export format '{format}'")
         return None

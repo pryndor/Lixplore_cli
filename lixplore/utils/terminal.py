@@ -23,45 +23,55 @@ def _label(unicode_ok: bool, emoji: str, ascii_label: str) -> str:
 def format_article_for_review(article: dict, article_number: int = None) -> str:
     """
     Format article data for detailed review in a separate terminal.
-    
+
     Args:
         article: Dictionary containing article data
         article_number: Optional article number in the results list
-    
+
     Returns:
         Formatted text for display
     """
     unicode_ok = _supports_unicode_output()
+
+    # Get terminal width dynamically, with fallback to 100
+    try:
+        import shutil
+        width = shutil.get_terminal_size().columns
+        # Use reasonable limits: minimum 80, maximum 120
+        width = max(80, min(width, 120))
+    except:
+        width = 100  # fallback default
+
     lines = []
-    lines.append("=" * 80)
+    lines.append("=" * width)
     if article_number:
-        lines.append(f"ARTICLE #{article_number} - DETAILED REVIEW".center(80))
+        lines.append(f"ARTICLE #{article_number} - DETAILED REVIEW".center(width))
     else:
-        lines.append("ARTICLE DETAILED REVIEW".center(80))
-    lines.append("=" * 80)
+        lines.append("ARTICLE DETAILED REVIEW".center(width))
+    lines.append("=" * width)
     lines.append("")
     
     # Title
     if article.get('title'):
         lines.append(_label(unicode_ok, "📄", "Title"))
-        lines.append("-" * 80)
+        lines.append("-" * width)
         lines.append(article['title'])
         lines.append("")
-    
+
     # Authors
     if article.get('authors'):
         lines.append(_label(unicode_ok, "👥", "Authors"))
-        lines.append("-" * 80)
+        lines.append("-" * width)
         if isinstance(article['authors'], list):
             for i, author in enumerate(article['authors'], 1):
                 lines.append(f"  {i}. {author}")
         else:
             lines.append(f"  {article['authors']}")
         lines.append("")
-    
+
     # Publication Info
     lines.append(_label(unicode_ok, "📚", "Publication Info"))
-    lines.append("-" * 80)
+    lines.append("-" * width)
     if article.get('journal'):
         lines.append(f"  Journal: {article['journal']}")
     if article.get('year'):
@@ -73,24 +83,25 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     # DOI and URL
     if article.get('doi') or article.get('url'):
         lines.append(_label(unicode_ok, "🔗", "Links"))
-        lines.append("-" * 80)
+        lines.append("-" * width)
         if article.get('doi'):
             lines.append(f"  DOI: {article['doi']}")
             lines.append(f"  DOI URL: https://doi.org/{article['doi']}")
         if article.get('url'):
             lines.append(f"  URL: {article['url']}")
         lines.append("")
-    
+
     # Abstract
     if article.get('abstract'):
         lines.append(_label(unicode_ok, "📝", "Abstract"))
-        lines.append("-" * 80)
+        lines.append("-" * width)
         # Wrap abstract text for better readability
         abstract = article['abstract']
         words = abstract.split()
         current_line = ""
+        wrap_width = width - 2  # Leave 2 chars margin
         for word in words:
-            if len(current_line) + len(word) + 1 <= 78:
+            if len(current_line) + len(word) + 1 <= wrap_width:
                 current_line += word + " "
             else:
                 lines.append(current_line.strip())
@@ -98,10 +109,10 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
         if current_line:
             lines.append(current_line.strip())
         lines.append("")
-    
-    lines.append("=" * 80)
-    lines.append("Press 'q' or Ctrl+C to close this window...".center(80))
-    lines.append("=" * 80)
+
+    lines.append("=" * width)
+    lines.append("Press 'q' or Ctrl+C to close this window...".center(width))
+    lines.append("=" * width)
     
     return "\n".join(lines)
 

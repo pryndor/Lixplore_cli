@@ -6,8 +6,10 @@ from lixplore.utils.export import export_results
 import json
 import os
 from difflib import SequenceMatcher
+from datetime import datetime, timedelta
 
 CACHE_FILE = os.path.expanduser("~/.lixplore_cache.json")
+CACHE_EXPIRY_DAYS = 7  # Default cache expiration in days
 
 
 # ===== Extra helpers =====
@@ -43,9 +45,6 @@ def handle(args):
         results = deduplicate(results)
 
     show_results(results, args)
-
-    if args.zotero:
-        export_zotero(results)
 
     if args.history:
         show_history()
@@ -210,35 +209,271 @@ def deduplicate(results):
     return unique
 
 
+def get_completeness_score(article):
+    """
+    Calculate how complete an article's metadata is.
+    Returns a score based on number of filled fields.
+    """
+    score = 0
+    fields = ['title', 'authors', 'abstract', 'journal', 'year', 'doi', 'url', 'source']
+
+    for field in fields:
+        value = article.get(field)
+        if value:
+            if isinstance(value, str) and value.strip():
+                score += 1
+            elif isinstance(value, list) and len(value) > 0:
+                score += 1
+
+    # Bonus for having DOI (most valuable field)
+    if article.get('doi', '').strip():
+        score += 2
+
+    # Bonus for having abstract (indicates complete metadata)
+    if article.get('abstract', '').strip():
+        score += 1
+
+    return score
+
+
+def merge_duplicate_metadata(article1, article2):
+    """
+    Merge metadata from two duplicate articles.
+    Takes best available data from both.
+    """
+    merged = {}
+    fields = ['title', 'authors', 'abstract', 'journal', 'year', 'doi', 'url', 'source']
+
+    for field in fields:
+        val1 = article1.get(field)
+        val2 = article2.get(field)
+
+        if isinstance(val1, str) and isinstance(val2, str):
+            # For strings, prefer longer/more complete value
+            if val1 and val2:
+                merged[field] = val1 if len(val1) >= len(val2) else val2
+            else:
+                merged[field] = val1 or val2
+        elif isinstance(val1, list) and isinstance(val2, list):
+            # For lists (like authors), combine and deduplicate
+            combined = list(val1) if val1 else []
+            if val2:
+                for item in val2:
+                    if item not in combined:
+                        combined.append(item)
+            merged[field] = combined
+        else:
+            # Take whichever is available
+            merged[field] = val1 if val1 else val2
+
+    return merged
+
+
+def is_duplicate_with_strategy(article1, article2, strategy='auto', threshold=0.85):
+    """
+    Determine if two articles are duplicates using specified strategy.
+
+    Args:
+        article1, article2: Articles to compare
+        strategy: 'auto', 'doi_only', 'title_only', 'strict', 'loose'
+        threshold: Similarity threshold for title matching
+
+    Returns:
+        True if articles are duplicates
+    """
+    if strategy == 'doi_only':
+        # Only match by DOI
+        doi1 = article1.get("doi", "").strip()
+        doi2 = article2.get("doi", "").strip()
+        if doi1 and doi2:
+            return normalize_string(doi1) == normalize_string(doi2)
+        return False
+
+    elif strategy == 'title_only':
+        # Only match by title similarity
+        title1 = article1.get("title", "")
+        title2 = article2.get("title", "")
+        return title_similarity(title1, title2, threshold=threshold)
+
+    elif strategy == 'strict':
+        # Higher thresholds for stricter matching
+        return is_duplicate_with_strategy(article1, article2, strategy='auto', threshold=0.95)
+
+    elif strategy == 'loose':
+        # Lower thresholds for looser matching
+        return is_duplicate_with_strategy(article1, article2, strategy='auto', threshold=0.75)
+
+    else:  # 'auto' or default
+        # Use existing multi-level logic with custom threshold
+        doi1 = article1.get("doi", "").strip()
+        doi2 = article2.get("doi", "").strip()
+
+        if doi1 and doi2:
+            return normalize_string(doi1) == normalize_string(doi2)
+
+        title1 = article1.get("title", "")
+        title2 = article2.get("title", "")
+
+        if title_similarity(title1, title2, threshold=threshold):
+            authors1 = article1.get("authors", [])
+            authors2 = article2.get("authors", [])
+
+            if authors1 and authors2:
+                return authors_match(authors1, authors2, min_common=1)
+            else:
+                return True
+
+        authors1 = article1.get("authors", [])
+        authors2 = article2.get("authors", [])
+
+        if authors1 and authors2 and len(authors1) >= 2 and len(authors2) >= 2:
+            if authors_match(authors1, authors2, min_common=min(3, min(len(authors1), len(authors2)))):
+                if title1 and title2:
+                    similarity = SequenceMatcher(None, normalize_string(title1), normalize_string(title2)).ratio()
+                    if similarity >= (threshold - 0.15):  # Slightly lower for author-confirmed
+                        return True
+
+        return False
+
+
+def deduplicate_advanced(results, strategy='auto', title_threshold=0.85, keep_preference='most_complete', merge_metadata=False):
+    """
+    Enhanced deduplication with configurable strategies.
+
+    Args:
+        results: List of article dictionaries
+        strategy: Deduplication strategy ('auto', 'doi_only', 'title_only', 'strict', 'loose')
+        title_threshold: Similarity threshold for title matching (0.0-1.0)
+        keep_preference: Which duplicate to keep ('first', 'most_complete', 'prefer_doi')
+        merge_metadata: If True, merge metadata from duplicates
+
+    Returns:
+        Deduplicated list of articles
+    """
+    if not results:
+        return []
+
+    unique = []
+    duplicates_found = []
+
+    for article in results:
+        is_dup = False
+        dup_index = -1
+
+        for idx, unique_article in enumerate(unique):
+            if is_duplicate_with_strategy(article, unique_article, strategy, title_threshold):
+                is_dup = True
+                dup_index = idx
+                break
+
+        if is_dup:
+            duplicates_found.append((article, dup_index))
+
+            if merge_metadata:
+                # Merge metadata from duplicate into existing unique entry
+                unique[dup_index] = merge_duplicate_metadata(unique[dup_index], article)
+            elif keep_preference == 'most_complete':
+                # Replace if new article has more complete metadata
+                if get_completeness_score(article) > get_completeness_score(unique[dup_index]):
+                    unique[dup_index] = article
+            elif keep_preference == 'prefer_doi':
+                # Replace if new article has DOI and existing doesn't
+                if article.get('doi', '').strip() and not unique[dup_index].get('doi', '').strip():
+                    unique[dup_index] = article
+            # For 'first', do nothing (keep existing)
+        else:
+            unique.append(article)
+
+    duplicate_count = len(duplicates_found)
+    if duplicate_count > 0:
+        action = "merged metadata from" if merge_metadata else "removed"
+        print(f"Deduplication ({strategy}): {action} {duplicate_count} duplicate(s)")
+
+    return unique
+
+
 def filter_by_date(results, date_range):
     # TODO: implement date filtering
     return results
 
 
+def paginate_results(results, page=1, page_size=20):
+    """
+    Paginate results for display.
+
+    Args:
+        results: List of all results
+        page: Page number (1-indexed)
+        page_size: Number of results per page
+
+    Returns:
+        Tuple of (paginated_results, total_pages, start_index, end_index)
+    """
+    total_results = len(results)
+    total_pages = (total_results + page_size - 1) // page_size  # Ceiling division
+
+    # Validate page number
+    if page < 1:
+        page = 1
+    elif page > total_pages:
+        page = total_pages if total_pages > 0 else 1
+
+    # Calculate indices
+    start_index = (page - 1) * page_size
+    end_index = min(start_index + page_size, total_results)
+
+    # Get paginated results
+    paginated = results[start_index:end_index]
+
+    return paginated, total_pages, start_index, end_index
+
+
 def show_results(results, args):
-    """Show search results and optionally abstracts/detailed view."""
-    for i, r in enumerate(results, start=1):
-        print(f"[{i}] {r.get('title', 'No title')}")
+    """Show search results with pagination support and optional abstracts/detailed view."""
+    total_results = len(results)
 
-    if args.abstract:
-        print("\n--- Abstracts ---")
+    # Check if pagination is needed
+    page = getattr(args, 'page', 1)
+    page_size = getattr(args, 'page_size', 20)
+
+    # Only paginate if results exceed page size
+    if total_results > page_size:
+        paginated, total_pages, start_idx, end_idx = paginate_results(results, page, page_size)
+
+        # Show pagination info
+        print(f"\n📄 Page {page} of {total_pages} | Showing {start_idx + 1}-{end_idx} of {total_results} results")
+        print(f"   Use -p {page + 1} to see next page" if page < total_pages else "   (Last page)")
+        print("")
+
+        # Display paginated results
+        for i, r in enumerate(paginated, start=start_idx + 1):
+            print(f"[{i}] {r.get('title', 'No title')}")
+
+        # Show abstracts for paginated results if requested
+        if args.abstract:
+            print("\n--- Abstracts ---")
+            for i, r in enumerate(paginated, start=start_idx + 1):
+                print(f"[{i}] {r.get('abstract', 'No abstract available.')}")
+    else:
+        # No pagination needed - show all results
         for i, r in enumerate(results, start=1):
-            print(f"[{i}] {r.get('abstract', 'No abstract available.')}")
+            print(f"[{i}] {r.get('title', 'No title')}")
 
+        if args.abstract:
+            print("\n--- Abstracts ---")
+            for i, r in enumerate(results, start=1):
+                print(f"[{i}] {r.get('abstract', 'No abstract available.')}")
+
+    # Detailed view is independent of pagination
     if args.number:
         # args.number is a list (because nargs="+"), loop over it
         for n in args.number:
             idx = n - 1
-            if 0 <= idx < len(results):
+            if 0 <= idx < total_results:
                 print("\n=== Detailed View ===")
                 print(json.dumps(results[idx], indent=2, ensure_ascii=False))
             else:
                 print(f"Invalid selection: {n}")
-
-
-def export_zotero(results):
-    # TODO: connect to Zotero
-    print("Exporting to Zotero...")
 
 
 def show_history():
@@ -246,16 +481,78 @@ def show_history():
     print("Search history not yet implemented")
 
 
-def export_to_format(results, format, filename=None):
+def export_to_format(results, format, filename=None, fields=None, compress=False):
     """
     Export results to specified format.
-    
+
     Args:
         results: List of article dictionaries
-        format: Export format ('csv', 'json', 'bibtex', 'ris')
+        format: Export format ('csv', 'json', 'bibtex', 'ris', etc.')
         filename: Optional output filename
+        fields: Optional list of field names to export
+        compress: If True, compress exported file to ZIP
     """
-    export_results(results, format, filename)
+    from lixplore.utils.export import compress_export
+    exported_path = export_results(results, format, filename, fields)
+
+    # Compress if requested
+    if compress and exported_path:
+        compress_export(exported_path, remove_original=False)
+
+    return exported_path
+
+
+def batch_export(results, formats, output_base=None, fields=None, compress=False):
+    """
+    Export results to multiple formats simultaneously.
+
+    Args:
+        results: List of article dictionaries
+        formats: List of format names ('csv', 'ris', 'bibtex', etc.)
+        output_base: Optional base filename (without extension)
+        fields: Optional list of field names to export
+        compress: If True, compress each exported file to ZIP
+
+    Returns:
+        List of exported file paths
+    """
+    if not results:
+        print("No results to export.")
+        return []
+
+    if not formats:
+        print("No export formats specified.")
+        return []
+
+    print(f"Batch exporting to {len(formats)} format(s): {', '.join(formats)}")
+
+    exported_files = []
+    for format in formats:
+        # Generate format-specific filename if base provided
+        if output_base:
+            # Get appropriate extension for format
+            ext_map = {
+                'csv': 'csv',
+                'json': 'json',
+                'bibtex': 'bib',
+                'ris': 'ris',
+                'endnote': 'xml',
+                'enw': 'enw',
+                'xlsx': 'xlsx',
+                'xml': 'xml'
+            }
+            ext = ext_map.get(format, format)
+            filename = f"{output_base}.{ext}"
+        else:
+            filename = None
+
+        # Export to this format
+        exported_path = export_to_format(results, format, filename, fields, compress)
+        if exported_path:
+            exported_files.append(exported_path)
+
+    print(f"\n✓ Batch export complete: {len(exported_files)} file(s) created")
+    return exported_files
 
 
 def review_articles(results, article_numbers):
@@ -279,31 +576,79 @@ def review_articles(results, article_numbers):
             print(f"Warning: Article #{num} is out of range (1-{len(results)})")
 
 
-def save_results(results):
+def save_results(results, query=None, sources=None):
+    """
+    Save search results to cache with timestamp and metadata.
+
+    Args:
+        results: List of article dictionaries
+        query: Search query string (optional)
+        sources: List of sources searched (optional)
+    """
+    cache_data = {
+        "timestamp": datetime.now().isoformat(),
+        "query": query,
+        "sources": sources,
+        "count": len(results),
+        "results": results
+    }
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
+        json.dump(cache_data, f, ensure_ascii=False, indent=2)
 
 
-def load_cached_results():
+def load_cached_results(check_expiry=True, force_refresh=False):
     """
-    Load previously cached search results.
-    
+    Load previously cached search results with expiration checking.
+
+    Args:
+        check_expiry: If True, check if cache has expired (default: True)
+        force_refresh: If True, ignore cache and return None (default: False)
+
     Returns:
-        List of article dictionaries or None if no cache exists
+        List of article dictionaries or None if no cache/expired
     """
-    if os.path.exists(CACHE_FILE):
-        try:
-            with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading cached results: {e}")
+    if force_refresh:
+        return None
+
+    if not os.path.exists(CACHE_FILE):
+        return None
+
+    try:
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            cache_data = json.load(f)
+
+        # Handle old cache format (just array of results)
+        if isinstance(cache_data, list):
+            print("⚠️  Cache format outdated, will refresh...")
             return None
-    return None
+
+        # Check expiration if enabled
+        if check_expiry and "timestamp" in cache_data:
+            cached_time = datetime.fromisoformat(cache_data["timestamp"])
+            expiry_time = cached_time + timedelta(days=CACHE_EXPIRY_DAYS)
+
+            if datetime.now() > expiry_time:
+                print(f"⚠️  Cache expired (older than {CACHE_EXPIRY_DAYS} days)")
+                return None
+
+            # Show cache age
+            age = datetime.now() - cached_time
+            if age.days > 0:
+                print(f"ℹ️  Using cached results ({age.days} day(s) old)")
+            else:
+                hours = age.seconds // 3600
+                print(f"ℹ️  Using cached results ({hours} hour(s) old)")
+
+        # Return just the results array
+        return cache_data.get("results", [])
+
+    except Exception as e:
+        print(f"Error loading cached results: {e}")
+        return None
 
 
 def load_results():
-    if not os.path.exists(CACHE_FILE):
-        return []
-    with open(CACHE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    """Legacy function for backward compatibility."""
+    cached = load_cached_results(check_expiry=False)
+    return cached if cached else []
 

@@ -1,0 +1,15 @@
+{
+  "name": "Nature",
+  "description": "Export format for Nature journal submissions",
+  "format": "bibtex",
+  "citation_style": "apa",
+  "fields": ["title", "authors", "journal", "year", "doi"],
+  "field_order": ["authors", "title", "journal", "year", "doi"],
+  "author_format": "Last, F.",
+  "max_authors": 10,
+  "abbreviate_journal": false,
+  "include_abstract": false,
+  "sort": "newest",
+  "deduplicate": "strict",
+  "enrich": ["crossref"]
+}

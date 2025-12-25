@@ -1,0 +1,15 @@
+{
+  "name": "Science",
+  "description": "Export format for Science journal submissions",
+  "format": "bibtex",
+  "citation_style": "chicago",
+  "fields": ["title", "authors", "journal", "year", "doi", "abstract"],
+  "field_order": ["authors", "year", "title", "journal", "doi", "abstract"],
+  "author_format": "Last F.",
+  "max_authors": 8,
+  "abbreviate_journal": true,
+  "include_abstract": true,
+  "sort": "newest",
+  "deduplicate": "auto",
+  "enrich": ["crossref", "pubmed"]
+}

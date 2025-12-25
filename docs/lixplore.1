@@ -36,10 +36,15 @@ Search arXiv (preprint repository for physics, math, CS, etc.)
 Search ALL sources at once
 .TP
 .BR \-s " \fICODES\fR, " \-\-sources " \fICODES\fR"
-Combined source selection using codes: P=PubMed, C=Crossref, J=DOAJ, 
+Combined source selection using codes: P=PubMed, C=Crossref, J=DOAJ,
 E=EuropePMC, X=arXiv, A=All
 .br
 Example: \fB-s PX\fR for PubMed+arXiv, \fB-s PCE\fR for PubMed+Crossref+EuropePMC
+.TP
+.BR \-\-custom\-api " \fINAME\fR"
+Use a custom API source (Springer, BASE, etc.). Must be configured in ~/.lixplore/apis/ or ~/.lixplore/custom_apis.json. Allows integration with any API via simple JSON configuration (see --create-api-examples).
+.br
+Example: \fB--custom-api springer -q "quantum physics"\fR
 
 .SS "Search Parameters"
 .TP
@@ -80,8 +85,47 @@ Filter by publication date range in YYYY-MM-DD format
 .br
 Example: \fB-d 2020-01-01 2024-12-31\fR
 .TP
-.BR \-D ", " \-\-deduplicate
-Remove duplicate results when searching multiple sources (recommended with \fB-A\fR or \fB-s\fR)
+.BR \-D " [\fISTRATEGY\fR], " \-\-deduplicate " [\fISTRATEGY\fR]"
+Remove duplicate results when searching multiple sources (recommended with \fB-A\fR or \fB-s\fR).
+.br
+Available strategies:
+.RS
+.IP \(bu 2
+\fBauto\fR - Default, uses DOI → title similarity → author matching
+.IP \(bu 2
+\fBstrict\fR - Higher similarity thresholds (0.95 for title matching)
+.IP \(bu 2
+\fBloose\fR - Lower similarity thresholds (0.75 for title matching)
+.IP \(bu 2
+\fBdoi_only\fR - Only match by DOI
+.IP \(bu 2
+\fBtitle_only\fR - Only match by title similarity
+.RE
+.IP
+Example: \fB-D strict\fR
+.TP
+.BR \-\-dedup\-threshold " \fIFLOAT\fR"
+Title similarity threshold for deduplication (0.0-1.0, default: 0.85)
+.br
+Example: \fB--dedup-threshold 0.9\fR
+.TP
+.BR \-\-dedup\-keep " \fISTRATEGY\fR"
+Which duplicate to keep when multiple matches found. Options:
+.RS
+.IP \(bu 2
+\fBfirst\fR - Keep the first occurrence
+.IP \(bu 2
+\fBmost_complete\fR - Keep entry with most metadata fields filled
+.IP \(bu 2
+\fBprefer_doi\fR - Prefer entries that have DOIs
+.RE
+.IP
+Example: \fB--dedup-keep most_complete\fR
+.TP
+.BR \-\-dedup\-merge
+Merge metadata from all duplicate entries (combines best data from each duplicate)
+.br
+Example: \fB-D strict --dedup-merge\fR
 .TP
 .BR \-\-sort " \fIORDER\fR"
 Sort results by specified order. Options:
@@ -99,11 +143,35 @@ Sort results by specified order. Options:
 .RE
 .IP
 Example: \fB--sort newest\fR
+.TP
+.BR \-\-enrich " [\fIAPI\fR ...]"
+Enrich article metadata by fetching additional information from external APIs.
+.br
+Available APIs:
+.RS
+.IP \(bu 2
+\fBcrossref\fR - CrossRef API (DOI resolution, journal info, citations)
+.IP \(bu 2
+\fBpubmed\fR - PubMed API (biomedical literature metadata)
+.IP \(bu 2
+\fBarxiv\fR - arXiv API (preprint metadata)
+.IP \(bu 2
+\fBall\fR - Use all available APIs (default if no APIs specified)
+.RE
+.IP
+Enrichment fills in missing fields, validates DOIs, and improves metadata quality.
+.br
+Examples: \fB--enrich\fR (all APIs) | \fB--enrich crossref\fR | \fB--enrich crossref pubmed\fR
 
 .SS "Display Options"
 .TP
 .BR \-a ", " \-\-abstract
 Display abstracts along with titles in the results
+.TP
+.BR \-i ", " \-\-interactive
+Launch interactive TUI mode for browsing results. Navigate with keyboard commands: next/prev pages, view details, select articles, export. Requires 'rich' library for enhanced display (falls back to simple mode).
+.br
+Example: \fB-P -q "cancer" -m 50 -i\fR
 .TP
 .BR \-N " \fIN\fR [\fIN\fR ...], " \-\-number " \fIN\fR [\fIN\fR ...]"
 View detailed information for specific article(s) by number
@@ -121,13 +189,32 @@ In the review window, press \fBq\fR or \fBCtrl+C\fR to close.
 .br
 Example: \fB-R 1\fR or \fB-R 1 2 3\fR
 .TP
-.BR \-st " \fIN\fR, " \-\-stat " \fIN\fR"
-Get statistics for the specified count (default: 50)
+.BR \-\-stat
+Show comprehensive statistics dashboard with visualizations including publication trends by year, top journals, top authors, and source distribution
+.br
+Example: \fB-P -q "AI" -m 100 --stat\fR
+.TP
+.BR \-\-stat\-top " \fIN\fR"
+Number of top items to show in statistics rankings (default: 10). Use with --stat.
+.br
+Example: \fB--stat --stat-top 15\fR
+.TP
+.BR \-p " \fIN\fR, " \-\-page " \fIN\fR"
+Page number to display when results exceed page size (default: 1). Automatic pagination activates when results > 20.
+.br
+Example: \fB-P -q "cancer" -m 100 -p 2\fR
+.TP
+.BR \-\-page\-size " \fIN\fR"
+Number of results to display per page (default: 20)
+.br
+Example: \fB-P -q "research" -m 100 --page-size 50\fR
 
 .SS "Export & Output"
 .TP
 .BR \-X " \fIFORMAT\fR, " \-\-export " \fIFORMAT\fR"
-Export results to specified format. Available formats:
+Export results to specified format. Supports batch export with comma-separated formats.
+.br
+Available formats:
 .RS
 .IP \(bu 2
 \fBcsv\fR - CSV format (Excel, Google Sheets)
@@ -148,19 +235,142 @@ Export results to specified format. Available formats:
 .RE
 .IP
 Files are automatically saved to \fIexports/\fR folder
+.br
+Examples: \fB-X csv\fR | \fB-X csv,bibtex,ris\fR (batch export)
 .TP
 .BR \-o " \fIFILE\fR, " \-\-output " \fIFILE\fR"
 Custom output filename for export (default: auto-generated with timestamp)
 .br
 Example: \fB-o my_results.csv\fR
 .TP
-.BR \-Z ", " \-\-zotero
-Export results to Zotero reference manager
+.BR \-S " \fISELECTION\fR [\fISELECTION\fR ...], " \-\-select " \fISELECTION\fR [\fISELECTION\fR ...]"
+Select specific article(s) to export. Supports multiple selection patterns:
+.RS
+.IP \(bu 2
+\fBNumbers\fR - Individual articles (e.g., 1 3 5)
+.IP \(bu 2
+\fBRanges\fR - Article ranges (e.g., 1-10, 5-15)
+.IP \(bu 2
+\fBodd\fR - All odd-numbered articles
+.IP \(bu 2
+\fBeven\fR - All even-numbered articles
+.IP \(bu 2
+\fBfirst:N\fR or \fBtop:N\fR - First N articles
+.IP \(bu 2
+\fBlast:N\fR - Last N articles
+.RE
+.IP
+Without this flag, all results are exported.
+.br
+Examples: \fB-S 1 3 5\fR | \fB-S odd\fR | \fB-S 1-10\fR | \fB-S first:5\fR | \fB-S last:3\fR
+.TP
+.BR \-\-export\-fields " \fIFIELD\fR [\fIFIELD\fR ...]"
+Select specific fields to export. Available fields: title, authors, abstract, journal, year, doi, url, source
+.br
+Example: \fB--export-fields title authors year doi\fR
+.TP
+.BR \-\-zip
+Compress exported file(s) to ZIP format
+.br
+Example: \fB-X csv --zip\fR
+.TP
+.BR \-c " \fISTYLE\fR, " \-\-citations " \fISTYLE\fR"
+Export as formatted citations. Available styles: apa, mla, chicago, ieee
+.br
+Example: \fB-c apa\fR or \fB--citations apa\fR
+.TP
+.BR \-\-download\-pdf
+Download full-text PDFs for search results. Automatically tries multiple sources in priority order: PubMed Central (open access), arXiv (preprints), DOI resolution (Unpaywall), and optionally SciHub. PDFs saved to ~/Lixplore_PDFs/ organized by source.
+.br
+Example: \fB-P -q "open access" -m 10 --download-pdf\fR
+.TP
+.BR \-\-pdf\-numbers " \fIN\fR [\fIN\fR ...]"
+Download PDFs only for specific article numbers. Use with --download-pdf.
+.br
+Example: \fB--download-pdf --pdf-numbers 1 3 5\fR
+.TP
+.BR \-\-use\-scihub
+Use SciHub as fallback for PDF download (requires SciHub mirror configuration via --set-scihub-mirror). Use at your own discretion and respect copyright laws.
+.br
+Example: \fB--download-pdf --use-scihub\fR
+.TP
+.BR \-\-add\-to\-zotero
+Add search results directly to Zotero library via API. Requires Zotero API configuration (see --configure-zotero).
+.br
+Example: \fB-P -q "research" -m 10 --add-to-zotero\fR
+.TP
+.BR \-\-zotero\-collection " \fIKEY\fR"
+Zotero collection key to add items to. Use with --add-to-zotero. Get collection keys with --show-zotero-collections.
+.br
+Example: \fB--add-to-zotero --zotero-collection ABC123\fR
+.TP
+.BR \-\-export\-for\-mendeley
+Export results as RIS file for Mendeley Desktop import. Mendeley doesn't provide a public API, so RIS export is used for compatibility.
+.br
+Example: \fB-P -q "biology" -m 30 --export-for-mendeley\fR
+.TP
+.BR \-\-save\-profile " \fINAME\fR"
+Save current export settings as a reusable profile
+.br
+Example: \fB--save-profile my_nature_export\fR
+.TP
+.BR \-\-load\-profile " \fINAME\fR"
+Load previously saved export profile
+.br
+Example: \fB--load-profile my_nature_export\fR
+.TP
+.BR \-\-template " \fINAME\fR"
+Use predefined export template. Available templates: nature, science, ieee
+.br
+Example: \fB--template nature\fR
 
 .SS "Utility"
 .TP
 .BR \-H ", " \-\-history
 Show search history
+.TP
+.BR \-\-refresh
+Bypass cache and fetch fresh results. Normally, search results are cached for 7 days to improve performance. This flag forces a fresh search ignoring the cache.
+.br
+Example: \fB-P -q "cancer" -m 50 --refresh\fR
+.TP
+.BR \-\-examples
+Show quick examples (tldr-style) and exit
+.TP
+.BR \-\-list\-profiles
+List all saved export profiles
+.TP
+.BR \-\-delete\-profile " \fINAME\fR"
+Delete a saved export profile
+.br
+Example: \fB--delete-profile my_export\fR
+.TP
+.BR \-\-list\-templates
+List all available export templates (built-in and user-defined)
+.TP
+.BR \-\-list\-custom\-apis
+List all configured custom API sources with their descriptions
+.TP
+.BR \-\-create\-api\-examples
+Create example custom API configuration files for Springer and BASE. Use these as templates to configure your own APIs.
+.br
+Example: \fB--create-api-examples\fR
+.TP
+.BR \-\-set\-scihub\-mirror " \fIURL\fR"
+Configure SciHub mirror URL for PDF downloads. Required for --use-scihub.
+.br
+Example: \fB--set-scihub-mirror https://sci-hub.se\fR
+.TP
+.BR \-\-show\-pdf\-dir
+Show PDF download directory location and count of downloaded PDFs
+.TP
+.BR \-\-configure\-zotero " \fIAPI_KEY\fR \fIUSER_ID\fR"
+Configure Zotero API access for direct library integration. Get API key from https://www.zotero.org/settings/keys
+.br
+Example: \fB--configure-zotero YOUR_API_KEY YOUR_USER_ID\fR
+.TP
+.BR \-\-show\-zotero\-collections
+List all Zotero collections with their keys (for use with --zotero-collection)
 .TP
 .BR \-h ", " \-\-help
 Display help message and exit
@@ -248,12 +458,189 @@ lixplore -P -q "science" -m 50 -S 10-20 -X xlsx
 # Export first 15 and last 5
 lixplore -P -q "study" -m 50 -S first:15 last:5 -X enw
 .fi
+.TP
+.B Citation style export:
+.nf
+# Export as APA citations
+lixplore -P -q "climate change" -m 20 -c apa -o citations.txt
+
+# Export as IEEE citations
+lixplore -P -q "robotics" -m 15 -c ieee
+.fi
+.TP
+.B Batch export to multiple formats:
+.nf
+# Export to CSV, BibTeX, and RIS simultaneously
+lixplore -P -q "machine learning" -m 30 -X csv,bibtex,ris
+
+# Batch export with compression
+lixplore -P -q "AI research" -m 50 -X csv,json,ris --zip
+.fi
+.TP
+.B Export with field filtering:
+.nf
+# Export only specific fields
+lixplore -P -q "biology" -m 25 -X csv --export-fields title authors year doi
+
+# Minimal export for quick reference
+lixplore -P -q "chemistry" -m 50 -X json --export-fields title doi
+.fi
+.TP
+.B Metadata enrichment:
+.nf
+# Enrich using all APIs
+lixplore -P -q "genomics" -m 20 --enrich -X bibtex
+
+# Enrich using specific APIs
+lixplore -P -q "physics" -m 30 --enrich crossref pubmed -X xlsx
+
+# Enrich with field filtering
+lixplore -P -q "medicine" -m 25 --enrich --export-fields title authors doi year -X csv
+.fi
+.TP
+.B Pagination and browsing:
+.nf
+# View results page by page
+lixplore -P -q "cancer" -m 100 -p 1              # Page 1 (results 1-20)
+lixplore -P -q "cancer" -m 100 -p 2              # Page 2 (results 21-40)
+
+# Custom page size
+lixplore -P -q "research" -m 100 --page-size 50 -p 1
+
+# Interactive mode for easy browsing
+lixplore -P -q "AI" -m 50 -i
+# In interactive: use n/p for pages, v to view, s to select, e to export
+.fi
+.TP
+.B Statistics dashboard:
+.nf
+# Show comprehensive statistics
+lixplore -P -q "machine learning" -m 100 --stat
+
+# Show top 20 items in rankings
+lixplore -A -q "COVID-19" -m 200 --stat --stat-top 20
+
+# Statistics with deduplication
+lixplore -A -q "cancer research" -m 150 -D --stat
+.fi
+.TP
+.B PDF downloads:
+.nf
+# Download PDFs for all results
+lixplore -P -q "open access" -m 10 --download-pdf
+
+# Download specific articles
+lixplore -P -q "research" -m 50 --download-pdf --pdf-numbers 1 3 5
+
+# Configure SciHub and use as fallback
+lixplore --set-scihub-mirror https://sci-hub.se
+lixplore -P -q "article" -m 20 --download-pdf --use-scihub
+
+# Check PDF directory
+lixplore --show-pdf-dir
+.fi
+.TP
+.B Custom API sources:
+.nf
+# Create example configurations
+lixplore --create-api-examples
+
+# List configured APIs
+lixplore --list-custom-apis
+
+# Search using Springer API (after configuration)
+lixplore --custom-api springer -q "quantum physics" -m 20
+
+# Combine with standard sources
+lixplore -P --custom-api base -q "biology" -m 30 -D
+.fi
+.TP
+.B Reference manager integration:
+.nf
+# Configure Zotero (one-time setup)
+lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID
+
+# List Zotero collections
+lixplore --show-zotero-collections
+
+# Add to Zotero
+lixplore -P -q "research" -m 10 --add-to-zotero
+
+# Add to specific Zotero collection
+lixplore -P -q "AI" -m 20 --add-to-zotero --zotero-collection ABC123
+
+# Export for Mendeley
+lixplore -P -q "biology" -m 30 --export-for-mendeley
+.fi
+.TP
+.B Cache management:
+.nf
+# Normal search uses cache if < 7 days old
+lixplore -P -q "cancer" -m 50
+
+# Force refresh (bypass cache)
+lixplore -P -q "cancer" -m 50 --refresh
+
+# Review cached results later
+lixplore -R 1 5 9
+.fi
+.TP
+.B Enhanced deduplication:
+.nf
+# Strict deduplication with metadata merging
+lixplore -A -q "cancer research" -m 100 -D strict --dedup-merge -X xlsx
+
+# Custom threshold deduplication
+lixplore -A -q "biology" -m 50 -D --dedup-threshold 0.9 --dedup-keep most_complete
+.fi
+.TP
+.B Export profiles:
+.nf
+# Save current settings as profile
+lixplore -P -q "test" -X bibtex --sort newest --save-profile my_nature_export
+
+# Load and use saved profile
+lixplore -P -q "new search" -m 30 --load-profile my_nature_export
+
+# List all profiles
+lixplore --list-profiles
+
+# Delete a profile
+lixplore --delete-profile old_profile
+.fi
+.TP
+.B Export templates:
+.nf
+# Use Nature journal template
+lixplore -P -q "genetics" -m 25 --template nature
+
+# Use IEEE template
+lixplore -P -q "engineering" -m 30 --template ieee
+
+# List available templates
+lixplore --list-templates
+.fi
+.TP
+.B Advanced comprehensive workflow:
+.nf
+# Search all sources, deduplicate, enrich, filter fields, batch export, compress
+lixplore -A -q "machine learning" -m 100 -D strict --dedup-merge \\
+  --enrich --export-fields title authors doi year journal \\
+  -X csv,bibtex --zip --save-profile ml_comprehensive
+
+# Search with template and enrichment
+lixplore -P -C -q "cancer AND treatment" -m 50 -D \\
+  --enrich crossref --template nature -X bibtex
+.fi
 
 .SH EXPORT LOCATIONS
 All exports are automatically saved to organized folders:
 .TP
 .I exports/csv/
 CSV files
+.TP
+.I exports/citations/
+Formatted citation files (APA, MLA, Chicago, IEEE)
 .TP
 .I exports/excel/
 Microsoft Excel files (.xlsx)
@@ -280,6 +667,12 @@ Generic XML files
 .TP
 .I ~/.lixplore_cache.json
 Cache file for search results (7-day retention)
+.TP
+.I ~/.lixplore/profiles.json
+Saved export profiles for reusable configurations
+.TP
+.I ~/.lixplore/templates/
+User-defined custom export templates
 .TP
 .I ./exports/
 Directory containing all exported files, organized by format

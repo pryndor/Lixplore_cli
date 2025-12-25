@@ -120,7 +120,6 @@ cat docs/lixplore.md
 -o FILE, --output     Custom output filename
 -S SELECTION, --select  Smart selection ✨ NEW
                         (odd, even, 1-10, first:N, last:N, top:N)
--Z, --zotero          Export to Zotero
 ```
 
 ### ℹ️ UTILITY (3 flags)
