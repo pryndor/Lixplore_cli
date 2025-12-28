@@ -4,10 +4,15 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://pryndor.github.io/Lixplore_cli/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/pryndor/Lixplore_cli)
 [![PyPI version](https://badge.fury.io/py/lixplore.svg)](https://badge.fury.io/py/lixplore)
+[![Issues](https://img.shields.io/github/issues/pryndor/Lixplore_cli)](https://github.com/pryndor/Lixplore_cli/issues)
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
 Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) with Boolean operators, smart selection, and export to 8 formats including EndNote, Excel, and BibTeX.
+
+**📚 [Complete Documentation](https://pryndor.github.io/Lixplore_cli/)** | **🐛 [Report Issues](https://github.com/pryndor/Lixplore_cli/issues)** | **💬 [Discussions](https://github.com/pryndor/Lixplore_cli/discussions)**
 
 ---
 
@@ -39,9 +44,12 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 - 🗜️ **Export Compression** - ZIP compression for batch exports
 
 ### Documentation
-- 📚 **Complete Documentation** - Man page, help, examples, TLDR guide
-- 🎓 **Feature Guide** - Comprehensive documentation for all features
+- 📚 **[Complete Documentation Site](https://pryndor.github.io/Lixplore_cli/)** - Comprehensive online documentation
+- 📖 **32+ Documentation Pages** - Getting started, user guides, command reference, examples
+- 🔍 **All 95 Flags Documented** - Detailed examples for every command-line flag
+- 🎓 **Step-by-Step Tutorials** - From installation to advanced workflows
 - 💡 **Quick Examples** - Built-in examples with `--examples` flag
+- 📄 **Man Page** - Traditional Unix man page included
 
 ### 🚀 NEW! Interactive Modes
 - 🐚 **Shell Mode** - Persistent terminal session (like OpenBB Terminal)
@@ -185,8 +193,8 @@ lixplore --custom-api springer -q "quantum physics" -m 20
 pip install lixplore
 
 # From source
-git clone https://github.com/yourusername/lixplore.git
-cd lixplore
+git clone https://github.com/pryndor/Lixplore_cli.git
+cd Lixplore_cli
 pip install -e .
 ```
 
@@ -207,6 +215,15 @@ lixplore -P -q "diabetes" -m 20 -X xlsx -o results.xlsx
 
 ## 📚 Documentation
 
+### 📖 [Complete Online Documentation](https://pryndor.github.io/Lixplore_cli/)
+
+Visit our comprehensive documentation site for:
+- **Getting Started Guides** - Installation and first search tutorial
+- **User Guides** - Search, filtering, export, annotations, PDF management
+- **Command Reference** - All 95 flags with detailed examples
+- **Advanced Features** - Automation, AI integration, Zotero, custom APIs
+- **Examples** - Common workflows, use cases, tool integrations
+
 ### Quick Help
 
 ```bash
@@ -218,6 +235,9 @@ lixplore --help
 
 # View man page (after installing)
 man lixplore
+
+# Browse online documentation
+# https://pryndor.github.io/Lixplore_cli/
 ```
 
 ### Key Commands
@@ -424,8 +444,8 @@ pip install lixplore
 
 ### Method 2: From Source
 ```bash
-git clone https://github.com/yourusername/lixplore.git
-cd lixplore
+git clone https://github.com/pryndor/Lixplore_cli.git
+cd Lixplore_cli
 pip install -e .
 ```
 
@@ -526,20 +546,23 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📧 Support
+## 📧 Support & Community
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/lixplore/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/lixplore/discussions)
-- **Email:** lixplore@example.com
+- **📚 Documentation:** [https://pryndor.github.io/Lixplore_cli/](https://pryndor.github.io/Lixplore_cli/)
+- **🐛 Issues:** [GitHub Issues](https://github.com/pryndor/Lixplore_cli/issues)
+- **💬 Discussions:** [GitHub Discussions](https://github.com/pryndor/Lixplore_cli/discussions)
+- **❓ FAQ:** [Documentation FAQ](https://pryndor.github.io/Lixplore_cli/about/faq/)
 
 ---
 
-## 🔗 Links
+## 🔗 Quick Links
 
-- [PyPI Package](https://pypi.org/project/lixplore/)
-- [GitHub Repository](https://github.com/yourusername/lixplore)
-- [Documentation](https://github.com/yourusername/lixplore#readme)
-- [Issue Tracker](https://github.com/yourusername/lixplore/issues)
+- **📦 PyPI Package:** [https://pypi.org/project/lixplore/](https://pypi.org/project/lixplore/) *(Coming Soon)*
+- **💻 GitHub Repository:** [https://github.com/pryndor/Lixplore_cli](https://github.com/pryndor/Lixplore_cli)
+- **📚 Documentation:** [https://pryndor.github.io/Lixplore_cli/](https://pryndor.github.io/Lixplore_cli/)
+- **🐛 Issue Tracker:** [https://github.com/pryndor/Lixplore_cli/issues](https://github.com/pryndor/Lixplore_cli/issues)
+- **🚀 Changelog:** [https://pryndor.github.io/Lixplore_cli/about/changelog/](https://pryndor.github.io/Lixplore_cli/about/changelog/)
+- **🤝 Contributing Guide:** [https://pryndor.github.io/Lixplore_cli/about/contributing/](https://pryndor.github.io/Lixplore_cli/about/contributing/)
 
 ---
 
