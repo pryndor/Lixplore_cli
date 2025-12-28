@@ -1,0 +1,16 @@
+# GitHub linguist configuration
+# Exclude generated files and documentation builds from language statistics
+
+# Documentation build outputs
+site/** linguist-generated
+docs/_build/** linguist-generated
+
+# Python bytecode
+*.pyc linguist-generated
+__pycache__/** linguist-generated
+
+# Mark documentation source as documentation
+docs/**/*.md linguist-documentation
+
+# Ensure Python is detected as primary language
+*.py linguist-detectable
