@@ -54,10 +54,12 @@ test_*.py
 troubleshoot.py
 pub.py
 
-# All markdown files in root directory
+# All markdown files in root directory except README and CHANGELOG
 # Documentation is available at https://pryndor.github.io/Lixplore_cli/
 # Source files in docs/ directory are kept for building documentation site
 /*.md
+!README.md
+!CHANGELOG.md
 
 # Distribution / packaging
 *.whl
