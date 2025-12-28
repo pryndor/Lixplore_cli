@@ -44,6 +44,7 @@ results.json
 .crossref
 .semantischolar
 config.json
+lixplore_annotations_*.*
 
 # Test files and debugging
 tmp_rovodev_*
@@ -88,6 +89,7 @@ coverage.xml
 
 # Documentation builds
 docs/_build/
+site/
 
 # OS specific
 Thumbs.db
