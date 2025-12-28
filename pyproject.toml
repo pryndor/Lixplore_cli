@@ -3,17 +3,17 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lixplore-cli"
+name = "lixplore"
 version = "1.0.0"
 description = "Academic Literature Search & Export CLI Tool"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Lixplore Contributors", email = "lixplore@example.com"}
+    {name = "Pryndor", email = "noreply@github.com"}
 ]
 maintainers = [
-    {name = "Lixplore Contributors", email = "lixplore@example.com"}
+    {name = "Pryndor", email = "noreply@github.com"}
 ]
 keywords = [
     "literature",
@@ -67,10 +67,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/lixplore"
-Documentation = "https://github.com/yourusername/lixplore#readme"
-Repository = "https://github.com/yourusername/lixplore"
-"Bug Tracker" = "https://github.com/yourusername/lixplore/issues"
+Homepage = "https://github.com/pryndor/Lixplore_cli"
+Documentation = "https://pryndor.github.io/Lixplore_cli/"
+Repository = "https://github.com/pryndor/Lixplore_cli"
+"Bug Tracker" = "https://github.com/pryndor/Lixplore_cli/issues"
 
 [project.scripts]
 lixplore = "lixplore.cli:main"
