@@ -12,7 +12,7 @@
 
 Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) with Boolean operators, smart selection, and export to 8 formats including EndNote, Excel, and BibTeX.
 
-**📚 [Complete Documentation](https://pryndor.github.io/Lixplore_cli/)** | **🐛 [Report Issues](https://github.com/pryndor/Lixplore_cli/issues)** | **💬 [Discussions](https://github.com/pryndor/Lixplore_cli/discussions)**
+**📚 [Complete Documentation](https://pryndor.github.io/Lixplore_cli/)** | **🐛 [Report Issues](https://github.com/pryndor/Lixplore_cli/issues)**
 
 ---
 
@@ -550,7 +550,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **📚 Documentation:** [https://pryndor.github.io/Lixplore_cli/](https://pryndor.github.io/Lixplore_cli/)
 - **🐛 Issues:** [GitHub Issues](https://github.com/pryndor/Lixplore_cli/issues)
-- **💬 Discussions:** [GitHub Discussions](https://github.com/pryndor/Lixplore_cli/discussions)
 - **❓ FAQ:** [Documentation FAQ](https://pryndor.github.io/Lixplore_cli/about/faq/)
 
 ---
