@@ -46,7 +46,7 @@ def initialize_export_folders():
     """
     if not os.path.exists(DEFAULT_EXPORT_DIR):
         os.makedirs(DEFAULT_EXPORT_DIR)
-        print(f"✓ Created main export directory: {DEFAULT_EXPORT_DIR}")
+        print(f"Created main export directory: {DEFAULT_EXPORT_DIR}")
     
     # Create all format-specific subfolders
     for format_key, folder_name in EXPORT_FOLDERS.items():
@@ -207,7 +207,7 @@ def export_to_csv(results: List[Dict], filename: str = None, fields: List[str] =
                 row['authors'] = "; ".join(row['authors'])
             writer.writerow(row)
 
-    print(f"✓ Exported {len(results)} results to: {filename}")
+    print(f"Exported {len(results)} results to: {filename}")
     return filename
 
 
@@ -240,7 +240,7 @@ def export_to_json(results: List[Dict], filename: str = None, fields: List[str] 
     with open(filename, 'w', encoding='utf-8') as jsonfile:
         json.dump(results, jsonfile, indent=2, ensure_ascii=False)
 
-    print(f"✓ Exported {len(results)} results to: {filename}")
+    print(f"Exported {len(results)} results to: {filename}")
     return filename
 
 
@@ -313,7 +313,7 @@ def export_to_bibtex(results: List[Dict], filename: str = None, fields: List[str
             # Close entry
             bibfile.write("}\n\n")
     
-    print(f"✓ Exported {len(results)} results to: {filename}")
+    print(f"Exported {len(results)} results to: {filename}")
     return filename
 
 
@@ -384,7 +384,7 @@ def export_to_ris(results: List[Dict], filename: str = None, fields: List[str] =
             # ER - End of reference
             risfile.write("ER  - \n\n")
     
-    print(f"✓ Exported {len(results)} results to: {filename}")
+    print(f"Exported {len(results)} results to: {filename}")
     return filename
 
 
@@ -467,7 +467,7 @@ def export_to_xlsx(results: List[Dict], filename: str = None, fields: List[str] 
     # Save workbook
     wb.save(filename)
     
-    print(f"✓ Exported {len(results)} results to: {filename}")
+    print(f"Exported {len(results)} results to: {filename}")
     return filename
 
 
@@ -578,7 +578,7 @@ def export_to_endnote_xml(results: List[Dict], filename: str = None, fields: Lis
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(xml_str)
     
-    print(f"✓ Exported {len(results)} results to EndNote XML: {filename}")
+    print(f"Exported {len(results)} results to EndNote XML: {filename}")
     return filename
 
 
@@ -650,7 +650,7 @@ def export_to_enw(results: List[Dict], filename: str = None, fields: List[str] =
             # End of record (blank line)
             enwfile.write("\n")
     
-    print(f"✓ Exported {len(results)} results to EndNote format: {filename}")
+    print(f"Exported {len(results)} results to EndNote format: {filename}")
     return filename
 
 
@@ -707,7 +707,7 @@ def export_to_xml(results: List[Dict], filename: str = None, fields: List[str] =
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(xml_str)
     
-    print(f"✓ Exported {len(results)} results to XML: {filename}")
+    print(f"Exported {len(results)} results to XML: {filename}")
     return filename
 
 
@@ -752,7 +752,7 @@ def export_to_citations(results: List[Dict], style: str, filename: str = None, f
             for citation in citations:
                 f.write(citation + '\n\n')
 
-        print(f"✓ Exported {len(results)} citations ({style.upper()} style) to: {filename}")
+        print(f"Exported {len(results)} citations ({style.upper()} style) to: {filename}")
         return filename
 
     except ValueError as e:
@@ -783,12 +783,12 @@ def compress_export(filepath: str, remove_original: bool = False) -> str:
             # Add file to ZIP with just the basename (not full path)
             zipf.write(filepath, os.path.basename(filepath))
 
-        print(f"✓ Compressed to: {zip_path}")
+        print(f"Compressed to: {zip_path}")
 
         # Optionally remove original file
         if remove_original:
             os.remove(filepath)
-            print(f"✓ Removed original file: {filepath}")
+            print(f"Removed original file: {filepath}")
 
         return zip_path
 

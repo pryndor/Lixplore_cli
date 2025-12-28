@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI version](https://badge.fury.io/py/lixplore.svg)](https://badge.fury.io/py/lixplore)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/lixplore)
+<a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
 Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) with Boolean operators, smart selection, and export to 8 formats including EndNote, Excel, and BibTeX.
 
@@ -25,6 +25,7 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 
 ### Advanced Features
 - 📥 **PDF Downloads** - Automatic PDF downloads from PMC, arXiv, Unpaywall, and SciHub (optional)
+- 🔗 **PDF Link Display** - Show clickable PDF links for open access articles in terminal (NEW!)
 - 📚 **Reference Manager Integration** - Direct Zotero API integration and Mendeley RIS export
 - 📊 **Statistics Dashboard** - Comprehensive analytics with visualizations (publication trends, top journals, top authors)
 - 🎨 **Interactive TUI Mode** - Browse, select, and export with an interactive terminal UI
@@ -42,14 +43,62 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 - 🎓 **Feature Guide** - Comprehensive documentation for all features
 - 💡 **Quick Examples** - Built-in examples with `--examples` flag
 
+### 🚀 NEW! Interactive Modes
+- 🐚 **Shell Mode** - Persistent terminal session (like OpenBB Terminal)
+- 🧙 **Wizard Mode** - Guided step-by-step workflows for beginners
+- 📝 **Annotation System** - Rate, tag, comment, and organize your research library
+
+---
+
+## 🎯 Three Ways to Use Lixplore
+
+### 1️⃣ Shell Mode (NEW!) - Persistent Interactive Session
+
+**Perfect for power users and continuous workflows**
+
+```bash
+lixplore --shell
+
+# Inside shell - no need to type 'lixplore' repeatedly!
+lixplore> search "cancer treatment" -P -m 20
+lixplore> annotate 5 --rating 5 --tags "important"
+lixplore> list annotations
+lixplore> export markdown
+```
+
+### 2️⃣ Wizard Mode (NEW!) - Guided Workflows
+
+**Perfect for beginners and learning**
+
+```bash
+lixplore --wizard
+
+# Follow interactive prompts - no flags to memorize!
+What do you want to do?
+  1. Search for articles
+  2. Annotate an article
+  3. View my annotations
+  ...
+```
+
+### 3️⃣ Command Line - Traditional Flags
+
+**Perfect for scripting and automation**
+
+```bash
+lixplore -P -q "machine learning" -m 20 -X xlsx
+```
+
+**📖 See [INTERACTIVE_MODES_GUIDE.md](INTERACTIVE_MODES_GUIDE.md) for complete guide**
+
 ---
 
 ## 🆕 What's New in Version 2.0
 
 Lixplore has been massively upgraded with powerful new features:
 
-### 📥 PDF Download Integration
-Download full-text PDFs automatically with smart fallback chain:
+### 📥 PDF Download & Link Display
+**Download PDFs** automatically with smart fallback chain:
 - PubMed Central (open access)
 - arXiv (preprints)
 - DOI Resolution via Unpaywall
@@ -59,13 +108,31 @@ Download full-text PDFs automatically with smart fallback chain:
 lixplore -P -q "open access" -m 10 --download-pdf
 ```
 
+**Show PDF Links** directly in search results (NEW!):
+- Display clickable PDF links for open access articles
+- Works in modern terminals (iTerm2, GNOME Terminal, Windows Terminal)
+- No download required - click to open in browser
+
+```bash
+lixplore -x -q "machine learning" -m 10 --show-pdf-links
+```
+
 ### 📚 Reference Manager Integration
 Direct integration with your favorite reference managers:
 - **Zotero**: API integration with collection support
 - **Mendeley**: RIS export for easy import
 
+**Setup Zotero (one-time):**
+1. Get API key: https://www.zotero.org/settings/keys
+2. Configure: `lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID`
+
+**Usage:**
 ```bash
+# Add to Zotero library
 lixplore -P -q "research" -m 10 --add-to-zotero
+
+# Add to specific collection
+lixplore -P -q "AI" -m 20 --add-to-zotero --zotero-collection 4FCVPNAP
 ```
 
 ### 📊 Statistics Dashboard
@@ -225,6 +292,18 @@ lixplore -P -q "aspirin" -m 10
 lixplore -R 2
 
 # Close review window: Press 'q' or Ctrl+C
+```
+
+#### PDF Links
+```bash
+# Show clickable PDF links in results
+lixplore -x -q "neural networks" -m 10 --show-pdf-links
+
+# Combine with abstracts
+lixplore -P -q "cancer" -m 20 -a --show-pdf-links
+
+# Multi-source with PDF links
+lixplore -A -q "COVID-19" -m 50 -D --show-pdf-links
 ```
 
 ---
@@ -390,7 +469,7 @@ man lixplore
 
 If you find Lixplore useful for your research, consider supporting its development!
 
-<a href="https://www.buymeacoffee.com/lixplore" target="_blank">
+<a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer">
   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
 </a>
 

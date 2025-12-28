@@ -1,0 +1,63 @@
+{
+  "doi:10.1016/j.ajt.2025.12.021": {
+    "article_info": {
+      "title": "Normothermic versus Hypothermic Machine Perfusion in Kidney Transplantation: a Randomized Controlled Trial.",
+      "authors": [
+        "Slagter Julia S",
+        "Bouari Sarah",
+        "Rijkse Elsaline",
+        "Cristoferi Iacopo",
+        "Fang Yitian",
+        "Papamanoli Agni",
+        "Stubbs Andrew",
+        "de Jonge Jeroen",
+        "De Bruin Ron W F",
+        "Van den Hoogen Martijn W F",
+        "Hoogduijn Martin J",
+        "Clahsen-van Groningen Marian C",
+        "Porte Robert J",
+        "Kimenai Hendrikus J A N",
+        "Minnee Robert C"
+      ],
+      "year": "2025",
+      "doi": "10.1016/j.ajt.2025.12.021",
+      "source": "pubmed"
+    },
+    "comments": [
+      {
+        "timestamp": "2025-12-27T21:59:22.424340",
+        "text": "Excellent RCT comparing normothermic vs hypothermic perfusion"
+      }
+    ],
+    "tags": [
+      "important",
+      "kidney-transplant",
+      "methodology"
+    ],
+    "rating": 5,
+    "read_status": "unread",
+    "priority": "high",
+    "created_at": "2025-12-27T21:59:22.424331",
+    "updated_at": "2025-12-27T21:59:22.424352"
+  },
+  "doi:10.1134/S0006297925602527": {
+    "article_info": {
+      "title": "Suppressing Mitochondrial ROS Production is Beneficial in Multiple Preclinical Models of Human Disease.",
+      "authors": [
+        "Brand Martin D"
+      ],
+      "year": "2025",
+      "doi": "10.1134/S0006297925602527",
+      "source": "pubmed"
+    },
+    "comments": [],
+    "tags": [
+      "test"
+    ],
+    "rating": 5,
+    "read_status": "unread",
+    "priority": "medium",
+    "created_at": "2025-12-27T22:07:35.595585",
+    "updated_at": "2025-12-27T22:07:35.595613"
+  }
+}

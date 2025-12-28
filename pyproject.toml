@@ -3,7 +3,7 @@ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lixplore"
+name = "lixplore-cli"
 version = "1.0.0"
 description = "Academic Literature Search & Export CLI Tool"
 readme = "README.md"

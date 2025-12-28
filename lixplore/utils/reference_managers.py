@@ -54,7 +54,7 @@ def configure_zotero(api_key: str, user_id: str, library_type: str = "user"):
         'library_type': library_type
     }
     save_config(config)
-    print(f"✓ Zotero configured for {library_type} library (ID: {user_id})")
+    print(f"Zotero configured for {library_type} library (ID: {user_id})")
 
 
 def article_to_zotero_item(article: Dict) -> Dict:
@@ -159,7 +159,7 @@ def add_to_zotero(articles: List[Dict], collection_key: Optional[str] = None) ->
     failed_count = 0
     failed_titles = []
 
-    print(f"\n📚 Adding {len(articles)} article(s) to Zotero...")
+    print(f"\nAdding {len(articles)} article(s) to Zotero...")
 
     for i, article in enumerate(articles, 1):
         try:
@@ -179,7 +179,7 @@ def add_to_zotero(articles: List[Dict], collection_key: Optional[str] = None) ->
             )
 
             if response.status_code in [200, 201]:
-                print(f"[{i}/{len(articles)}] ✓ {article.get('title', 'Unknown')[:60]}...")
+                print(f"[{i}/{len(articles)}] {article.get('title', 'Unknown')[:60]}...")
                 success_count += 1
             else:
                 print(f"[{i}/{len(articles)}] ✗ {article.get('title', 'Unknown')[:60]}... (HTTP {response.status_code})")
@@ -191,7 +191,7 @@ def add_to_zotero(articles: List[Dict], collection_key: Optional[str] = None) ->
             failed_count += 1
             failed_titles.append(article.get('title', 'Unknown'))
 
-    print(f"\n✓ Zotero import complete: {success_count} successful, {failed_count} failed")
+    print(f"\nZotero import complete: {success_count} successful, {failed_count} failed")
 
     return {
         'success': success_count,
@@ -222,9 +222,9 @@ def export_for_mendeley(articles: List[Dict], output_file: Optional[str] = None)
     # Export to RIS format
     export_path = export_to_ris(articles, output_file)
 
-    print(f"\n✓ Exported {len(articles)} article(s) for Mendeley")
-    print(f"📁 File: {export_path}")
-    print(f"\nℹ️  Import to Mendeley:")
+    print(f"\nExported {len(articles)} article(s) for Mendeley")
+    print(f"File: {export_path}")
+    print(f"\nImport to Mendeley:")
     print(f"   1. Open Mendeley Desktop")
     print(f"   2. File → Import → RIS")
     print(f"   3. Select: {export_path}")

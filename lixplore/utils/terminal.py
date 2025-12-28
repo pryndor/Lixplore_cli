@@ -17,7 +17,7 @@ def _supports_unicode_output() -> bool:
 
 
 def _label(unicode_ok: bool, emoji: str, ascii_label: str) -> str:
-    return f"{emoji} {ascii_label}:" if unicode_ok else f"{ascii_label.upper()}:"
+    return f"{ascii_label.upper()}:"
 
 
 def format_article_for_review(article: dict, article_number: int = None) -> str:
@@ -70,7 +70,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
         lines.append("")
 
     # Publication Info
-    lines.append(_label(unicode_ok, "📚", "Publication Info"))
+    lines.append(_label(unicode_ok, "", "Publication Info"))
     lines.append("-" * width)
     if article.get('journal'):
         lines.append(f"  Journal: {article['journal']}")
@@ -82,7 +82,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
     
     # DOI and URL
     if article.get('doi') or article.get('url'):
-        lines.append(_label(unicode_ok, "🔗", "Links"))
+        lines.append(_label(unicode_ok, "", "Links"))
         lines.append("-" * width)
         if article.get('doi'):
             lines.append(f"  DOI: {article['doi']}")
@@ -93,7 +93,7 @@ def format_article_for_review(article: dict, article_number: int = None) -> str:
 
     # Abstract
     if article.get('abstract'):
-        lines.append(_label(unicode_ok, "📝", "Abstract"))
+        lines.append(_label(unicode_ok, "", "Abstract"))
         lines.append("-" * width)
         # Wrap abstract text for better readability
         abstract = article['abstract']

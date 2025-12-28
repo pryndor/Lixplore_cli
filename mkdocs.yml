@@ -1,0 +1,127 @@
+site_name: Lixplore_cli - Academic Literature Explorer
+site_description: Fast, lightweight, multi-source academic literature search and export tool for researchers
+site_author: Pryndor
+site_url: https://pryndor.github.io/Lixplore_cli/
+
+repo_name: pryndor/Lixplore_cli
+repo_url: https://github.com/pryndor/Lixplore_cli
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - admonition
+  - tables
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+plugins:
+  - search:
+      lang: en
+
+nav:
+  - Home: index.md
+
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quickstart.md
+    - Basic Usage: getting-started/basic-usage.md
+    - First Search: getting-started/first-search.md
+
+  - User Guide:
+    - Search & Sources: guide/search-sources.md
+    - Filtering & Sorting: guide/filtering.md
+    - Export Formats: guide/export.md
+    - Annotations & Tags: guide/annotations.md
+    - Interactive Modes: guide/interactive.md
+    - PDF Management: guide/pdf.md
+
+  - Advanced Features:
+    - Automation & Cron Jobs: advanced/automation.md
+    - AI Integration: advanced/ai-integration.md
+    - Profiles & Templates: advanced/profiles.md
+    - Custom APIs: advanced/custom-apis.md
+    - Zotero Integration: advanced/zotero.md
+
+  - Command Reference:
+    - All Flags Overview: reference/flags-overview.md
+    - Source Selection: reference/source-flags.md
+    - Search Parameters: reference/search-flags.md
+    - Filtering Options: reference/filter-flags.md
+    - Display Options: reference/display-flags.md
+    - Export Options: reference/export-flags.md
+    - Annotation Flags: reference/annotation-flags.md
+    - Interactive Flags: reference/interactive-flags.md
+    - Utility Flags: reference/utility-flags.md
+
+  - Examples:
+    - Common Workflows: examples/workflows.md
+    - Research Use Cases: examples/use-cases.md
+    - Integration Examples: examples/integrations.md
+    - Automation Examples: examples/automation-examples.md
+
+  - About:
+    - Changelog: about/changelog.md
+    - Contributing: about/contributing.md
+    - License: about/license.md
+    - FAQ: about/faq.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pryndor/Lixplore_cli
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/lixplore/
+
+copyright: Copyright &copy; 2024 Pryndor

@@ -1,3 +1,11 @@
-biopython>=1.84
-requests>=2.31.0
-litstudy>=1.0.6
+biopython>=1.79
+requests>=2.25.0
+litstudy>=1.0.0
+openpyxl>=3.0.0
+
+[dev]
+pytest>=6.0
+pytest-cov
+black
+flake8
+mypy

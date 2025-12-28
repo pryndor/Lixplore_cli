@@ -18,7 +18,7 @@ def ensure_profiles_dir():
     """Create ~/.lixplore directory if it doesn't exist."""
     if not os.path.exists(PROFILES_DIR):
         os.makedirs(PROFILES_DIR)
-        print(f"✓ Created profiles directory: {PROFILES_DIR}")
+        print(f"Created profiles directory: {PROFILES_DIR}")
 
 
 def load_profiles() -> Dict:

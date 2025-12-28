@@ -142,7 +142,7 @@ def create_example_configs():
     with open(example_file, 'w', encoding='utf-8') as f:
         json.dump(examples, f, indent=2, ensure_ascii=False)
 
-    print(f"✓ Example API configurations created at: {example_file}")
+    print(f"Example API configurations created at: {example_file}")
     print(f"  - Springer: Requires API key from https://dev.springernature.com/")
     print(f"  - BASE: No authentication required")
     print(f"\nTo use: Copy the config to {CUSTOM_API_CONFIG} or create individual files.")

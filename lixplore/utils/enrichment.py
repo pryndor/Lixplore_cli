@@ -285,7 +285,7 @@ def enrich_results(results: List[Dict], apis: List[str] = None, show_progress: b
         enriched_results.append(enriched)
 
     if show_progress:
-        print(f"✓ Enrichment complete: {len(enriched_results)} articles")
+        print(f"Enrichment complete: {len(enriched_results)} articles")
 
     return enriched_results
 
@@ -331,7 +331,7 @@ def resolve_all_dois(results: List[Dict]) -> List[Dict]:
         # Rate limiting
         time.sleep(RATE_LIMIT_DELAY)
 
-    print(f"✓ DOI resolution complete:")
+    print(f"DOI resolution complete:")
     print(f"  - Validated: {validated_count} existing DOIs")
     print(f"  - Found: {found_count} missing DOIs")
 

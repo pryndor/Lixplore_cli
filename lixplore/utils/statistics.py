@@ -282,7 +282,7 @@ def generate_statistics_report(results: List[Dict], top_n: int = 10) -> str:
 
     lines = []
     lines.append("")
-    lines.append("📊 LITERATURE STATISTICS DASHBOARD" if unicode_ok else "LITERATURE STATISTICS DASHBOARD")
+    lines.append("LITERATURE STATISTICS DASHBOARD")
     lines.append(separator)
     lines.append("")
 
@@ -301,7 +301,7 @@ def generate_statistics_report(results: List[Dict], top_n: int = 10) -> str:
     source_dist = analyze_source_distribution(results)
     lines.append(create_bar_chart(
         source_dist,
-        "🗂️  Source Distribution" if unicode_ok else "SOURCE DISTRIBUTION",
+        "SOURCE DISTRIBUTION",
         max_width=40,
         top_n=20
     ))
@@ -321,7 +321,7 @@ def generate_statistics_report(results: List[Dict], top_n: int = 10) -> str:
     if top_journals:
         lines.append(create_bar_chart(
             top_journals,
-            f"📚 Top {top_n} Journals" if unicode_ok else f"TOP {top_n} JOURNALS",
+            f"Top {top_n} Journals" if unicode_ok else f"TOP {top_n} JOURNALS",
             max_width=40,
             top_n=top_n
         ))

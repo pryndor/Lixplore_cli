@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 CACHE_FILE = os.path.expanduser("~/.lixplore_cache.json")
 CACHE_EXPIRY_DAYS = 7  # Default cache expiration in days
+HISTORY_FILE = os.path.expanduser("~/.lixplore_history.json")
+MAX_HISTORY_ENTRIES = 100  # Maximum number of history entries to keep
 
 
 # ===== Extra helpers =====
@@ -428,6 +430,21 @@ def paginate_results(results, page=1, page_size=20):
     return paginated, total_pages, start_index, end_index
 
 
+def make_clickable_link(url: str, text: str) -> str:
+    """
+    Create a clickable hyperlink using OSC 8 terminal escape sequences.
+    Supported by modern terminals (iTerm2, GNOME Terminal, etc.)
+
+    Args:
+        url: The URL to link to
+        text: The visible text
+
+    Returns:
+        Formatted string with hyperlink
+    """
+    return f"\033]8;;{url}\033\\{text}\033]8;;\033\\"
+
+
 def show_results(results, args):
     """Show search results with pagination support and optional abstracts/detailed view."""
     total_results = len(results)
@@ -435,6 +452,18 @@ def show_results(results, args):
     # Check if pagination is needed
     page = getattr(args, 'page', 1)
     page_size = getattr(args, 'page_size', 20)
+    show_pdf_links = getattr(args, 'show_pdf_links', False)
+
+    # Fetch PDF links if requested
+    pdf_links = {}
+    if show_pdf_links:
+        print("\nChecking for open access PDFs...")
+        from lixplore.utils.pdf_downloader import get_pdf_links_batch
+        pdf_links = get_pdf_links_batch(results)
+        if pdf_links:
+            print(f"Found {len(pdf_links)} PDF(s) available\n")
+        else:
+            print("Info: No open access PDFs found\n")
 
     # Only paginate if results exceed page size
     if total_results > page_size:
@@ -447,7 +476,14 @@ def show_results(results, args):
 
         # Display paginated results
         for i, r in enumerate(paginated, start=start_idx + 1):
-            print(f"[{i}] {r.get('title', 'No title')}")
+            title = r.get('title', 'No title')
+            print(f"[{i}] {title}")
+
+            # Show PDF link if available
+            if show_pdf_links and (i - 1) in pdf_links:
+                pdf_url = pdf_links[i - 1]
+                clickable = make_clickable_link(pdf_url, "Open PDF")
+                print(f"    {clickable} → {pdf_url}")
 
         # Show abstracts for paginated results if requested
         if args.abstract:
@@ -457,7 +493,14 @@ def show_results(results, args):
     else:
         # No pagination needed - show all results
         for i, r in enumerate(results, start=1):
-            print(f"[{i}] {r.get('title', 'No title')}")
+            title = r.get('title', 'No title')
+            print(f"[{i}] {title}")
+
+            # Show PDF link if available
+            if show_pdf_links and (i - 1) in pdf_links:
+                pdf_url = pdf_links[i - 1]
+                clickable = make_clickable_link(pdf_url, "Open PDF")
+                print(f"    {clickable} → {pdf_url}")
 
         if args.abstract:
             print("\n--- Abstracts ---")
@@ -476,9 +519,126 @@ def show_results(results, args):
                 print(f"Invalid selection: {n}")
 
 
+def save_to_history(query, sources, result_count):
+    """
+    Save search to history file.
+
+    Args:
+        query: Search query string
+        sources: List of sources searched
+        result_count: Number of results found
+    """
+    history_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "query": query,
+        "sources": sources if sources else [],
+        "result_count": result_count
+    }
+
+    # Load existing history
+    history = []
+    if os.path.exists(HISTORY_FILE):
+        try:
+            with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+                history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            history = []
+
+    # Add new entry at the beginning (most recent first)
+    history.insert(0, history_entry)
+
+    # Keep only the most recent MAX_HISTORY_ENTRIES
+    history = history[:MAX_HISTORY_ENTRIES]
+
+    # Save updated history
+    try:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except IOError as e:
+        # Silently fail if we can't write history (not critical)
+        pass
+
+
 def show_history():
-    # TODO: implement persistent history
-    print("Search history not yet implemented")
+    """Display search history."""
+    if not os.path.exists(HISTORY_FILE):
+        print("No search history found.")
+        print("Run a search to start building history (e.g., lixplore -P -q \"cancer\" -m 10)")
+        return
+
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            history = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        print("Error reading history file.")
+        return
+
+    if not history:
+        print("No search history found.")
+        return
+
+    print(f"\n{'='*80}")
+    print(f"SEARCH HISTORY ({len(history)} searches)")
+    print(f"{'='*80}\n")
+
+    for i, entry in enumerate(history, 1):
+        timestamp = entry.get("timestamp", "Unknown time")
+        query = entry.get("query", "Unknown query")
+        sources = entry.get("sources", [])
+        result_count = entry.get("result_count", 0)
+
+        # Parse timestamp for display
+        try:
+            dt = datetime.fromisoformat(timestamp)
+            time_str = dt.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Calculate how long ago
+            now = datetime.now()
+            delta = now - dt
+            if delta.days > 0:
+                ago = f"{delta.days} day{'s' if delta.days != 1 else ''} ago"
+            elif delta.seconds >= 3600:
+                hours = delta.seconds // 3600
+                ago = f"{hours} hour{'s' if hours != 1 else ''} ago"
+            elif delta.seconds >= 60:
+                minutes = delta.seconds // 60
+                ago = f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+            else:
+                ago = "just now"
+        except (ValueError, AttributeError):
+            time_str = timestamp
+            ago = ""
+
+        # Format sources
+        source_names = {
+            "pubmed": "PubMed",
+            "crossref": "Crossref",
+            "doaj": "DOAJ",
+            "europepmc": "EuropePMC",
+            "arxiv": "arXiv"
+        }
+
+        sources_display = []
+        for src in sources:
+            # Handle custom API format "custom:springer"
+            if src.startswith("custom:"):
+                api_name = src.split(":", 1)[1]
+                sources_display.append(f"{api_name} (custom)")
+            else:
+                sources_display.append(source_names.get(src, src))
+
+        sources_str = ", ".join(sources_display) if sources_display else "Unknown"
+
+        print(f"[{i}] {time_str} ({ago})")
+        print(f"    Query: {query}")
+        print(f"    Sources: {sources_str}")
+        print(f"    Results: {result_count}")
+        print()
+
+    print(f"{'='*80}")
+    print(f"History file: {HISTORY_FILE}")
+    print(f"Showing {len(history)} most recent searches (max: {MAX_HISTORY_ENTRIES})")
+    print(f"{'='*80}\n")
 
 
 def export_to_format(results, format, filename=None, fields=None, compress=False):
@@ -551,7 +711,7 @@ def batch_export(results, formats, output_base=None, fields=None, compress=False
         if exported_path:
             exported_files.append(exported_path)
 
-    print(f"\n✓ Batch export complete: {len(exported_files)} file(s) created")
+    print(f"\nBatch export complete: {len(exported_files)} file(s) created")
     return exported_files
 
 
@@ -619,7 +779,7 @@ def load_cached_results(check_expiry=True, force_refresh=False):
 
         # Handle old cache format (just array of results)
         if isinstance(cache_data, list):
-            print("⚠️  Cache format outdated, will refresh...")
+            print("Cache format outdated, will refresh...")
             return None
 
         # Check expiration if enabled
@@ -628,16 +788,16 @@ def load_cached_results(check_expiry=True, force_refresh=False):
             expiry_time = cached_time + timedelta(days=CACHE_EXPIRY_DAYS)
 
             if datetime.now() > expiry_time:
-                print(f"⚠️  Cache expired (older than {CACHE_EXPIRY_DAYS} days)")
+                print(f"Cache expired (older than {CACHE_EXPIRY_DAYS} days)")
                 return None
 
             # Show cache age
             age = datetime.now() - cached_time
             if age.days > 0:
-                print(f"ℹ️  Using cached results ({age.days} day(s) old)")
+                print(f"Using cached results ({age.days} day(s) old)")
             else:
                 hours = age.seconds // 3600
-                print(f"ℹ️  Using cached results ({hours} hour(s) old)")
+                print(f"Using cached results ({hours} hour(s) old)")
 
         # Return just the results array
         return cache_data.get("results", [])

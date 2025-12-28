@@ -7,9 +7,19 @@ import os
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-# Read requirements from requirements.txt (UTF-8 to be Windows-safe)
-with open('requirements.txt', encoding='utf-8') as f:
-    requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+# Core dependencies (required for basic functionality)
+core_requirements = [
+    'biopython>=1.79',
+    'requests>=2.25.0',
+    'litstudy>=1.0.0',
+    'openpyxl>=3.0.0',
+]
+
+# Optional dependencies for enhanced features
+extras_requirements = {
+    'tui': ['rich>=13.0.0'],  # Enhanced interactive TUI mode
+    'all': ['rich>=13.0.0'],  # Install all optional features
+}
 
 setup(
     name='lixplore',
@@ -27,7 +37,8 @@ setup(
     },
     packages=find_packages(exclude=('tests', 'tests.*')),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=core_requirements,
+    extras_require=extras_requirements,
     entry_points={
         'console_scripts': [
             'lixplore=lixplore.cli:main',

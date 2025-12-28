@@ -59,7 +59,7 @@ def set_scihub_mirror(mirror_url: str):
     os.makedirs(os.path.dirname(SCIHUB_CONFIG), exist_ok=True)
     with open(SCIHUB_CONFIG, 'w') as f:
         f.write(mirror_url.strip())
-    print(f"✓ SciHub mirror configured: {mirror_url}")
+    print(f"SciHub mirror configured: {mirror_url}")
 
 
 def sanitize_filename(filename: str) -> str:
@@ -320,23 +320,23 @@ def download_article_pdf(article: Dict, use_scihub: bool = False) -> Tuple[bool,
     if source.lower() == 'pubmed':
         result = try_pmc_download(article, source_dir)
         if result:
-            return True, f"✓ Downloaded from PMC: {result}"
+            return True, f"Downloaded from PMC: {result}"
 
     # Try arXiv
     result = try_arxiv_download(article, source_dir)
     if result:
-        return True, f"✓ Downloaded from arXiv: {result}"
+        return True, f"Downloaded from arXiv: {result}"
 
     # Try DOI resolution / Unpaywall
     result = try_doi_resolution(article, source_dir)
     if result:
-        return True, f"✓ Downloaded (open access): {result}"
+        return True, f"Downloaded (open access): {result}"
 
     # Try SciHub as last resort (if enabled)
     if use_scihub:
         result = try_scihub_download(article, source_dir)
         if result:
-            return True, f"✓ Downloaded via SciHub: {result}"
+            return True, f"Downloaded via SciHub: {result}"
 
     return False, f"✗ PDF not available: {title[:60]}..."
 
@@ -374,7 +374,7 @@ def download_multiple_pdfs(articles: List[Dict], article_numbers: List[int] = No
         if scihub_mirror:
             print(f"   Using SciHub mirror: {scihub_mirror}")
         else:
-            print(f"   ⚠️  SciHub not configured, will skip SciHub downloads")
+            print(f"   SciHub not configured, will skip SciHub downloads")
             print(f"   Configure with: lixplore --set-scihub-mirror <url>")
 
     print("")
@@ -393,14 +393,94 @@ def download_multiple_pdfs(articles: List[Dict], article_numbers: List[int] = No
             print(message)
             failed_count += 1
 
-    print(f"\n📊 Download Summary: {success_count} successful, {failed_count} failed")
-    print(f"📁 PDFs saved to: {PDF_DIR}")
+    print(f"\nDownload Summary: {success_count} successful, {failed_count} failed")
+    print(f"PDFs saved to: {PDF_DIR}")
 
     return {
         'success': success_count,
         'failed': failed_count,
         'total': len(to_download)
     }
+
+
+def get_pdf_link(article: Dict) -> Optional[str]:
+    """
+    Get PDF link for an article without downloading.
+    Tries multiple sources in priority order:
+    1. PMC (PubMed Central)
+    2. arXiv
+    3. Unpaywall (open access)
+
+    Args:
+        article: Article dictionary with metadata
+
+    Returns:
+        PDF URL if available, None otherwise
+    """
+    # Try PMC first
+    pmcid = article.get('pmcid') or article.get('pmc')
+    if pmcid:
+        pmcid = pmcid.replace('PMC', '')
+        pmc_url = f"https://www.ncbi.nlm.nih.gov/pmc/articles/PMC{pmcid}/pdf/"
+        return pmc_url
+
+    # Try arXiv
+    arxiv_id = article.get('arxiv_id')
+    if not arxiv_id:
+        # Try to extract from URL (e.g., http://arxiv.org/abs/2306.04338v1)
+        url = article.get('url', '')
+        if 'arxiv.org' in url:
+            match = re.search(r'arxiv\.org/abs/([0-9]+\.[0-9]+(?:v[0-9]+)?)', url)
+            if match:
+                arxiv_id = match.group(1)
+
+    if arxiv_id:
+        # Remove version suffix for PDF URL (e.g., 2306.04338v1 -> 2306.04338)
+        arxiv_id_clean = re.sub(r'v\d+$', '', arxiv_id)
+        return f"https://arxiv.org/pdf/{arxiv_id_clean}.pdf"
+
+    # Try Unpaywall (DOI-based)
+    doi = article.get('doi')
+    if doi:
+        try:
+            email = "lixplore@example.com"
+            unpaywall_url = f"https://api.unpaywall.org/v2/{doi}?email={email}"
+
+            response = requests.get(unpaywall_url, timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+
+                # Check for open access PDF
+                if data.get('is_oa'):
+                    best_oa_location = data.get('best_oa_location')
+                    if best_oa_location:
+                        pdf_url = best_oa_location.get('url_for_pdf')
+                        if pdf_url:
+                            return pdf_url
+        except:
+            pass
+
+    return None
+
+
+def get_pdf_links_batch(articles: List[Dict]) -> Dict[int, str]:
+    """
+    Get PDF links for multiple articles efficiently.
+
+    Args:
+        articles: List of article dictionaries
+
+    Returns:
+        Dictionary mapping article index to PDF URL
+    """
+    pdf_links = {}
+
+    for i, article in enumerate(articles):
+        pdf_url = get_pdf_link(article)
+        if pdf_url:
+            pdf_links[i] = pdf_url
+
+    return pdf_links
 
 
 if __name__ == "__main__":

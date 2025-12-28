@@ -9,6 +9,7 @@ This document provides a comprehensive guide to all the new features added to Li
 3. [Custom API Integration System](#3-custom-api-integration-system)
 4. [Statistics Dashboard with Visualizations](#4-statistics-dashboard-with-visualizations)
 5. [PDF Download Integration](#5-pdf-download-integration)
+   - 5.5. [PDF Link Display (NEW!)](#55-pdf-link-display-new)
 6. [Reference Manager Integration](#6-reference-manager-integration)
 7. [Interactive TUI Mode](#7-interactive-tui-mode)
 
@@ -308,6 +309,111 @@ lixplore --show-pdf-dir
 
 ---
 
+## 5.5. PDF Link Display (NEW!)
+
+### Overview
+Display clickable PDF links for open access articles directly in search results without downloading. Perfect for quick access to PDFs without storing them locally.
+
+### New Flag
+- `--show-pdf-links` - Display PDF links for open access articles
+
+### Features
+- **No Download Required**: Links displayed directly in terminal
+- **Clickable Links**: Works in modern terminals with OSC 8 support
+- **Multiple Sources**: Checks PMC, arXiv, and Unpaywall
+- **Fast**: Checks all articles in batch
+- **Smart Detection**: Automatically extracts PDF URLs
+
+### How to Use
+
+#### Basic Usage
+```bash
+# Show PDF links in search results
+lixplore -x -q "machine learning" -m 10 --show-pdf-links
+
+# Combine with abstracts
+lixplore -P -q "cancer" -m 20 -a --show-pdf-links
+
+# Multi-source with deduplication
+lixplore -A -q "COVID-19" -m 50 -D --show-pdf-links
+```
+
+#### Terminal Compatibility
+Works with clickable links in:
+- ✅ iTerm2 (macOS)
+- ✅ GNOME Terminal 3.x+ (Linux)
+- ✅ Konsole (KDE)
+- ✅ Windows Terminal (Windows 10+)
+- ✅ kitty, Alacritty, WezTerm
+
+In terminals without OSC 8 support, the full URL is still displayed and can be copied.
+
+### Output Format
+```
+🔍 Checking for open access PDFs...
+✓ Found 3 PDF(s) available
+
+[1] Neural Networks for Data Science
+    📄 Open PDF → https://arxiv.org/pdf/2306.14753.pdf
+[2] Machine Learning in Healthcare
+    📄 Open PDF → https://arxiv.org/pdf/2307.05639.pdf
+[3] Deep Learning Applications
+    📄 Open PDF → https://arxiv.org/pdf/2901.06610.pdf
+```
+
+### How It Works
+1. **PMC (PubMed Central)**: Checks for PMCID and generates PMC PDF link
+2. **arXiv**: Extracts arXiv ID from URL and generates PDF link
+3. **Unpaywall API**: For DOI-based articles, queries Unpaywall for open access PDFs
+
+### Examples
+
+#### arXiv Papers (Best for PDFs)
+```bash
+lixplore -x -q "neural networks" -m 10 --show-pdf-links
+```
+
+#### PubMed Open Access
+```bash
+lixplore -P -q "open access" -m 20 --show-pdf-links
+```
+
+#### Combined with Other Features
+```bash
+# With sorting and selection
+lixplore -x -q "deep learning" -m 50 --sort newest --show-pdf-links -S first:10
+
+# With pagination
+lixplore -A -q "AI" -m 100 --show-pdf-links -p 1 --page-size 20
+
+# Full workflow
+lixplore -A -q "COVID-19 vaccine" -m 50 -D --show-pdf-links --sort newest -a
+```
+
+### Technical Details
+- Implementation: `lixplore/utils/pdf_downloader.py` (functions: `get_pdf_link()`, `get_pdf_links_batch()`)
+- Display: `lixplore/dispatcher.py` (function: `make_clickable_link()`, `show_results()`)
+- OSC 8 escape sequences for terminal hyperlinks
+- Timeout: 5 seconds per Unpaywall API request
+- No rate limiting (batch processing)
+
+### Advantages vs. Download
+| Feature | PDF Links | PDF Download |
+|---------|-----------|--------------|
+| **Speed** | Instant | Slow (downloads files) |
+| **Storage** | No disk space used | Requires disk space |
+| **Access** | Click to open in browser | Local file access |
+| **Updates** | Always latest version | Static snapshot |
+| **Use Case** | Quick browsing | Offline reading |
+
+### Tips
+- Use with arXiv for guaranteed PDF availability
+- Combine with `-a` to see abstracts before clicking PDFs
+- Works great with `--sort newest` to find latest papers with PDFs
+- Perfect for literature reviews - quickly scan titles and click interesting papers
+
+---
+
 ## 6. Reference Manager Integration
 
 ### Overview
@@ -322,26 +428,74 @@ Direct integration with Zotero API and RIS export for Mendeley.
 
 ### Zotero Integration
 
-#### Setup (One-Time)
-```bash
-# Get API key from https://www.zotero.org/settings/keys
-lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID
+#### Setup (One-Time Configuration)
 
-# List your collections (to get collection keys)
+**Step 1: Get API Key**
+1. Go to https://www.zotero.org/settings/keys
+2. Click **"Create new private key"**
+3. Give it a name (e.g., "Lixplore CLI")
+4. Enable permissions:
+   - ✅ **Allow library access**
+   - ✅ **Allow write access** (IMPORTANT!)
+5. Click **"Save Key"**
+6. **Copy the API key** (shown only once!)
+
+**Step 2: Get User ID**
+- Your **User ID** is displayed at the top of the same page (e.g., `1234567`)
+
+**Step 3: Configure Lixplore**
+```bash
+lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID
+```
+
+**Example:**
+```bash
+lixplore --configure-zotero abc123XYZ789key 1234567
+```
+
+**Step 4: Get Collection Keys (Optional)**
+```bash
+# List all your Zotero collections with their keys
 lixplore --show-zotero-collections
 ```
 
+**Alternative ways to get Collection Key:**
+- **Web**: Go to https://www.zotero.org → Click collection → Copy key from URL (e.g., `4FCVPNAP`)
+- **Desktop**: Right-click collection → "Copy Collection Key"
+
 #### Usage
 ```bash
-# Add to default library
-lixplore -P -q "research" -m 10 --add-to-zotero
+# Add to main Zotero library
+lixplore -P -q "machine learning" -m 10 --add-to-zotero
 
-# Add to specific collection
-lixplore -P -q "AI papers" -m 20 --add-to-zotero --zotero-collection ABC123XYZ
+# Add to specific collection (using collection key)
+lixplore -P -q "AI research" -m 20 --add-to-zotero --zotero-collection 4FCVPNAP
 
-# Combined with search and export
+# Combined with deduplication and sorting
+lixplore -A -q "COVID-19" -m 50 -D --sort newest --add-to-zotero --zotero-collection 4FCVPNAP
+
+# Combined with search and export (add to Zotero AND export to BibTeX)
 lixplore -A -q "machine learning" -m 50 -D --add-to-zotero -X bibtex
 ```
+
+#### Troubleshooting
+
+**Error: "Zotero API not configured"**
+- Solution: Run `lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID`
+
+**Error: "Invalid API key"**
+- Check your API key is correct
+- Ensure it has **write permissions** enabled
+- Regenerate key if needed
+
+**Error: "Collection not found"**
+- Verify collection key is correct using `lixplore --show-zotero-collections`
+- Collection key is case-sensitive (e.g., `4FCVPNAP`)
+
+**Items not appearing in collection:**
+- Check if items were added to main library
+- Verify collection key is correct
+- Ensure you have permission to add to that collection
 
 ### Mendeley Integration
 

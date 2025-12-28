@@ -2,7 +2,7 @@
 
 import argparse
 import json
-from os import stat
+import os
 from . import dispatcher
 
 
@@ -186,7 +186,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     )
     display_group.add_argument(
         "-i", "--interactive", action="store_true",
-        help="Launch interactive TUI mode for browsing results (requires 'rich' library for enhanced display, falls back to simple mode)"
+        help="Launch simple interactive TUI mode for searching and browsing (can be used standalone: lixplore -i)"
     )
     display_group.add_argument(
         "-N", "--number", type=int, nargs="+", default=[], metavar="N",
@@ -212,7 +212,11 @@ For more information, visit: https://github.com/yourusername/lixplore
         "--page-size", type=int, default=20, metavar="N",
         help="Number of results to display per page (default: 20). Example: --page-size 50"
     )
-    
+    display_group.add_argument(
+        "--show-pdf-links", action="store_true",
+        help="Display PDF links for open access articles (from PMC, arXiv, Unpaywall). Links are clickable in modern terminals. Example: -P -q 'cancer' --show-pdf-links"
+    )
+
     # ===== EXPORT & OUTPUT =====
     export_group = parser.add_argument_group(
         '[EXPORT & OUTPUT]',
@@ -336,6 +340,84 @@ For more information, visit: https://github.com/yourusername/lixplore
     utility_group.add_argument(
         "--show-zotero-collections", action="store_true",
         help="List Zotero collections with their keys"
+    )
+
+    # ===== INTERACTIVE MODES =====
+    mode_group = parser.add_argument_group(
+        '[INTERACTIVE MODES]',
+        'Enhanced interactive experiences for easier usage'
+    )
+
+    mode_group.add_argument(
+        "--tui", action="store_true",
+        help="Launch enhanced TUI (Text User Interface) mode - the primary interactive interface. Includes search, annotation, statistics, and export in a beautiful visual interface. This is the DEFAULT when no query is provided."
+    )
+    mode_group.add_argument(
+        "--shell", action="store_true",
+        help="[Deprecated - use --tui instead] Launch interactive shell mode."
+    )
+    mode_group.add_argument(
+        "--wizard", action="store_true",
+        help="[Deprecated - use --tui instead] Launch wizard mode."
+    )
+
+    # ===== ANNOTATIONS =====
+    annotation_group = parser.add_argument_group(
+        '[ANNOTATIONS]',
+        'Annotate, rate, and organize articles'
+    )
+
+    annotation_group.add_argument(
+        "--annotate", type=int, metavar="N",
+        help="Annotate article #N from last search. Use with --comment, --rating, --tags, etc. Example: --annotate 5 --rating 4 --tags 'important,methodology'"
+    )
+    annotation_group.add_argument(
+        "--comment", type=str, metavar="TEXT",
+        help="Add comment/note to article (use with --annotate). Example: --annotate 3 --comment 'Excellent methodology section'"
+    )
+    annotation_group.add_argument(
+        "--rating", type=int, choices=[1, 2, 3, 4, 5], metavar="1-5",
+        help="Rate article 1-5 stars (use with --annotate). Example: --annotate 3 --rating 5"
+    )
+    annotation_group.add_argument(
+        "--tags", type=str, metavar="TAGS",
+        help="Add comma-separated tags (use with --annotate). Example: --annotate 3 --tags 'important,review-later,cite'"
+    )
+    annotation_group.add_argument(
+        "--read-status", type=str, choices=['unread', 'reading', 'read'], metavar="STATUS",
+        help="Set read status: unread, reading, read (use with --annotate). Example: --annotate 3 --read-status read"
+    )
+    annotation_group.add_argument(
+        "--priority", type=str, choices=['low', 'medium', 'high'], metavar="LEVEL",
+        help="Set priority level: low, medium, high (use with --annotate). Example: --annotate 3 --priority high"
+    )
+    annotation_group.add_argument(
+        "--show-annotation", type=int, metavar="N",
+        help="Show annotation for article #N from last search"
+    )
+    annotation_group.add_argument(
+        "--list-annotations", action="store_true",
+        help="List all annotated articles"
+    )
+    annotation_group.add_argument(
+        "--filter-annotations", type=str, metavar="FILTERS",
+        help="Filter annotations. Format: key=value,key=value. Keys: min_rating, read_status, priority, tag. Example: --filter-annotations 'min_rating=4,priority=high'"
+    )
+    annotation_group.add_argument(
+        "--search-annotations", type=str, metavar="QUERY",
+        help="Search annotations by keyword in comments, tags, or title. Example: --search-annotations 'methodology'"
+    )
+    annotation_group.add_argument(
+        "--export-annotations", type=str, choices=['markdown', 'json', 'csv'], metavar="FORMAT",
+        help="Export all annotations to file. Formats: markdown, json, csv. Example: --export-annotations markdown"
+    )
+    annotation_group.add_argument(
+        "--annotation-stats", action="store_true",
+        help="Show annotation statistics (total, ratings distribution, tags, etc.)"
+    )
+    annotation_group.add_argument(
+        "--delete-annotation", type=int, metavar="N",
+        help="Delete annotation for article #N from last search"
     )
 
     parser.set_defaults(func=run_main)
@@ -463,7 +545,7 @@ def parse_selection(selection_args, total_results):
 def _supports_unicode_output() -> bool:
     """Return True if stdout can encode common Unicode characters (emojis/box)."""
     import sys
-    test_string = "📚═"
+    test_string = "═│"
     try:
         test_string.encode(sys.stdout.encoding or "utf-8")
         return True
@@ -478,21 +560,21 @@ def _examples_text(unicode_ok: bool) -> str:
 ║                    LIXPLORE - Quick Examples                          ║
 ╚═══════════════════════════════════════════════════════════════════════╝
 
-📚 BASIC SEARCH
+BASIC SEARCH
   Search PubMed for a query:
     $ lixplore -P -q "cancer treatment" -m 10
 
   Search with abstracts:
     $ lixplore -P -q "diabetes" -m 5 -a
 
-📦 MULTI-SOURCE SEARCH
+MULTI-SOURCE SEARCH
   Search PubMed + arXiv:
     $ lixplore -s PX -q "machine learning" -m 20
 
   Search all sources with deduplication:
     $ lixplore -A -q "COVID-19" -m 50 -D
 
-💾 EXPORT RESULTS
+EXPORT RESULTS
   Export to Excel:
     $ lixplore -P -q "neuroscience" -m 15 -X xlsx -o brain_research.xlsx
 
@@ -505,7 +587,7 @@ def _examples_text(unicode_ok: bool) -> str:
   Export to BibTeX:
     $ lixplore -P -q "artificial intelligence" -m 25 -X bibtex
 
-🎯 ADVANCED SEARCH
+ADVANCED SEARCH
   Search with date filter:
     $ lixplore -P -q "vaccine development" -d 2020-01-01 2024-12-31 -m 15
 
@@ -571,7 +653,7 @@ def _examples_text(unicode_ok: bool) -> str:
   Mixed selection (combine patterns):
     $ lixplore -P -q "chemistry" -m 50 -S 1 3 5-10 odd -X csv
 
-📊 SORT RESULTS
+SORT RESULTS
   Sort by newest (latest first):
     $ lixplore -P -q "COVID-19" -m 50 --sort newest
 
@@ -587,11 +669,24 @@ def _examples_text(unicode_ok: bool) -> str:
   Combine sort + selection + export:
     $ lixplore -P -q "cancer" -m 50 --sort newest -S first:10 -X xlsx
 
-📊 SOURCE CODES (for -s flag)
+PDF LINKS (Display without downloading)
+  Show clickable PDF links for open access articles:
+    $ lixplore -x -q "neural networks" -m 10 --show-pdf-links
+
+  Combine with abstracts:
+    $ lixplore -P -q "cancer" -m 20 -a --show-pdf-links
+
+  Multi-source with PDF links:
+    $ lixplore -A -q "COVID-19" -m 50 -D --show-pdf-links
+
+  Links work in modern terminals (iTerm2, GNOME Terminal, Windows Terminal)
+  Click to open PDF in browser - no download required!
+
+SOURCE CODES (for -s flag)
   P = PubMed       C = Crossref      J = DOAJ
   E = EuropePMC    X = arXiv         A = All sources
 
-💾 EXPORT FORMATS
+EXPORT FORMATS
   csv      - CSV (Excel, Google Sheets)
   xlsx     - Excel with formatting
   json     - JSON structured data
@@ -601,18 +696,19 @@ def _examples_text(unicode_ok: bool) -> str:
   endnote  - EndNote XML
   xml      - Generic XML
 
-📁 Export locations: All files saved to exports/ folder
+Export locations: All files saved to exports/ folder
    (organized by format: exports/csv/, exports/excel/, etc.)
 
-💡 TIP: Use -D flag when searching multiple sources to remove duplicates
-💡 TIP: Use -a flag to see abstracts in results
-💡 TIP: Use -R for detailed review in separate windows (press 'q' to close)
-💡 TIP: Use -S with keywords (odd, even, first:N, last:N) for smart selection
-💡 TIP: Use --sort newest to get latest research first
-💡 TIP: Results are cached - review later with: lixplore -R 1 2 3
-💡 TIP: Combine features: --sort newest -S first:10 -X xlsx
-💡 TIP: Use --help for complete documentation
-💡 TIP: Use 'man lixplore' for detailed manual page
+TIP: Use -D flag when searching multiple sources to remove duplicates
+TIP: Use -a flag to see abstracts in results
+TIP: Use -R for detailed review in separate windows (press 'q' to close)
+TIP: Use -S with keywords (odd, even, first:N, last:N) for smart selection
+TIP: Use --sort newest to get latest research first
+TIP: Use --show-pdf-links to see clickable PDF links (works in modern terminals!)
+TIP: Results are cached - review later with: lixplore -R 1 2 3
+TIP: Combine features: --sort newest -S first:10 -X xlsx
+TIP: Use --help for complete documentation
+TIP: Use 'man lixplore' for detailed manual page
 
 For more information: lixplore --help
 """
@@ -771,12 +867,193 @@ def show_examples():
 def run_main(args):
     """Main handler for CLI options."""
 
+    # Handle interactive modes first (only if used standalone, without search)
+    # If -i is used WITH search flags, it will be handled later after the search
+    has_search_params = (args.query or args.author or args.doi or
+                         any([args.pubmed, args.crossref, args.doaj,
+                              args.europepmc, args.arxiv, getattr(args, 'all', False),
+                              args.sources]))
+
+    if args.interactive and not has_search_params:
+        # Launch simple interactive TUI standalone
+        from lixplore.utils.interactive_tui import launch_interactive_mode
+        launch_interactive_mode([])
+        return
+
+    if args.tui:
+        from lixplore.utils.enhanced_tui import launch_enhanced_tui
+        launch_enhanced_tui()
+        return
+
+    # Deprecated modes (kept for backwards compatibility)
+    if args.shell:
+        print("Note: --shell is deprecated.")
+        from lixplore.utils.shell_mode import launch_shell
+        launch_shell()
+        return
+
+    if args.wizard:
+        print("Note: --wizard is deprecated.")
+        from lixplore.utils.wizard_mode import launch_wizard
+        launch_wizard()
+        return
+
     # If user only wants examples
     if args.examples:
         show_examples()
         return
 
     # If user only wants history
+    # Handle annotation commands
+    from lixplore.utils.annotations import AnnotationManager, display_annotation
+
+    # Annotation-only commands (don't require search)
+    if args.list_annotations:
+        manager = AnnotationManager()
+        filter_params = None
+
+        if hasattr(args, 'filter_annotations') and args.filter_annotations:
+            # Parse filter string: "min_rating=4,priority=high"
+            filter_params = {}
+            for item in args.filter_annotations.split(','):
+                if '=' in item:
+                    key, value = item.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+
+                    if key == 'min_rating':
+                        filter_params['min_rating'] = int(value)
+                    elif key == 'max_rating':
+                        filter_params['max_rating'] = int(value)
+                    elif key == 'read_status':
+                        filter_params['read_status'] = value
+                    elif key == 'priority':
+                        filter_params['priority'] = value
+                    elif key == 'tag':
+                        filter_params['tags'] = [value]
+
+        annotations = manager.list_all(filter_params)
+
+        if not annotations:
+            print("No annotated articles found.")
+            if filter_params:
+                print("Try removing filters or annotate some articles first.")
+        else:
+            print(f"\n{'='*80}")
+            print(f"ANNOTATED ARTICLES ({len(annotations)})")
+            print(f"{'='*80}\n")
+
+            for i, item in enumerate(annotations, 1):
+                annotation = item['annotation']
+                info = annotation.get('article_info', {})
+
+                print(f"[{i}] {info.get('title', 'No title')}")
+
+                # Show rating
+                if annotation.get('rating'):
+                    stars = '' * annotation['rating']
+                    print(f"    Rating: {stars} ({annotation['rating']}/5)")
+
+                # Show tags
+                if annotation.get('tags'):
+                    print(f"    Tags: {', '.join(annotation['tags'])}")
+
+                # Show status and priority
+                print(f"    Status: {annotation.get('read_status', 'unread').title()} | Priority: {annotation.get('priority', 'medium').title()}")
+
+                # Show comment count
+                comments_count = len(annotation.get('comments', []))
+                if comments_count > 0:
+                    print(f"    Comments: {comments_count}")
+
+                print()
+
+            print(f"{'='*80}\n")
+        return
+
+    if args.search_annotations:
+        manager = AnnotationManager()
+        results = manager.search_annotations(args.search_annotations)
+
+        if not results:
+            print(f"No annotations found matching: '{args.search_annotations}'")
+        else:
+            print(f"\n{'='*80}")
+            print(f"SEARCH RESULTS ({len(results)} matches)")
+            print(f"{'='*80}\n")
+
+            for i, item in enumerate(results, 1):
+                annotation = item['annotation']
+                info = annotation.get('article_info', {})
+
+                print(f"[{i}] {info.get('title', 'No title')}")
+                print(f"    Match type: {item['match_type']}")
+                print(f"    Match: {item['match_text'][:100]}...")
+                print()
+
+            print(f"{'='*80}\n")
+        return
+
+    if args.export_annotations:
+        manager = AnnotationManager()
+        output_file = manager.export_annotations(format=args.export_annotations)
+        print(f"Annotations exported to: {output_file}")
+        return
+
+    if args.annotation_stats:
+        manager = AnnotationManager()
+        stats = manager.get_statistics()
+
+        print(f"\n{'='*80}")
+        print("ANNOTATION STATISTICS")
+        print(f"{'='*80}\n")
+
+        print(f"Total Annotated Articles: {stats['total']}")
+
+        if stats['total'] == 0:
+            print("\nNo annotations yet. Start annotating articles with:")
+            print("  lixplore -P -q 'query' -m 10")
+            print("  lixplore --annotate 1 --rating 5 --tags 'important'")
+            print(f"{'='*80}\n")
+            return
+
+        # Rating distribution
+        if stats['by_rating']:
+            print(f"\nRating Distribution:")
+            for rating in sorted(stats['by_rating'].keys(), reverse=True):
+                count = stats['by_rating'][rating]
+                stars = '' * rating
+                bar = '█' * count
+                print(f"  {stars} ({rating}): {bar} {count}")
+
+        # Read status
+        if stats['by_status']:
+            print(f"\nRead Status:")
+            for status, count in stats['by_status'].items():
+                print(f"  {status.title()}: {count}")
+
+        # Priority
+        if stats['by_priority']:
+            print(f"\nPriority:")
+            for priority, count in stats['by_priority'].items():
+                print(f"  {priority.title()}: {count}")
+
+        # Comments
+        print(f"\nComments:")
+        print(f"  Articles with comments: {stats['with_comments']}")
+        print(f"  Total comments: {stats['total_comments']}")
+
+        # Tags
+        print(f"\nTags:")
+        print(f"  Unique tags: {stats['total_tags']}")
+        if stats['unique_tags']:
+            print(f"  Tags: {', '.join(stats['unique_tags'][:20])}")
+            if len(stats['unique_tags']) > 20:
+                print(f"        ... and {len(stats['unique_tags']) - 20} more")
+
+        print(f"\n{'='*80}\n")
+        return
+
     # Handle template and profile management commands
     from lixplore.utils import profiles
     from lixplore.utils import template_engine
@@ -824,7 +1101,7 @@ def run_main(args):
                     if 'description' in config:
                         print(f"      {config['description']}")
                     if 'requires_auth' in config and config['requires_auth']:
-                        print(f"      ⚠️  Requires authentication")
+                        print(f"      Requires authentication")
         else:
             print("No custom APIs configured.")
             print("Run: lixplore --create-api-examples to create example configurations")
@@ -868,14 +1145,14 @@ def run_main(args):
 
     if args.delete_profile:
         if profiles.delete_profile(args.delete_profile):
-            print(f"✓ Profile '{args.delete_profile}' deleted successfully")
+            print(f"Profile '{args.delete_profile}' deleted successfully")
         return
 
     # Load template if specified
     if args.template:
         template = template_engine.load_template(args.template)
         if template:
-            print(f"✓ Loading template: {args.template}")
+            print(f"Loading template: {args.template}")
             args = template_engine.apply_template_to_args(args, template)
         else:
             print(f"Error: Template '{args.template}' not found")
@@ -886,7 +1163,7 @@ def run_main(args):
     if args.load_profile:
         profile = profiles.load_profile(args.load_profile)
         if profile:
-            print(f"✓ Loading profile: {args.load_profile}")
+            print(f"Loading profile: {args.load_profile}")
             args = profiles.apply_profile_to_args(args, profile)
         else:
             print(f"Error: Profile '{args.load_profile}' not found")
@@ -979,16 +1256,19 @@ def run_main(args):
         print("  -x or --arxiv       Search arXiv")
         print("  -A or --all         Search all sources")
         print("  --custom-api NAME   Search custom API (Springer, BASE, etc.)")
+        print("\nFor interactive mode, use: lixplore -i")
         print("\nExamples:")
+        print("  lixplore -P -q 'search term' -m 20       # PubMed search")
         print("  lixplore -s PX -q 'search term'          # PubMed + arXiv")
         print("  lixplore -s PCE -q 'search term'         # PubMed + Crossref + EuropePMC")
+        print("  lixplore -i                              # Interactive TUI mode")
         print("  lixplore --custom-api springer -q 'term' # Custom API (requires configuration)")
         return
 
     results = []
     query = None
 
-    # 🔹 Build query based on search type
+    #  Build query based on search type
     if args.query:
         query = args.query
         print(f"Searching for query: {query}")
@@ -1000,10 +1280,15 @@ def run_main(args):
         query = args.doi
         print(f"Fetching article with DOI: {args.doi}")
     else:
-        print("Error: Please provide a search query (-q), author (-au), or DOI (-DOI)")
+        print("Error: Please provide a query, author, or DOI to search:")
+        print("  -q, --query QUERY      Search query")
+        print("  -au, --author AUTHOR   Search by author")
+        print("  -DOI DOI               Fetch article by DOI")
+        print("\nFor interactive mode, use: lixplore -i")
+        print("\nExample: lixplore -P -q \"cancer treatment\" -m 20")
         return
 
-    # 🔹 Display selected sources
+    #  Display selected sources
     source_names = {
         "pubmed": "PubMed",
         "crossref": "Crossref",
@@ -1021,7 +1306,7 @@ def run_main(args):
     if use_custom_api:
         print(f"Custom API: {custom_api_name}")
 
-    # 🔹 Execute search on selected sources
+    #  Execute search on selected sources
     for src in sources_to_search:
         print(f"  Searching {source_names[src]}...")
         src_results = dispatcher.search(
@@ -1031,7 +1316,7 @@ def run_main(args):
         )
         results.extend(src_results)
 
-    # 🔹 Execute search on custom API if selected
+    #  Execute search on custom API if selected
     if use_custom_api:
         print(f"  Searching {custom_api_name} (custom API)...")
         custom_results = custom_apis.call_custom_api(custom_api_name, query, args.max_results)
@@ -1040,7 +1325,7 @@ def run_main(args):
     if (len(sources_to_search) > 1) or (len(sources_to_search) > 0 and use_custom_api):
         print(f"Total results before deduplication: {len(results)}")
 
-    # 🔹 Post-processing
+    #  Post-processing
     if args.deduplicate and results:
         print("Removing duplicates")
         results = dispatcher.deduplicate_advanced(
@@ -1051,19 +1336,19 @@ def run_main(args):
             merge_metadata=args.dedup_merge
         )
 
-    # 🔹 Enrich metadata if requested
+    #  Enrich metadata if requested
     if args.enrich is not None and results:
         from lixplore.utils.enrichment import enrich_results
         # If --enrich used without arguments, use all APIs
         apis = args.enrich if args.enrich else ['all']
         results = enrich_results(results, apis, show_progress=True)
 
-    # 🔹 Sort results if requested
+    #  Sort results if requested
     if results and args.sort and args.sort != "relevant":
         results = sort_results(results, args.sort)
         print(f"Results sorted by: {args.sort}")
 
-    # 🔹 Export to file format if requested
+    #  Export to file format if requested
     if args.export and results:
         # Check if multiple formats specified (comma-separated)
         formats = [f.strip() for f in args.export.split(',')]
@@ -1105,7 +1390,7 @@ def run_main(args):
                 # Single format export
                 dispatcher.export_to_format(results, formats[0], args.output, args.export_fields, args.zip)
 
-    # 🔹 Export as formatted citations if requested
+    #  Export as formatted citations if requested
     if args.citations and results:
         from lixplore.utils.export import export_to_citations, compress_export
         print(f"Generating {args.citations.upper()} style citations...")
@@ -1113,19 +1398,19 @@ def run_main(args):
         if args.zip and exported_path:
             compress_export(exported_path, remove_original=False)
 
-    # 🔹 Save profile if requested (after export completes)
+    #  Save profile if requested (after export completes)
     if args.save_profile:
         config = profiles.create_profile_from_args(args)
         if config:  # Only save if there are settings to save
             if profiles.save_profile(args.save_profile, config):
-                print(f"✓ Profile '{args.save_profile}' saved successfully")
+                print(f"Profile '{args.save_profile}' saved successfully")
                 print(f"  Settings saved: {', '.join(config.keys())}")
             else:
                 print(f"Error: Could not save profile '{args.save_profile}'")
         else:
             print("Warning: No export settings to save in profile")
 
-    # 🔹 Show results (titles + optional inline abstracts)
+    #  Show results (titles + optional inline abstracts)
     # Display results BEFORE review so users don't see them again after closing review windows
     if results:
         print(f"\nFound {len(results)} results:")
@@ -1136,6 +1421,9 @@ def run_main(args):
         if use_custom_api:
             all_sources.append(f"custom:{custom_api_name}")
         dispatcher.save_results(results, query=query, sources=all_sources)
+
+        # Save to search history
+        dispatcher.save_to_history(query=query, sources=all_sources, result_count=len(results))
 
         # If user requested detailed view(s) via -N, print them inline
         if args.number:
@@ -1151,7 +1439,7 @@ def run_main(args):
                 else:
                     print(f"Selection out of range: {n} (valid 1..{len(results)})")
 
-        # 🔹 Download PDFs if requested
+        #  Download PDFs if requested
         if args.download_pdf:
             pdf_numbers = args.pdf_numbers if args.pdf_numbers else None
             pdf_downloader.download_multiple_pdfs(
@@ -1160,31 +1448,96 @@ def run_main(args):
                 use_scihub=args.use_scihub
             )
 
-        # 🔹 Add to Zotero if requested
+        #  Add to Zotero if requested
         if args.add_to_zotero:
             collection_key = args.zotero_collection if hasattr(args, 'zotero_collection') and args.zotero_collection else None
             reference_managers.add_to_zotero(results, collection_key=collection_key)
 
-        # 🔹 Export for Mendeley if requested
+        #  Export for Mendeley if requested
         if args.export_for_mendeley:
             reference_managers.export_for_mendeley(results)
 
-        # 🔹 Show statistics dashboard if requested
+        #  Show statistics dashboard if requested
         if args.stat:
             from lixplore.utils.statistics import generate_statistics_report
             stats_report = generate_statistics_report(results, top_n=args.stat_top)
             print(stats_report)
 
-        # 🔹 Launch interactive mode if requested
+        #  Launch interactive mode if requested
         if args.interactive:
             from lixplore.utils.interactive_tui import launch_interactive_mode
             launch_interactive_mode(results)
             return  # Interactive mode handles everything
 
-        # 🔹 Review articles in separate terminal if requested
+        #  Review articles in separate terminal if requested
         # This comes AFTER showing results so user sees the list, then reviews, then returns without duplication
         if args.review:
             dispatcher.review_articles(results, args.review)
+
+        #  Handle annotations for articles from search results
+        if args.annotate or args.show_annotation or args.delete_annotation:
+            manager = AnnotationManager()
+
+            # Annotate article
+            if args.annotate:
+                article_num = args.annotate
+                if 1 <= article_num <= len(results):
+                    article = results[article_num - 1]
+
+                    # Collect annotation data
+                    tags_list = None
+                    if args.tags:
+                        tags_list = [t.strip() for t in args.tags.split(',')]
+
+                    # Add annotation
+                    article_id = manager.annotate(
+                        article=article,
+                        comment=args.comment if hasattr(args, 'comment') and args.comment else None,
+                        rating=args.rating if hasattr(args, 'rating') and args.rating else None,
+                        tags=tags_list,
+                        read_status=args.read_status if hasattr(args, 'read_status') and args.read_status else None,
+                        priority=args.priority if hasattr(args, 'priority') and args.priority else None
+                    )
+
+                    print(f"\nAnnotation saved for article #{article_num}: {article.get('title', 'No title')[:60]}...")
+
+                    # Show the annotation
+                    annotation = manager.get_annotation(article_id)
+                    if annotation:
+                        display_annotation(annotation, article_id)
+                else:
+                    print(f"Error: Article #{article_num} is out of range (1-{len(results)})")
+
+            # Show annotation
+            if args.show_annotation:
+                article_num = args.show_annotation
+                if 1 <= article_num <= len(results):
+                    article = results[article_num - 1]
+                    annotation = manager.get_annotation_for_article(article)
+
+                    if annotation:
+                        article_id = manager._get_article_id(article)
+                        display_annotation(annotation, article_id)
+                    else:
+                        print(f"\nNo annotation found for article #{article_num}")
+                        print(f"Add annotation with: lixplore --annotate {article_num} --rating 5 --tags 'important'")
+                else:
+                    print(f"Error: Article #{article_num} is out of range (1-{len(results)})")
+
+            # Delete annotation
+            if args.delete_annotation:
+                article_num = args.delete_annotation
+                if 1 <= article_num <= len(results):
+                    article = results[article_num - 1]
+                    article_id = manager._get_article_id(article)
+
+                    if manager.remove_annotation(article_id):
+                        print(f"Annotation deleted for article #{article_num}")
+                    else:
+                        print(f"No annotation found for article #{article_num}")
+                else:
+                    print(f"Error: Article #{article_num} is out of range (1-{len(results)})")
+
     else:
         print("No results found.")
 

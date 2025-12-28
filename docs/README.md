@@ -1,68 +1,133 @@
 # Lixplore Documentation
 
-This directory contains documentation files for Lixplore.
+This directory contains the complete documentation for Lixplore_cli - Academic Literature Explorer.
 
-## Files
+## Documentation Structure
 
-### Man Page
-- **lixplore.1** - Unix man page in groff format
-- **install_man_page.sh** - Installation script for the man page
-
-### TLDR Page
-- **lixplore.md** - TLDR-style quick reference page
-
-## Installing the Man Page
-
-### Option 1: Using the install script (Recommended)
-```bash
-cd docs/
-./install_man_page.sh
+```
+docs/
+├── index.md                          # Homepage
+├── getting-started/                  # Getting started guides
+│   ├── installation.md               # How to install
+│   ├── quickstart.md                 # 5-minute quick start
+│   ├── basic-usage.md                # Basic concepts
+│   └── first-search.md               # First search tutorial
+├── guide/                            # User guides
+│   ├── search-sources.md             # Source-specific search guide
+│   ├── filtering.md                  # Filtering and sorting
+│   ├── export.md                     # Export formats guide
+│   ├── annotations.md                # Annotation system
+│   ├── interactive.md                # Interactive modes
+│   └── pdf.md                        # PDF management
+├── advanced/                         # Advanced features
+│   ├── automation.md                 # Cron jobs and automation
+│   ├── ai-integration.md             # AI integration (OpenAI, Gemini)
+│   ├── profiles.md                   # Profiles and templates
+│   ├── custom-apis.md                # Custom API integration
+│   └── zotero.md                     # Zotero integration
+├── reference/                        # Command reference
+│   ├── flags-overview.md             # All 95 flags overview
+│   ├── source-flags.md               # Source selection flags
+│   ├── search-flags.md               # Search parameter flags
+│   ├── filter-flags.md               # Filtering flags
+│   ├── display-flags.md              # Display option flags
+│   ├── export-flags.md               # Export flags
+│   ├── annotation-flags.md           # Annotation flags
+│   ├── interactive-flags.md          # Interactive mode flags
+│   └── utility-flags.md              # Utility flags
+├── examples/                         # Examples and use cases
+│   ├── workflows.md                  # Common workflows
+│   ├── use-cases.md                  # Real research scenarios
+│   ├── integrations.md               # Tool integration examples
+│   └── automation-examples.md        # Automation examples
+└── about/                            # About section
+    ├── changelog.md                  # Version history
+    ├── contributing.md               # How to contribute
+    ├── license.md                    # MIT License
+    └── faq.md                        # Frequently asked questions
 ```
 
-### Option 2: Manual installation
-```bash
-# Copy to user-local man directory
-mkdir -p ~/.local/share/man/man1
-cp docs/lixplore.1 ~/.local/share/man/man1/
-mandb -q
+## Building the Documentation
 
-# Or system-wide (requires sudo)
-sudo cp docs/lixplore.1 /usr/local/share/man/man1/
-sudo mandb -q
+### Install Dependencies
+
+```bash
+pip install mkdocs mkdocs-material
 ```
 
-### Viewing the man page
+### Local Development
+
 ```bash
-man lixplore
+# Serve documentation locally
+mkdocs serve
+
+# Open http://127.0.0.1:8000 in your browser
 ```
 
-## Using the TLDR Page
+### Build Static Site
 
-The TLDR page (lixplore.md) follows the [tldr-pages](https://github.com/tldr-pages/tldr) format.
-
-### View with tldr client
-If you have `tldr` installed:
 ```bash
-# Copy to tldr cache
-mkdir -p ~/.local/share/tldr/pages/common/
-cp docs/lixplore.md ~/.local/share/tldr/pages/common/
-tldr lixplore
+# Build to site/ directory
+mkdocs build
 ```
 
-### View directly
+### Deploy to GitHub Pages
+
 ```bash
-cat docs/lixplore.md
+# Deploy to gh-pages branch
+mkdocs gh-deploy
 ```
 
-Or use any markdown viewer:
+## Quick Scripts
+
+We provide convenience scripts:
+
+### Quick Setup and Preview
+
 ```bash
-glow docs/lixplore.md  # If you have glow installed
-mdless docs/lixplore.md  # If you have mdless installed
+./quick_docs_setup.sh
 ```
 
-## Man Page vs TLDR
+### Full Deployment
 
-- **Man Page (lixplore.1)** - Comprehensive reference with all options and details
-- **TLDR Page (lixplore.md)** - Quick examples for common use cases
+```bash
+# Test locally first
+./deploy_docs.sh
 
-Use `man lixplore` for complete documentation or `tldr lixplore` for quick examples.
+# Deploy to GitHub Pages
+./deploy_docs.sh --deploy
+```
+
+## Documentation Features
+
+- **Search**: Full-text search across all documentation
+- **Dark Mode**: Toggle between light and dark themes
+- **Mobile Responsive**: Works on all devices
+- **Code Highlighting**: Syntax highlighting for all code examples
+- **Navigation**: Easy navigation with tabs and sidebar
+- **Copy Code**: One-click code copying
+- **GitHub Integration**: Links to source code and issues
+
+## Contributing to Documentation
+
+To improve the documentation:
+
+1. Edit the Markdown files in `docs/`
+2. Test locally with `mkdocs serve`
+3. Submit a pull request
+
+See [Contributing Guide](about/contributing.md) for details.
+
+## Documentation URLs
+
+- **Local**: http://127.0.0.1:8000 (when running `mkdocs serve`)
+- **Production**: https://pryndor.github.io/Lixplore_cli/
+
+## Support
+
+- **Issues**: https://github.com/pryndor/Lixplore_cli/issues
+- **Discussions**: https://github.com/pryndor/Lixplore_cli/discussions
+
+---
+
+Built with [MkDocs](https://www.mkdocs.org/) and [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)

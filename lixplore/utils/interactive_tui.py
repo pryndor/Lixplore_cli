@@ -6,8 +6,9 @@ Provides an interactive terminal interface for browsing search results.
 Uses rich library if available for enhanced display, falls back to curses.
 """
 
+from __future__ import annotations
 import sys
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TYPE_CHECKING
 
 # Try importing rich library
 try:
@@ -49,7 +50,7 @@ def launch_rich_tui(results: List[Dict]):
     """
     console = Console()
 
-    console.print("\n[bold cyan]📚 LIXPLORE INTERACTIVE MODE[/bold cyan]")
+    console.print("\n[bold cyan]LIXPLORE INTERACTIVE MODE[/bold cyan]")
     console.print("[dim]Navigate results with commands. Type 'help' for available commands.[/dim]\n")
 
     current_page = 0
@@ -66,13 +67,13 @@ def launch_rich_tui(results: List[Dict]):
         # Create table
         table = Table(title=f"Search Results (Page {current_page + 1}/{total_pages})", show_header=True)
         table.add_column("#", style="cyan", width=5)
-        table.add_column("✓", style="green", width=3)
+        table.add_column("Selected", style="green", width=8)
         table.add_column("Title", style="white")
         table.add_column("Year", style="yellow", width=6)
         table.add_column("Source", style="magenta", width=12)
 
         for i, article in enumerate(page_results, start=start_idx + 1):
-            check = "✓" if i in selected_articles else ""
+            check = "Yes" if i in selected_articles else ""
             title = article.get('title', 'No title')[:60] + "..." if len(article.get('title', '')) > 60 else article.get('title', 'No title')
             year = str(article.get('year', 'N/A'))
             source = article.get('source', 'Unknown')
@@ -92,7 +93,7 @@ def launch_rich_tui(results: List[Dict]):
             console.print(f"\n[green]{len(selected_articles)} article(s) selected[/green]")
 
         # Command prompt
-        console.print("\n[bold]Commands:[/bold] [n]ext [p]rev [v]iew [s]elect [e]xport [q]uit [h]elp")
+        console.print("\n[bold]Commands:[/bold] (n)ext (p)rev (v)iew (s)elect (e)xport (q)uit (h)elp")
         command = Prompt.ask("\n>", default="n").lower().strip()
 
         if command in ['q', 'quit', 'exit']:
@@ -236,7 +237,7 @@ def export_selected_rich(console: Console, results: List[Dict], selected_numbers
             output_file = export_results(selected_results, selected_format)
 
             if output_file:
-                console.print(f"[green]✓ Exported to: {output_file}[/green]")
+                console.print(f"[green]Exported to: {output_file}[/green]")
             else:
                 console.print("[red]Export failed[/red]")
         else:
@@ -302,7 +303,7 @@ def launch_simple_tui(results: List[Dict]):
         print("-" * 80)
 
         for i, article in enumerate(page_results, start=start_idx + 1):
-            check = "[✓]" if i in selected_articles else "[ ]"
+            check = "[X]" if i in selected_articles else "[ ]"
             title = article.get('title', 'No title')[:55]
             year = str(article.get('year', 'N/A'))
             source = article.get('source', 'Unknown')[:10]
@@ -313,7 +314,7 @@ def launch_simple_tui(results: List[Dict]):
             print(f"\n{len(selected_articles)} article(s) selected")
 
         # Command prompt
-        print("\nCommands: [n]ext [p]rev [v]iew [s]elect [e]xport [q]uit [h]elp")
+        print("\nCommands: (n)ext (p)rev (v)iew (s)elect (e)xport (q)uit (h)elp")
         command = input("\n> ").lower().strip()
 
         if command in ['q', 'quit', 'exit']:
@@ -400,7 +401,7 @@ def launch_simple_tui(results: List[Dict]):
                         output_file = export_results(selected_results, formats[choice - 1])
 
                         if output_file:
-                            print(f"✓ Exported to: {output_file}")
+                            print(f"Exported to: {output_file}")
                         else:
                             print("Export failed")
                     else:
