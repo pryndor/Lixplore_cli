@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://pryndor.github.io/Lixplore_cli/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/pryndor/Lixplore_cli)
-[![PyPI version](https://badge.fury.io/py/lixplore.svg)](https://badge.fury.io/py/lixplore)
+[![PyPI version](https://badge.fury.io/py/lixplore-cli.svg)](https://pypi.org/project/lixplore-cli/)
 [![Issues](https://img.shields.io/github/issues/pryndor/Lixplore_cli)](https://github.com/pryndor/Lixplore_cli/issues)
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
@@ -190,7 +190,7 @@ lixplore --custom-api springer -q "quantum physics" -m 20
 
 ```bash
 # From PyPI (recommended)
-pip install lixplore
+pip install lixplore-cli
 
 # From source
 git clone https://github.com/pryndor/Lixplore_cli.git
@@ -439,7 +439,7 @@ Review feature uses cmd.exe
 
 ### Method 1: PyPI (Recommended)
 ```bash
-pip install lixplore
+pip install lixplore-cli
 ```
 
 ### Method 2: From Source
@@ -556,7 +556,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Quick Links
 
-- **📦 PyPI Package:** [https://pypi.org/project/lixplore/](https://pypi.org/project/lixplore/) *(Coming Soon)*
+- **📦 PyPI Package:** [https://pypi.org/project/lixplore-cli/](https://pypi.org/project/lixplore-cli/)
 - **💻 GitHub Repository:** [https://github.com/pryndor/Lixplore_cli](https://github.com/pryndor/Lixplore_cli)
 - **📚 Documentation:** [https://pryndor.github.io/Lixplore_cli/](https://pryndor.github.io/Lixplore_cli/)
 - **🐛 Issue Tracker:** [https://github.com/pryndor/Lixplore_cli/issues](https://github.com/pryndor/Lixplore_cli/issues)
