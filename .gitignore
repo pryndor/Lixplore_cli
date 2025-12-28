@@ -54,30 +54,10 @@ test_*.py
 troubleshoot.py
 pub.py
 
-# Development and meta documentation files (not part of core project)
-# Keep only README.md and CHANGELOG.md
-*_SUMMARY.md
-*_GUIDE.md
-*_REPORT.md
-*_COMPLETE.md
-*_READY.md
-*_REFERENCE.md
-DEPLOYMENT_GUIDE.md
-PACKAGE_DEPLOYMENT_SUMMARY.md
-QUICK_DEPLOY.md
-QUICK_START_*.md
-TODO_*.md
-ROADMAP.md
-PROGRESS_SUMMARY.md
-IMPLEMENTATION_SUMMARY.md
-FINAL_*.md
-DEMO_*.md
-TEST_RESULTS.md
-ENHANCED_*.md
-DOCS_README.md
-lixplore_annotations_*.md
-FLAGS_REFERENCE.md
-TROUBLESHOOTING_REPORT.md
+# All markdown files in root directory
+# Documentation is available at https://pryndor.github.io/Lixplore_cli/
+# Source files in docs/ directory are kept for building documentation site
+/*.md
 
 # Distribution / packaging
 *.whl
