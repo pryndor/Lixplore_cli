@@ -7,6 +7,7 @@
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://pryndor.github.io/Lixplore_cli/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/pryndor/Lixplore_cli)
 [![PyPI version](https://badge.fury.io/py/lixplore-cli.svg)](https://pypi.org/project/lixplore-cli/)
+[![Downloads](https://static.pepy.tech/badge/lixplore-cli)](https://pepy.tech/project/lixplore-cli)
 [![Issues](https://img.shields.io/github/issues/pryndor/Lixplore_cli)](https://github.com/pryndor/Lixplore_cli/issues)
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
