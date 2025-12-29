@@ -51,53 +51,51 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 - 💡 **Quick Examples** - Built-in examples with `--examples` flag
 - 📄 **Man Page** - Traditional Unix man page included
 
-### 🚀 NEW! Interactive Modes
-- 🐚 **Shell Mode** - Persistent terminal session (like OpenBB Terminal)
-- 🧙 **Wizard Mode** - Guided step-by-step workflows for beginners
+### 🚀 Interactive Interface
+- 🎨 **Enhanced TUI Mode** - Beautiful text-based interface with search, browse, annotate, and export
 - 📝 **Annotation System** - Rate, tag, comment, and organize your research library
+- 📊 **Statistics Dashboard** - Visualize publication trends and analytics
+- 💾 **Smart Export** - Export to 8 formats with intelligent deduplication
 
 ---
 
-## 🎯 Three Ways to Use Lixplore
+## 🎯 Two Ways to Use Lixplore
 
-### 1️⃣ Shell Mode (NEW!) - Persistent Interactive Session
+### 1️⃣ Interactive TUI Mode - Visual Interface (Recommended)
 
-**Perfect for power users and continuous workflows**
+**Perfect for exploration, learning, and complex workflows**
 
 ```bash
-lixplore --shell
+# Launch interactive TUI
+lixplore --tui
 
-# Inside shell - no need to type 'lixplore' repeatedly!
-lixplore> search "cancer treatment" -P -m 20
-lixplore> annotate 5 --rating 5 --tags "important"
-lixplore> list annotations
-lixplore> export markdown
+# Or simply run without arguments
+lixplore
+
+# Navigate with arrow keys, search visually, annotate results, view stats
 ```
 
-### 2️⃣ Wizard Mode (NEW!) - Guided Workflows
+**Features:**
+- Visual search interface with source selection
+- Browse and select articles interactively
+- Annotation management with ratings and tags
+- Statistics dashboard with visualizations
+- Export functionality with format selection
+- Beautiful terminal UI with keyboard shortcuts
 
-**Perfect for beginners and learning**
+### 2️⃣ Command Line Mode - Direct Commands
 
-```bash
-lixplore --wizard
-
-# Follow interactive prompts - no flags to memorize!
-What do you want to do?
-  1. Search for articles
-  2. Annotate an article
-  3. View my annotations
-  ...
-```
-
-### 3️⃣ Command Line - Traditional Flags
-
-**Perfect for scripting and automation**
+**Perfect for scripting, automation, and quick searches**
 
 ```bash
+# Quick search and export
 lixplore -P -q "machine learning" -m 20 -X xlsx
+
+# Advanced workflow
+lixplore -A -q "COVID-19" -m 50 -D --sort newest -X csv
 ```
 
-**📖 See [INTERACTIVE_MODES_GUIDE.md](INTERACTIVE_MODES_GUIDE.md) for complete guide**
+**Note:** Legacy shell (`--shell`) and wizard (`--wizard`) modes are still available but deprecated in favor of the enhanced TUI mode.
 
 ---
 

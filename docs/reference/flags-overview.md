@@ -191,9 +191,11 @@ Rate, tag, comment, and organize your research library.
 Launch interactive interfaces for easier usage.
 
 **Modes:**
-- Enhanced TUI (primary interface)
-- Shell mode (persistent session)
-- Wizard mode (guided workflows)
+- **Enhanced TUI** (primary interface - recommended)
+- Shell mode (persistent session - deprecated)
+- Wizard mode (guided workflows - deprecated)
+
+**Note:** Shell and wizard modes are deprecated in favor of the enhanced TUI.
 
 **See:** [interactive-flags.md](interactive-flags.md) for complete documentation
 
