@@ -1,0 +1,256 @@
+# lixplore
+
+Literature search and export tool with advanced export features.
+Search across 5 academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) and export in multiple formats.
+
+## Basic Search
+
+# Search PubMed for "cancer research":
+lixplore -P -q "cancer research"
+
+# Search multiple sources for "machine learning":
+lixplore -A -q "machine learning" -m 20
+
+# Search by author:
+lixplore -P -au "Smith J" -m 10
+
+# Search by DOI:
+lixplore -C -DOI "10.1038/nature12345"
+
+## Export Formats
+
+# Export to CSV:
+lixplore -P -q "covid" -m 10 -X csv
+
+# Export to BibTeX:
+lixplore -P -q "quantum computing" -X bibtex
+
+# Export to RIS (works with Zotero/Mendeley):
+lixplore -P -q "neuroscience" -X ris
+
+# Batch export to multiple formats:
+lixplore -P -q "AI" -m 15 -X csv,bibtex,ris
+
+## Citation Export
+
+# Export as APA citations:
+lixplore -P -q "climate change" -c apa
+
+# Export as IEEE citations:
+lixplore -P -q "robotics" -c ieee -o ieee_citations.txt
+
+# Export as MLA citations:
+lixplore -P -q "literature" -c mla
+
+## Field Filtering
+
+# Export only specific fields:
+lixplore -P -q "biology" -X csv --export-fields title authors year doi
+
+# Export minimal metadata:
+lixplore -P -q "chemistry" -X json --export-fields title doi
+
+## Metadata Enrichment
+
+# Enrich metadata using all APIs:
+lixplore -P -q "genomics" --enrich -X bibtex
+
+# Enrich using specific APIs:
+lixplore -P -q "physics" --enrich crossref pubmed -X xlsx
+
+# Enrich and export with specific fields:
+lixplore -P -q "medicine" --enrich --export-fields title authors doi year -X csv
+
+## Deduplication
+
+# Basic deduplication:
+lixplore -A -q "cancer" -m 50 -D
+
+# Strict deduplication with metadata merging:
+lixplore -A -q "AI research" -m 100 -D strict --dedup-merge
+
+# Custom threshold deduplication:
+lixplore -A -q "biology" -m 50 -D --dedup-threshold 0.9 --dedup-keep most_complete
+
+## Export Compression
+
+# Compress exports to ZIP:
+lixplore -P -q "data science" -X csv --zip
+
+# Batch export with compression:
+lixplore -P -q "ML" -X csv,bibtex,ris --zip
+
+## Templates
+
+# Use Nature template:
+lixplore -P -q "genetics" --template nature
+
+# Use IEEE template:
+lixplore -P -q "engineering" --template ieee
+
+# List available templates:
+lixplore --list-templates
+
+## Export Profiles
+
+# Save export configuration as profile:
+lixplore -P -q "test" -X bibtex --sort newest --save-profile my_export
+
+# Load and use saved profile:
+lixplore -P -q "new search" --load-profile my_export
+
+# List all saved profiles:
+lixplore --list-profiles
+
+# Delete a profile:
+lixplore --delete-profile my_export
+
+## Advanced Workflows
+
+# Comprehensive export with all features:
+lixplore -A -q "machine learning" -m 100 -D strict --dedup-merge --enrich --export-fields title authors doi year journal -X csv,bibtex --zip --save-profile ml_comprehensive
+
+# Search, enrich, deduplicate, and export to multiple formats:
+lixplore -P -C -q "cancer AND treatment" -m 50 -D --enrich crossref -X csv,ris,bibtex
+
+# Use template with custom output:
+lixplore -P -q "quantum" --template nature -o nature_refs.bib
+
+# Export citations with enrichment:
+lixplore -P -q "AI ethics" --enrich -c apa -o ethics_citations.txt --zip
+
+## Filtering and Sorting
+
+# Filter by date range:
+lixplore -P -q "COVID-19" -d 2020-01-01 2024-12-31
+
+# Sort by newest first:
+lixplore -P -q "vaccines" --sort newest -m 20
+
+# Sort by journal alphabetically:
+lixplore -P -q "immunology" --sort journal
+
+## Selection and Review
+
+# Select specific articles to export:
+lixplore -P -q "cancer" -m 50 -S 1-10 -X csv
+
+# Select odd-numbered articles:
+lixplore -P -q "biology" -m 50 -S odd -X bibtex
+
+# Review article in separate terminal:
+lixplore -P -q "genomics" -m 10 -R 1
+
+## Display Options
+
+# Show abstracts inline:
+lixplore -P -q "neuroscience" -a
+
+# View detailed info for specific articles:
+lixplore -P -q "physics" -N 1 3 5
+
+# Get statistics:
+lixplore -P -q "medicine" -m 100 --stat
+
+# Show clickable PDF links for open access articles:
+lixplore -x -q "machine learning" -m 10 --show-pdf-links
+
+# Combine PDF links with abstracts:
+lixplore -P -q "cancer" -m 20 -a --show-pdf-links
+
+## Pagination
+
+# View specific page:
+lixplore -P -q "cancer" -m 100 -p 2
+
+# Custom page size:
+lixplore -P -q "research" -m 100 --page-size 50
+
+## Interactive Mode
+
+# Browse interactively (with rich UI):
+lixplore -P -q "AI" -m 50 -i
+
+## Statistics Dashboard
+
+# Show comprehensive statistics:
+lixplore -P -q "machine learning" -m 100 --stat
+
+# Show top 20 rankings:
+lixplore -A -q "COVID-19" -m 200 --stat --stat-top 20
+
+## PDF Downloads & Links
+
+# Show PDF links (no download - clickable in terminal):
+lixplore -x -q "neural networks" -m 10 --show-pdf-links
+
+# Download PDFs:
+lixplore -P -q "open access" -m 10 --download-pdf
+
+# Download specific articles:
+lixplore -P -q "research" -m 50 --download-pdf --pdf-numbers 1 3 5
+
+# Configure SciHub:
+lixplore --set-scihub-mirror https://sci-hub.se
+
+# Download with SciHub fallback:
+lixplore -P -q "article" -m 20 --download-pdf --use-scihub
+
+## Custom API Sources
+
+# Create API examples:
+lixplore --create-api-examples
+
+# List custom APIs:
+lixplore --list-custom-apis
+
+# Search Springer API:
+lixplore --custom-api springer -q "quantum" -m 20
+
+## Reference Managers
+
+# Configure Zotero (one-time setup):
+# Get API key from: https://www.zotero.org/settings/keys
+# Your User ID is shown at the top of that page
+lixplore --configure-zotero YOUR_API_KEY YOUR_USER_ID
+
+# List Zotero collections (to get collection keys):
+lixplore --show-zotero-collections
+
+# Add to Zotero main library:
+lixplore -P -q "machine learning" -m 10 --add-to-zotero
+
+# Add to specific Zotero collection:
+# Get collection key from: https://www.zotero.org (URL) or right-click in desktop app
+lixplore -P -q "AI research" -m 20 --add-to-zotero --zotero-collection 4FCVPNAP
+
+# Combine with deduplication:
+lixplore -A -q "COVID-19" -m 50 -D --add-to-zotero --zotero-collection 4FCVPNAP
+
+# Export for Mendeley:
+lixplore -P -q "biology" -m 30 --export-for-mendeley
+
+## Cache Management
+
+# Refresh cache:
+lixplore -P -q "cancer" -m 50 --refresh
+
+# View search history:
+lixplore -H
+
+# Show PDF directory:
+lixplore --show-pdf-dir
+
+# List Zotero collections:
+lixplore --show-zotero-collections
+
+## Help and Examples
+
+# Show quick examples:
+lixplore --examples
+
+# Show help:
+lixplore --help
+
+# Show man page:
+man lixplore
