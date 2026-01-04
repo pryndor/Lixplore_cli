@@ -207,6 +207,43 @@ lixplore --custom-api springer -q "quantum physics" -m 20
 
 ## 🚀 Quick Start
 
+### ⚠️ Prerequisites
+
+Before installing Lixplore, ensure you have:
+
+**1. Python Installed:**
+```bash
+# Check Python version (requires 3.8 or higher)
+python --version
+# or
+python3 --version
+```
+
+**2. pip Installed:**
+```bash
+# Check pip version
+pip --version
+# or
+pip3 --version
+```
+
+**3. (Windows Only) Microsoft C++ Build Tools:**
+
+If you're on **Windows** and encounter build errors during installation, you need Microsoft C++ Build Tools:
+
+**Option A: Quick Install (Recommended)**
+- Download and install **Microsoft C++ Build Tools**: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+- Select "Desktop development with C++" during installation
+- Restart your terminal after installation
+
+**Option B: Full Visual Studio**
+- Install Visual Studio Community: https://visualstudio.microsoft.com/downloads/
+- Select "Desktop development with C++" workload
+
+> **Why?** The `gensim` package (a dependency) requires C++ compilation on Windows. This is a one-time setup.
+
+---
+
 ### Installation
 
 ```bash
@@ -220,6 +257,62 @@ pip install --upgrade lixplore-cli
 git clone https://github.com/pryndor/Lixplore_cli.git
 cd Lixplore_cli
 pip install -e .
+```
+
+### 🐛 Troubleshooting Installation
+
+#### ❌ Error: "Failed to build gensim" (Windows)
+
+**Error Message:**
+```
+Failed to build gensim
+error: Microsoft Visual C++ 14.0 or greater is required
+```
+
+**Solution:**
+1. Install Microsoft C++ Build Tools (see Prerequisites above)
+2. Restart your terminal/PowerShell
+3. Try installing again: `pip install lixplore-cli`
+
+**Alternative Solution (if build tools don't work):**
+```bash
+# Install pre-built binary wheels first
+pip install --upgrade pip setuptools wheel
+pip install gensim --no-cache-dir
+pip install lixplore-cli
+```
+
+#### ❌ Error: "command 'pip' not found"
+
+**Solution:**
+```bash
+# Try using pip3
+pip3 install lixplore-cli
+
+# Or use Python module syntax
+python -m pip install lixplore-cli
+```
+
+#### ❌ Error: Permission denied
+
+**Solution (Linux/Mac):**
+```bash
+# Install for current user only
+pip install --user lixplore-cli
+```
+
+**Solution (Windows - Run as Administrator):**
+- Right-click Command Prompt → "Run as administrator"
+- Then: `pip install lixplore-cli`
+
+#### ✅ Verify Installation
+
+```bash
+# Check if installed correctly
+lixplore --version
+
+# Run quick test
+lixplore --help
 ```
 
 ### Basic Usage
