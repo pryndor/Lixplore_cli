@@ -22,7 +22,7 @@ extras_requirements = {
 }
 
 setup(
-    name='lixplore',
+    name='lixplore-cli',
     version='1.0.1',
     description='Academic Literature Search & Export CLI Tool - Search PubMed, arXiv, Crossref, DOAJ, EuropePMC with Boolean operators, smart selection, and 8 export formats',
     long_description=long_description,
