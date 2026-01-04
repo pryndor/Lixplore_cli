@@ -191,6 +191,9 @@ lixplore --custom-api springer -q "quantum physics" -m 20
 # From PyPI (recommended)
 pip install lixplore-cli
 
+# Upgrade to latest version
+pip install --upgrade lixplore-cli
+
 # From source
 git clone https://github.com/pryndor/Lixplore_cli.git
 cd Lixplore_cli
@@ -450,7 +453,7 @@ pip install -e .
 
 ### Method 3: Using pipx (Isolated)
 ```bash
-pipx install lixplore
+pipx install lixplore-cli
 ```
 
 ---
