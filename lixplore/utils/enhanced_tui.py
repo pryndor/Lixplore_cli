@@ -222,9 +222,9 @@ and managing your research literature.[/dim]
                 all_results = dispatcher.deduplicate_advanced(
                     all_results,
                     strategy="auto",
-                    threshold=0.85,
-                    keep="first",
-                    merge_data=False
+                    title_threshold=0.85,
+                    keep_preference="first",
+                    merge_metadata=False
                 )
 
             if all_results:
