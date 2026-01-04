@@ -1,4 +1,4 @@
-# Lixplore
+# Lixplore-cli
 
 > **Academic Literature Search & Export CLI Tool**
 
