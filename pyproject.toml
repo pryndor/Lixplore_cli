@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lixplore-cli"
-version = "1.0.0"
+version = "1.0.1"
 description = "Academic Literature Search & Export CLI Tool"
 readme = "README.md"
 requires-python = ">=3.8"

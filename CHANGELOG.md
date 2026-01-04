@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-01-04
+
+### Fixed
+- **TUI Mode Deduplication Error** - Fixed TypeError when using deduplication in TUI mode
+  - Changed incorrect parameter names in `enhanced_tui.py`:
+    - `threshold` → `title_threshold`
+    - `keep` → `keep_preference`
+    - `merge_data` → `merge_metadata`
+  - TUI mode now properly calls `deduplicate_advanced()` with correct parameters
+  - Resolves: "deduplicate_advanced() got an unexpected keyword argument 'threshold'"
+
+### Changed
+- Improved error handling and parameter validation in TUI search workflow
+
 ## [2.0.0] - 2024-12-24
 
 ### Added - Major Export Enhancement Update
