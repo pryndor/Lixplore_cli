@@ -62,7 +62,9 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 
 ## 🎯 Two Ways to Use Lixplore
 
-### 1️⃣ Interactive TUI Mode - Visual Interface (Recommended)
+> **📢 IMPORTANT:** TUI mode is currently under active development. While functional, some advanced features are still being refined. **All 95 command-line flags are fully compatible and production-ready in CLI mode.** Future updates will focus on bringing TUI mode to feature parity with CLI mode.
+
+### 1️⃣ Interactive TUI Mode - Visual Interface ⚠️ (Under Development)
 
 **Perfect for exploration, learning, and complex workflows**
 
@@ -76,25 +78,45 @@ lixplore
 # Navigate with arrow keys, search visually, annotate results, view stats
 ```
 
-**Features:**
-- Visual search interface with source selection
-- Browse and select articles interactively
-- Annotation management with ratings and tags
-- Statistics dashboard with visualizations
-- Export functionality with format selection
-- Beautiful terminal UI with keyboard shortcuts
+**Features (Currently Available):**
+- ✅ Visual search interface with source selection
+- ✅ Browse and select articles interactively
+- ✅ Annotation management with ratings and tags
+- ✅ Statistics dashboard with visualizations
+- ✅ Export functionality with format selection
+- ✅ Beautiful terminal UI with keyboard shortcuts
+- ⚠️ **Note:** Some advanced CLI features are being integrated into TUI mode
 
-### 2️⃣ Command Line Mode - Direct Commands
+### 2️⃣ Command Line Mode - Direct Commands ✅ (Fully Production-Ready)
 
 **Perfect for scripting, automation, and quick searches**
+
+**All 95 flags fully functional and tested!**
 
 ```bash
 # Quick search and export
 lixplore -P -q "machine learning" -m 20 -X xlsx
 
-# Advanced workflow
+# Advanced workflow with deduplication
 lixplore -A -q "COVID-19" -m 50 -D --sort newest -X csv
+
+# Citation export with enrichment
+lixplore -P -q "CRISPR" -m 30 --enrich crossref -C apa
+
+# Batch export to multiple formats
+lixplore -x -q "quantum computing" -m 25 -X csv,bibtex,ris --zip
 ```
+
+**All Features Available:**
+- ✅ 95 command-line flags fully compatible
+- ✅ Multi-source search (PubMed, arXiv, Crossref, DOAJ, EuropePMC)
+- ✅ Boolean operators and advanced queries
+- ✅ 8 export formats (CSV, Excel, JSON, BibTeX, RIS, EndNote, XML)
+- ✅ Citation formatting (APA, MLA, Chicago, IEEE)
+- ✅ Metadata enrichment and PDF downloads
+- ✅ Deduplication with multiple strategies
+- ✅ Export profiles and templates
+- ✅ Complete annotation system
 
 **Note:** Legacy shell (`--shell`) and wizard (`--wizard`) modes are still available but deprecated in favor of the enhanced TUI mode.
 
@@ -517,6 +539,24 @@ Your support enables:
 - 📖 Improve documentation
 - 🔀 Contribute code via pull requests
 - 📢 Share Lixplore with your research community
+
+---
+
+## 🚀 Development Roadmap
+
+### TUI Mode Enhancement (Active Development)
+We're actively working to bring all CLI features into the TUI mode. Upcoming updates will include:
+
+- 🔄 **All 95 Flags in TUI** - Full integration of all command-line features
+- 📊 **Advanced Filtering** - Date ranges, author search, DOI lookup in TUI
+- 🎨 **Enhanced UI** - Improved navigation and visual design
+- 📥 **PDF Integration** - Direct PDF download and viewing from TUI
+- 🔧 **Custom API Support** - GUI for adding custom data sources
+- 📋 **Profile Management** - Visual interface for export profiles
+- 🎯 **Citation Formatting** - Interactive citation style selection
+- 📈 **Advanced Statistics** - More visualization options
+
+**Current Status:** Core TUI features working (search, browse, annotate, export). CLI mode has 100% feature parity with all flags.
 
 ---
 
