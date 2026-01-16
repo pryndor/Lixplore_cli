@@ -681,6 +681,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## Reviews
+
+- **OSTechNix:** [https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/](https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/)
+
+---
+
 ## 📧 Support & Community
 
 - **📚 Documentation:** [https://pryndor.github.io/Lixplore_cli/](https://pryndor.github.io/Lixplore_cli/)
