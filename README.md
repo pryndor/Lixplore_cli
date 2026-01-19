@@ -684,6 +684,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Reviews
 
 - **OSTechNix:** [https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/](https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/)
+- **Ardreyex:**  [https://andreyex.ru/linux/lixplore-cli-instrument-komandnoj-stroki-dlya-nauchnyh-issledovanij/](https://andreyex.ru/linux/lixplore-cli-instrument-komandnoj-stroki-dlya-nauchnyh-issledovanij/)
+- **Mylinux:**   [https://muylinux.xyz/lixplore-cli-una-herramienta-de-linea-de-comandos-para-investigacion-academica/](https://muylinux.xyz/lixplore-cli-una-herramienta-de-linea-de-comandos-para-investigacion-academica/)
 
 ---
 
