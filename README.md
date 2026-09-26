@@ -1,4 +1,4 @@
-# Lixplore
+# Lixplore-cli
 
 > **Academic Literature Search & Export CLI Tool**
 
@@ -803,6 +803,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Crossref for DOI metadata
 - DOAJ for open access journal data
 - EuropePMC for European literature access
+
+---
+
+## Reviews
+
+- **OSTechNix:** [https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/](https://ostechnix.com/lixplore-cli-command-line-academic-research-tool/)
+- **Ardreyex:**  [https://andreyex.ru/linux/lixplore-cli-instrument-komandnoj-stroki-dlya-nauchnyh-issledovanij/](https://andreyex.ru/linux/lixplore-cli-instrument-komandnoj-stroki-dlya-nauchnyh-issledovanij/)
+- **Mylinux:**   [https://muylinux.xyz/lixplore-cli-una-herramienta-de-linea-de-comandos-para-investigacion-academica/](https://muylinux.xyz/lixplore-cli-una-herramienta-de-linea-de-comandos-para-investigacion-academica/)
 
 ---
 
