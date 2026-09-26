@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-09-26
+
+### Added
+- **Paper alerts** - scheduled digests of newly published papers for your searches
+  - Runs free on GitHub Actions: fork the repo, set `LIXPLORE_QUERIES` and a channel's secrets under
+    Settings → Secrets and variables → Actions. No file edits needed
+  - Also runs on your own computer: `lixplore --alerts init | check | test | dry-run | run | schedule`
+    (or the `lixplore-alerts` command), configured with a `.env` file
+  - 17 delivery channels: Email, Telegram, Discord, Slack, Microsoft Teams, Google Chat, Matrix, WeCom,
+    Feishu, DingTalk, ntfy, Gotify, Pushover, PushPlus, ServerChan3, AstrBot and custom webhooks
+  - Per search, each source's count of new papers with titles, plus a CSV/BibTeX/RIS attachment
+  - Boolean queries (`AND`, `OR`, `NOT`, parentheses, quoted phrases) passed to each source
+  - Only papers not sent before; history kept on a `lixplore-state` branch (GitHub) or `.lixplore-state/` (local)
+  - Schedule by `LIXPLORE_SEND_DAYS` and `LIXPLORE_SEND_HOUR_UTC`
+  - Guide: `docs/guide/alerts.md`
+- Source modules accept an optional `since` date to fetch only recently added records
+- `--check-tui` diagnoses Rich / TUI installation problems
+- `--install-man` installs the `lixplore` man page
+- Arch Linux `PKGBUILD` and Homebrew formula
+
+### Changed
+- TUI reworked; Rich detection centralised in `utils/rich_check.py`
+- Rich moved to the optional `tui` / `all` extras
+- arXiv requests use HTTPS
+
+### Removed
+- Unused `litstudy` dependency
+
+### Fixed
+- README no longer claims that running `lixplore` with no arguments opens the TUI
+
 ## [1.0.1] - 2026-01-04
 
 ### Fixed

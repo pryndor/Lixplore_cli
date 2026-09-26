@@ -1,6 +1,6 @@
 # Maintainer: Balasubramanian Periannan <balathepharmacist@gmail.com>
 pkgname=lixplore-cli
-pkgver=1.0.1
+pkgver=1.1.0
 pkgrel=1
 pkgdesc="Academic Literature Search & Export CLI Tool - Search PubMed, arXiv, Crossref, DOAJ, EuropePMC"
 arch=('any')
