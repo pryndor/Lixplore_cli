@@ -4,7 +4,8 @@
 PubMed search source using NCBI Entrez API
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+from datetime import date
 from Bio import Entrez
 import os
 import json
@@ -46,11 +47,16 @@ class PubMedSource:
       #  if api_key:
        #     Entrez.api_key = api_key
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
         results = []
         try:
             # Step 1: Search IDs
-            handle = Entrez.esearch(db="pubmed", term=query, retmax=max_results)
+            params = {"db": "pubmed", "term": query, "retmax": max_results}
+            if since:
+                # Entrez date = when the record was added to PubMed
+                params.update(datetype="edat", mindate=since.strftime("%Y/%m/%d"),
+                              maxdate=date.today().strftime("%Y/%m/%d"), sort="pub_date")
+            handle = Entrez.esearch(**params)
             record = Entrez.read(handle)
             handle.close()
             id_list = record.get("IdList", [])
@@ -126,6 +132,6 @@ class PubMedSource:
 
 
 # 🔑 Wrapper so dispatcher can call pubmed.search()
-def search(query: str, max_results: int = 10) -> List[Dict]:
-    return PubMedSource().search(query, max_results)
+def search(query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+    return PubMedSource().search(query, max_results, since)
 

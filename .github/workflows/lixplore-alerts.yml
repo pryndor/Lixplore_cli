@@ -1,0 +1,153 @@
+name: Lixplore Alerts
+
+# New-paper digests by email and Telegram.
+# Configure everything under Settings -> Secrets and variables -> Actions.
+# No file in this repository needs editing. Setup guide: docs/guide/alerts.md
+
+on:
+  schedule:
+    # Runs hourly; the "Check schedule" step sends only on LIXPLORE_SEND_DAYS
+    # once LIXPLORE_SEND_HOUR_UTC has passed, at most once a day.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'run = fetch and send | dry-run = preview only | test = send a test message'
+        required: true
+        default: 'run'
+        type: choice
+        options:
+          - run
+          - dry-run
+          - test
+      queries:
+        description: 'One-off queries instead of LIXPLORE_QUERIES (optional)'
+        required: false
+        type: string
+      lookback_days:
+        description: 'Search window in days (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write   # save sent-paper history to the lixplore-state branch
+  actions: write    # keep the schedule from being auto-disabled after 60 idle days
+
+concurrency:
+  group: lixplore-alerts
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ fromJSON(vars.LIXPLORE_TIMEOUT_MINUTES || '20') }}
+    env:
+      PYTHONUTF8: '1'
+      LIXPLORE_QUERIES: ${{ vars.LIXPLORE_QUERIES || secrets.LIXPLORE_QUERIES }}
+      LIXPLORE_SEND_DAYS: ${{ vars.LIXPLORE_SEND_DAYS || 'daily' }}
+      LIXPLORE_SEND_HOUR_UTC: ${{ vars.LIXPLORE_SEND_HOUR_UTC || '6' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore sent-paper history
+        run: |
+          mkdir -p .lixplore-state
+          if git fetch --depth=1 origin lixplore-state 2>/dev/null; then
+            git archive FETCH_HEAD | tar -x -C .lixplore-state
+            echo "History restored (last run: $(cat .lixplore-state/last_run 2>/dev/null || echo never))"
+          else
+            echo "No history yet; first run will create the lixplore-state branch"
+          fi
+
+      - name: Check schedule
+        id: gate
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "send=true" >> "$GITHUB_OUTPUT"
+          else
+            python3 -m lixplore.alerts.gate >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        if: steps.gate.outputs.send == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Lixplore
+        if: steps.gate.outputs.send == 'true'
+        run: pip install .
+
+      - name: Run alerts
+        if: steps.gate.outputs.send == 'true'
+        env:
+          MODE: ${{ github.event.inputs.mode || 'run' }}
+          QUERIES_OVERRIDE: ${{ github.event.inputs.queries }}
+          LOOKBACK_OVERRIDE: ${{ github.event.inputs.lookback_days }}
+
+          # Search settings (Variables)
+          LIXPLORE_SOURCES: ${{ vars.LIXPLORE_SOURCES || secrets.LIXPLORE_SOURCES }}
+          LIXPLORE_MAX_RESULTS: ${{ vars.LIXPLORE_MAX_RESULTS || secrets.LIXPLORE_MAX_RESULTS }}
+          LIXPLORE_LOOKBACK_DAYS: ${{ vars.LIXPLORE_LOOKBACK_DAYS || secrets.LIXPLORE_LOOKBACK_DAYS }}
+          LIXPLORE_DEDUPE: ${{ vars.LIXPLORE_DEDUPE || secrets.LIXPLORE_DEDUPE }}
+          LIXPLORE_SEND_WHEN_EMPTY: ${{ vars.LIXPLORE_SEND_WHEN_EMPTY || secrets.LIXPLORE_SEND_WHEN_EMPTY }}
+          LIXPLORE_ATTACH_FORMAT: ${{ vars.LIXPLORE_ATTACH_FORMAT || secrets.LIXPLORE_ATTACH_FORMAT }}
+
+          # Email
+          EMAIL_SENDER: ${{ vars.EMAIL_SENDER || secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVERS: ${{ vars.EMAIL_RECEIVERS || secrets.EMAIL_RECEIVERS }}
+          EMAIL_SENDER_NAME: ${{ vars.EMAIL_SENDER_NAME || secrets.EMAIL_SENDER_NAME }}
+          SMTP_SERVER: ${{ vars.SMTP_SERVER || secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ vars.SMTP_PORT || secrets.SMTP_PORT }}
+
+          # Telegram
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_MESSAGE_THREAD_ID: ${{ secrets.TELEGRAM_MESSAGE_THREAD_ID }}
+
+          # PubMed (optional: only raises NCBI's rate limit)
+          PUBMED_EMAIL: ${{ secrets.PUBMED_EMAIL }}
+          PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
+        run: |
+          ARGS=("$MODE")
+          [ -n "$QUERIES_OVERRIDE" ] && ARGS+=(--queries "$QUERIES_OVERRIDE")
+          [ -n "$LOOKBACK_OVERRIDE" ] && ARGS+=(--lookback-days "$LOOKBACK_OVERRIDE")
+          lixplore-alerts "${ARGS[@]}"
+
+      - name: Save sent-paper history
+        if: steps.gate.outputs.send == 'true' && (github.event.inputs.mode || 'run') == 'run' && !github.event.inputs.queries
+        run: |
+          date -u +%F > .lixplore-state/last_run
+          cd .lixplore-state
+          git init -q
+          git checkout -q -b lixplore-state
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Update alert history $(date -u +%F)"
+          # One-commit branch, replaced each run, so it never grows
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" lixplore-state
+          echo "History saved to the lixplore-state branch"
+
+      - name: Upload digest
+        if: always() && steps.gate.outputs.send == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lixplore-digest-${{ github.run_number }}
+          path: reports/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Keep schedule enabled
+        # GitHub disables scheduled workflows after 60 days without repository activity
+        if: github.event_name == 'schedule' && steps.gate.outputs.send == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/lixplore-alerts.yml/enable" --silent

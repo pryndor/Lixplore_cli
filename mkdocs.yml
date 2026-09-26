@@ -86,6 +86,7 @@ nav:
     - Annotations & Tags: guide/annotations.md
     - Interactive Modes: guide/interactive.md
     - PDF Management: guide/pdf.md
+    - Paper Alerts (Email & Telegram): guide/alerts.md
 
   - Advanced Features:
     - Automation & Cron Jobs: advanced/automation.md

@@ -6,7 +6,8 @@ API Documentation: https://europepmc.org/RestfulWebService
 No authentication required
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+from datetime import date
 import requests
 
 
@@ -18,7 +19,7 @@ class EuropePMCSource:
     def __init__(self):
         self.base_url = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
         results = []
         try:
             params = {
@@ -26,6 +27,10 @@ class EuropePMCSource:
                 "pageSize": max_results,
                 "format": "json"
             }
+            if since:
+                # First index date = when Europe PMC first saw the record
+                params["query"] = f"({query}) AND FIRST_IDATE:[{since:%Y-%m-%d} TO {date.today():%Y-%m-%d}]"
+                params["sort"] = "FIRST_IDATE_D desc"
 
             response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
@@ -92,5 +97,5 @@ class EuropePMCSource:
 
 
 # Wrapper function for dispatcher
-def search(query: str, max_results: int = 10) -> List[Dict]:
-    return EuropePMCSource().search(query, max_results)
+def search(query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+    return EuropePMCSource().search(query, max_results, since)

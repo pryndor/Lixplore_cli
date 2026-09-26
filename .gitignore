@@ -97,3 +97,8 @@ Thumbs.db
 # Keep structure but ignore contents
 exports/*
 !exports/.gitignore
+
+# Lixplore Alerts (local runs)
+.env
+reports/
+.lixplore-state/

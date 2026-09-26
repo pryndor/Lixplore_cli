@@ -42,6 +42,7 @@ setup(
     entry_points={
         'console_scripts': [
             'lixplore=lixplore.cli:main',
+            'lixplore-alerts=lixplore.alerts.runner:main',
         ],
     },
     python_requires='>=3.8',

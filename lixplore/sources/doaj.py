@@ -6,7 +6,8 @@ API Documentation: https://doaj.org/api/docs
 No authentication required
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+from datetime import date
 import requests
 
 
@@ -18,7 +19,7 @@ class DOAJSource:
     def __init__(self):
         self.base_url = "https://doaj.org/api/v3/search/articles"
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
         results = []
         try:
             # DOAJ API v3 - query is part of the URL path
@@ -27,6 +28,9 @@ class DOAJSource:
                 "pageSize": max_results,
                 "page": 1
             }
+            if since:
+                # DOAJ rejects range queries, so sort newest-first and cut below
+                params["sort"] = "created_date:desc"
 
             response = requests.get(url, params=params, timeout=10)
             response.raise_for_status()
@@ -35,6 +39,8 @@ class DOAJSource:
             items = data.get("results", [])
 
             for item in items:
+                if since and item.get("created_date", "")[:10] < since.isoformat():
+                    break
                 article_data = self.parse_article(item)
                 results.append(article_data)
 
@@ -104,5 +110,5 @@ class DOAJSource:
 
 
 # Wrapper function for dispatcher
-def search(query: str, max_results: int = 10) -> List[Dict]:
-    return DOAJSource().search(query, max_results)
+def search(query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+    return DOAJSource().search(query, max_results, since)

@@ -360,6 +360,13 @@ For more information, visit: https://github.com/yourusername/lixplore
         "--wizard", action="store_true",
         help="[Deprecated - use --tui instead] Launch wizard mode."
     )
+    mode_group.add_argument(
+        "--alerts", nargs="?", const="run", metavar="MODE",
+        choices=["run", "dry-run", "test", "check"],
+        help="New-paper alerts by email/Telegram, configured via env vars or a .env file. "
+             "MODE: run (default), dry-run, test, check. Same as the 'lixplore-alerts' command. "
+             "Example: lixplore --alerts dry-run"
+    )
 
     # ===== ANNOTATIONS =====
     annotation_group = parser.add_argument_group(
@@ -879,6 +886,11 @@ def run_main(args):
         from lixplore.utils.interactive_tui import launch_interactive_mode
         launch_interactive_mode([])
         return
+
+    if getattr(args, 'alerts', None):
+        import sys
+        from lixplore.alerts.runner import main as alerts_main
+        sys.exit(alerts_main([args.alerts]))
 
     if args.tui:
         from lixplore.utils.enhanced_tui import launch_enhanced_tui

@@ -6,7 +6,8 @@ API Documentation: https://api.crossref.org/swagger-ui/index.html
 No authentication required
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+from datetime import date
 import requests
 
 
@@ -18,7 +19,7 @@ class CrossrefSource:
     def __init__(self):
         self.base_url = "https://api.crossref.org/works"
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
         results = []
         try:
             params = {
@@ -26,6 +27,11 @@ class CrossrefSource:
                 "rows": max_results,
                 "select": "DOI,title,author,abstract,container-title,published,URL"
             }
+            if since:
+                # Created date = when the DOI was first registered
+                params["filter"] = f"from-created-date:{since:%Y-%m-%d}"
+                params["sort"] = "created"
+                params["order"] = "desc"
 
             response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
@@ -98,5 +104,5 @@ class CrossrefSource:
 
 
 # Wrapper function for dispatcher
-def search(query: str, max_results: int = 10) -> List[Dict]:
-    return CrossrefSource().search(query, max_results)
+def search(query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+    return CrossrefSource().search(query, max_results, since)

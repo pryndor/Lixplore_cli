@@ -6,7 +6,8 @@ API Documentation: https://arxiv.org/help/api/user-manual
 No authentication required
 """
 
-from typing import List, Dict
+from typing import List, Dict, Optional
+from datetime import date
 import requests
 import xml.etree.ElementTree as ET
 
@@ -17,9 +18,9 @@ class ArxivSource:
     """
 
     def __init__(self):
-        self.base_url = "http://export.arxiv.org/api/query"
+        self.base_url = "https://export.arxiv.org/api/query"
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict]:
+    def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
         results = []
         try:
             params = {
@@ -27,6 +28,13 @@ class ArxivSource:
                 "start": 0,
                 "max_results": max_results
             }
+            if since:
+                params["search_query"] = (
+                    f"({self._and_terms(query)}) AND "
+                    f"submittedDate:[{since:%Y%m%d}0000 TO {date.today():%Y%m%d}2359]"
+                )
+                params["sortBy"] = "submittedDate"
+                params["sortOrder"] = "descending"
 
             response = requests.get(self.base_url, params=params, timeout=10)
             response.raise_for_status()
@@ -52,6 +60,13 @@ class ArxivSource:
             print(f"[arXiv Error] {e}")
 
         return results
+
+    @staticmethod
+    def _and_terms(query: str) -> str:
+        """arXiv ORs bare words; AND them unless the user wrote their own syntax."""
+        if ":" in query or any(op in query.split() for op in ("AND", "OR", "ANDNOT")):
+            return query
+        return " AND ".join(f"all:{word}" for word in query.split())
 
     def parse_article(self, entry, ns: Dict) -> Dict:
         # Title
@@ -104,5 +119,5 @@ class ArxivSource:
 
 
 # Wrapper function for dispatcher
-def search(query: str, max_results: int = 10) -> List[Dict]:
-    return ArxivSource().search(query, max_results)
+def search(query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+    return ArxivSource().search(query, max_results, since)

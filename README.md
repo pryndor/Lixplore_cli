@@ -205,6 +205,18 @@ lixplore --custom-api springer -q "quantum physics" -m 20
 
 ---
 
+## 📬 Paper Alerts by Email & Telegram
+
+Get new papers for your searches delivered on a schedule, run free by GitHub Actions. No server, no file edits:
+
+1. **Fork** this repo and enable workflows in the **Actions** tab.
+2. In **Settings → Secrets and variables → Actions**, add the variable `LIXPLORE_QUERIES` (one search per line), plus either `EMAIL_SENDER` + `EMAIL_PASSWORD` or `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` as secrets.
+3. Run **Actions → Lixplore Alerts → Run workflow → test**.
+
+Each digest lists only papers new since the last one, with a CSV/BibTeX attachment. Full guide: [docs/guide/alerts.md](docs/guide/alerts.md).
+
+---
+
 ## 🚀 Quick Start
 
 ### ⚠️ Prerequisites
