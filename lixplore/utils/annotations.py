@@ -11,6 +11,7 @@ Allows users to:
 - Search and filter annotations
 """
 
+import hashlib
 import json
 import os
 from datetime import datetime
@@ -49,11 +50,13 @@ class AnnotationManager:
         if doi:
             return f"doi:{doi}"
 
+        # hashlib, not hash(): Python salts hash() per process, so those IDs
+        # changed every run and annotations were never found again
         title = article.get('title', '')
         if title:
-            return f"title:{hash(title)}"
+            return "title:" + hashlib.sha1(title.strip().lower().encode('utf-8')).hexdigest()[:16]
 
-        return f"unknown:{hash(str(article))}"
+        return "unknown:" + hashlib.sha1(str(sorted(article.items())).encode('utf-8')).hexdigest()[:16]
 
     def annotate(self, article: Dict, comment: str = None, rating: int = None,
                  tags: List[str] = None, read_status: str = None,
@@ -83,6 +86,8 @@ class AnnotationManager:
                     'year': article.get('year'),
                     'doi': article.get('doi'),
                     'source': article.get('source'),
+                    'journal': article.get('journal'),
+                    'url': article.get('url'),
                 },
                 'comments': [],
                 'tags': [],
@@ -129,6 +134,13 @@ class AnnotationManager:
 
         self._save_annotations()
         return article_id
+
+    def set_tags(self, article: Dict, tags: List[str]) -> None:
+        """Replace an article's tags (annotate() only adds to them)."""
+        article_id = self.annotate(article)
+        self.annotations[article_id]['tags'] = sorted(set(t for t in tags if t))
+        self.annotations[article_id]['updated_at'] = datetime.now().isoformat()
+        self._save_annotations()
 
     def get_annotation(self, article_id: str) -> Optional[Dict]:
         """Get annotation for an article."""
