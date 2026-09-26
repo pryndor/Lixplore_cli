@@ -11,7 +11,6 @@ with open('README.md', encoding='utf-8') as f:
 core_requirements = [
     'biopython>=1.79',
     'requests>=2.25.0',
-    'litstudy>=1.0.0',
     'openpyxl>=3.0.0',
 ]
 
@@ -24,6 +23,9 @@ extras_requirements = {
 setup(
     name='lixplore-cli',
     version='1.0.1',
+    data_files=[
+        ('share/man/man1', ['docs/lixplore.1']),
+    ],
     description='Academic Literature Search & Export CLI Tool - Search PubMed, arXiv, Crossref, DOAJ, EuropePMC with Boolean operators, smart selection, and 8 export formats',
     long_description=long_description,
     long_description_content_type='text/markdown',
