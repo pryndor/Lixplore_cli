@@ -186,7 +186,7 @@ For more information, visit: https://github.com/yourusername/lixplore
     )
     display_group.add_argument(
         "-i", "--interactive", action="store_true",
-        help="Launch simple interactive TUI mode for searching and browsing (can be used standalone: lixplore -i)"
+        help="Browse this search's results in the full-screen TUI (standalone 'lixplore -i' opens the TUI)"
     )
     display_group.add_argument(
         "-N", "--number", type=int, nargs="+", default=[], metavar="N",
@@ -350,7 +350,7 @@ For more information, visit: https://github.com/yourusername/lixplore
 
     mode_group.add_argument(
         "--tui", action="store_true",
-        help="Launch enhanced TUI (Text User Interface) mode - the primary interactive interface. Includes search, annotation, statistics, and export in a beautiful visual interface. This is the DEFAULT when no query is provided."
+        help="Open the full-screen TUI: search with live preview, rate and annotate papers, browse your library, run alerts and export. Mouse and keyboard; press ? inside for keys. Needs: pip install \"lixplore-cli[tui]\"."
     )
     mode_group.add_argument(
         "--shell", action="store_true",
@@ -968,9 +968,8 @@ def run_main(args):
                               args.sources]))
 
     if args.interactive and not has_search_params:
-        # Launch simple interactive TUI standalone
-        from lixplore.utils.interactive_tui import launch_interactive_mode
-        launch_interactive_mode([])
+        from lixplore.tui import launch
+        launch()
         return
 
     if getattr(args, 'check_tui', False):
@@ -988,8 +987,8 @@ def run_main(args):
         sys.exit(alerts_main([args.alerts]))
 
     if args.tui:
-        from lixplore.utils.enhanced_tui import launch_enhanced_tui
-        launch_enhanced_tui()
+        from lixplore.tui import launch
+        launch()
         return
 
     # Deprecated modes (kept for backwards compatibility)
@@ -1572,8 +1571,8 @@ def run_main(args):
 
         #  Launch interactive mode if requested
         if args.interactive:
-            from lixplore.utils.interactive_tui import launch_interactive_mode
-            launch_interactive_mode(results)
+            from lixplore.tui import launch
+            launch(results, query=args.query or "")
             return  # Interactive mode handles everything
 
         #  Review articles in separate terminal if requested

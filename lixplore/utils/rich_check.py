@@ -158,6 +158,24 @@ def print_diagnostics():
             print("  # or just:")
             print("  pip install rich")
 
+    # Textual powers the full-screen TUI (lixplore --tui); without it the Rich TUI is used
+    print("\n" + "-" * 60)
+    print("TEXTUAL STATUS (full-screen TUI)")
+    print("-" * 60)
+    try:
+        import textual  # noqa: F401
+        from importlib.metadata import version as _pkg_version
+        print(f"Status: AVAILABLE ({_pkg_version('textual')})")
+        print("lixplore --tui opens the full-screen TUI.")
+    except Exception as e:
+        print(f"Status: NOT AVAILABLE ({e})")
+        if sys.version_info < (3, 9):
+            print("Textual needs Python 3.9+; lixplore --tui uses the basic Rich TUI instead.")
+        elif 'pipx' in sys.executable.lower() or '.local/pipx' in sys.prefix:
+            print("Fix: pipx inject lixplore-cli textual")
+        else:
+            print("Fix: pip install 'lixplore-cli[tui]'")
+
     # Show installed packages in current environment
     print("\n" + "-" * 60)
     print("INSTALLED PACKAGES (relevant)")
@@ -165,7 +183,7 @@ def print_diagnostics():
 
     try:
         from importlib.metadata import version, PackageNotFoundError
-        relevant = ['rich', 'lixplore-cli', 'biopython', 'requests']
+        relevant = ['rich', 'textual', 'lixplore-cli', 'biopython', 'requests']
         for pkg in relevant:
             try:
                 pkg_version = version(pkg)
@@ -176,7 +194,7 @@ def print_diagnostics():
         # Fallback for older Python
         try:
             import pkg_resources
-            relevant = ['rich', 'lixplore-cli', 'biopython', 'requests']
+            relevant = ['rich', 'textual', 'lixplore-cli', 'biopython', 'requests']
             for pkg in relevant:
                 try:
                     pkg_version = pkg_resources.get_distribution(pkg).version

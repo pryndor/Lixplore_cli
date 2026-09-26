@@ -1,193 +1,95 @@
-# Interactive TUI Mode
+# Full-screen TUI
 
-Lixplore includes a full-screen split-pane TUI (Text User Interface) that lets you search, browse, annotate, and export without typing any CLI flags. Navigation is driven entirely by the keyboard — no numbered prompts, no pressing Enter to move between items.
+The TUI is a research cockpit: search several databases at once, read papers in a live preview, rate and annotate them, keep a library, check your alerts and export — all from one screen, with keyboard or mouse.
 
-## Launching the TUI
+## Launching
 
 ```bash
-lixplore --tui
+pip install "lixplore-cli[tui]"          # adds Textual (Python 3.9+)
+
+lixplore --tui                           # open the TUI
+lixplore -P -q "CRISPR" -m 50 -i         # run a CLI search, then browse it in the TUI
 ```
 
-> **Note:** Running `lixplore` with no arguments does **not** launch the TUI — it shows a "no source selected" error. The `--tui` flag is always required.
-
----
+On Python 3.8, or without Textual installed, these commands open the older Rich-based TUI instead. `lixplore --check-tui` reports what is installed and how to fix it.
 
 ## Layout
 
-The TUI uses a **split-pane** design:
-
 ```
-┌─────────────────────┬──────────────────────────────┐
-│  Left panel         │  Right panel                 │
-│  Menu / Article list│  Description / Article detail│
-└─────────────────────┴──────────────────────────────┘
-```
-
-Both panels update live as you move the cursor.
-
----
-
-## Main Menu Navigation
-
-When you launch `--tui` you land on the main menu with six items:
-
-| Item | Action |
-|------|--------|
-| Search Articles | Search PubMed, arXiv, Crossref, EuropePMC |
-| My Annotations | Browse all your saved notes |
-| Statistics | Rating, status, and tag overview |
-| Export | Save annotations to file |
-| Help | Keyboard shortcut guide |
-| Exit | Quit Lixplore |
-
-### Main menu keys
-
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` (arrow keys) | Move highlight up / down |
-| `k` / `j` | Move highlight up / down (vim-style) |
-| `Enter`, `Space`, or `→` | Select highlighted item |
-| `1` – `6` | Jump to and select that item directly |
-| `q` or `Esc` | Quit |
-
-The right panel automatically shows a description of the highlighted item as you navigate.
-
----
-
-## Searching for Articles
-
-Select **Search Articles** from the main menu. You will be prompted (with normal text input) for:
-
-1. **Search query** — e.g. `cancer AND treatment`
-2. **Database** — choose from PubMed, arXiv, Crossref, EuropePMC, or All
-3. **Max results** — number of articles to fetch
-4. **Deduplicate?** — shown only when "All databases" is selected
-
-After the search completes you are offered the **split-pane results browser**.
-
----
-
-## Article Browser
-
-The article browser shows the result list on the left and the currently highlighted article's details on the right.
-
-### Navigation keys
-
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` (arrow keys) | Move cursor up / down through articles |
-| `k` / `j` | Move cursor up / down (vim-style) |
-| `n` | Next page |
-| `p` | Previous page |
-| `g` | Jump to article by number (shows a prompt) |
-
-### Article actions
-
-| Key | Action |
-|-----|--------|
-| `Enter` or `v` | View full article detail (fullscreen) |
-| `a` | Annotate current article (rating, tags, notes) |
-| `s` | Toggle selection of current article |
-| `e` | Export all selected articles (prompted for format) |
-| `f` | Toggle fullscreen for the right panel |
-| `b`, `q`, or `Esc` | Go back / exit browser |
-
-### Selection and export
-
-- Press `s` on any article to mark it (shown with `●`).
-- Press `e` to export your selection — you will be prompted to choose CSV, JSON, BibTeX, RIS, Excel, or EndNote.
-- The selection count is displayed at the top of the left panel.
-
----
-
-## Annotations
-
-Open **My Annotations** from the main menu to browse previously saved annotations. Filter by:
-
-- All annotations
-- High-rated (4–5 ★)
-- Unread articles
-- High priority
-- Keyword search
-
-To add or update an annotation for an article, navigate to it in the article browser and press `a`. You can set:
-
-- **Rating** (1–5 stars)
-- **Tags** (comma-separated, e.g. `cite, review-later`)
-- **Notes / comments**
-- **Priority** (low / medium / high)
-- **Read status** (unread / reading / read)
-
-Annotations are stored locally in `~/.lixplore_annotations.json` and persist across sessions.
-
----
-
-## Statistics
-
-Select **Statistics** from the main menu to see:
-
-- Total annotated articles
-- Rating distribution chart
-- Read-status breakdown
-- Priority breakdown
-- Unique tags and frequency
-- Total comments written
-
----
-
-## Export Annotations
-
-Select **Export** from the main menu to dump all saved annotations to a file. Available formats:
-
-| Format | Use case |
-|--------|----------|
-| Markdown | Human-readable notes |
-| JSON | Machine-readable backup |
-| CSV | Spreadsheet import |
-
----
-
-## Keyboard Reference (Summary)
-
-### Main menu
-
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` | Navigate items |
-| `j` / `k` | Navigate items (vim) |
-| `Enter` / `Space` / `→` | Select |
-| `1`–`6` | Direct select |
-| `q` / `Esc` | Quit |
-
-### Article browser
-
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` | Move cursor |
-| `j` / `k` | Move cursor (vim) |
-| `n` / `p` | Next / previous page |
-| `g` | Jump to # (prompted) |
-| `Enter` / `v` | View article |
-| `a` | Annotate |
-| `s` | Toggle select |
-| `e` | Export selected |
-| `f` | Fullscreen toggle |
-| `b` / `q` / `Esc` | Back |
-
----
-
-## Requirements
-
-The enhanced TUI requires the **Rich** library (≥ 13):
-
-```bash
-pip install "rich>=13"
+┌ ◆ Lixplore  [ search box ]   ● PubMed ● EuropePMC ● arXiv ○ Crossref ○ DOAJ │ ● Dedupe  20 [Search] ┐
+├──────────────┬──────────────────────────────────────────────┬─────────────────────────────────────────┤
+│ Search    ^F │ results table                                │ preview of the highlighted paper        │
+│ Library   ^L │                                              │ title, authors, journal, links,         │
+│ Alerts    ^N │                                              │ your rating / tags / notes, abstract    │
+│ Stats     ^T │                                              │                                         │
+│ RECENT       │ status: 36 results · 2 selected · sorted by… │                                         │
+├──────────────┴──────────────────────────────────────────────┴─────────────────────────────────────────┤
+│ footer: the keys available right now                                                                  │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-To diagnose Rich installation issues:
+- **Top bar**: type a query and press Enter. Click a database chip (or focus it and press Space) to switch it on or off. The number is the maximum results per database.
+- **Sidebar**: switch views (or `Ctrl+F` / `Ctrl+L` / `Ctrl+N` / `Ctrl+T`), or pick a recent search to run it again. `Esc` always takes you back.
+- **Preview**: follows the cursor. It is hidden on narrow terminals (under 130 columns); press Enter to read a paper full-screen instead.
 
-```bash
-lixplore --check-tui
+The footer always shows the keys that work in the current place.
+
+## Searching
+
+Queries go to each database as written, so boolean syntax works:
+
+```
+(semaglutide OR tirzepatide) AND obesity NOT diabetes
+"graph neural network" AND drug
 ```
 
-If Rich is unavailable, Lixplore falls back to a minimal text menu.
+Results appear as each database answers. With **Dedupe** on, the same paper found in several databases is merged at the end. If a database fails to answer, a notification says which one.
+
+## Working with results
+
+| Key | Action |
+|---|---|
+| `↑` `↓`, mouse | Move; the preview updates |
+| `Enter` | Read the paper full-screen (`Esc` to return) |
+| `o` | Open the paper in your browser |
+| `1`–`5` | Rate instantly |
+| `a` | Annotate: rating, read status, priority, tags and a new note on one form (`Ctrl+S` saves) |
+| `Space` | Select / unselect, then move down |
+| `A` / `x` | Select all shown / clear selection |
+| `e` | Export the selected, shown or all results (CSV, Excel, BibTeX, RIS, EndNote, JSON, XML) |
+| `f` | Filter the table as you type (`Enter` keeps it, `Esc` leaves) |
+| `s` | Sort: relevance → newest → oldest → title → source |
+| `/` | Start a new search |
+
+Rated papers show their stars in the first column; selected papers show `●`.
+
+## Library (Ctrl+L)
+
+Every paper you have rated, tagged or annotated, newest change first. Filter by *★ 4 and up*, *Unread*, *Reading*, *High priority* or *With notes*, or type to search titles, tags and notes. Rating, annotating, reading and opening work the same as in results.
+
+Annotations are stored in `~/.lixplore_annotations.json` and are shared with the CLI annotation flags.
+
+## Alerts (Ctrl+N)
+
+Lists the searches from the `.env` in the folder you started Lixplore in (create one with `lixplore --alerts init`). Press Enter on an alert to see papers added in the last 7 days for it. See [Paper Alerts](alerts.md) for scheduled delivery by email, Telegram and more.
+
+## Stats (Ctrl+T)
+
+Charts for the current search (papers per database and per year) and for your library (ratings, read status, tags).
+
+## Everywhere
+
+| Key | Action |
+|---|---|
+| `Esc` | **Back** from anywhere: closes a pop-up, clears the filter, leaves a text box, or returns to the previous view |
+| `Ctrl+F` `Ctrl+L` `Ctrl+N` `Ctrl+T` | Search · Library · Alerts · Stats |
+| `F1`–`F4` | Same, if your terminal doesn't use these keys itself (xfce4-terminal opens its own help on `F1`) |
+| `Ctrl+P` | Command palette, including theme switching (your choice is remembered) |
+| `?` | Help |
+| `q` | Quit |
+
+## Troubleshooting
+
+- **Colours look wrong or boxes appear**: use a terminal with true colour and a font with box-drawing characters (most modern terminals). On a raw Linux console (`TERM=linux`), use the CLI instead.
+- **`lixplore --tui` opens the old menu**: Textual is missing or Python is older than 3.9. Run `lixplore --check-tui`.
+- **Mouse doesn't work inside tmux**: enable it with `set -g mouse on`.

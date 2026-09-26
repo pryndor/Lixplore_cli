@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **New full-screen TUI** (`lixplore --tui`, and `-i` after a search), built on Textual
+  - Research-cockpit layout: search bar with database chips, sidebar, results table and live preview
+  - Results stream in per database; failed databases are reported
+  - Instant rating with `1`–`5`, one-screen annotation form, full-screen reader, open in browser
+  - Library view of annotated papers with filters and search; Alerts view; Stats charts
+  - Filter-as-you-type, sort, multi-select and export in 8 formats
+  - Mouse support, command palette, remembered theme, adapts to narrow terminals
+  - `Esc` goes back from anywhere; views switch with `Ctrl+F/L/N/T` (F1–F4 also work where the terminal allows)
+  - Falls back to the Rich TUI on Python 3.8 or without Textual
+- `--check-tui` also reports Textual status
+
+### Changed
+- The `tui` / `all` extras now install Textual (Python 3.9+)
+
+### Fixed
+- Annotations on papers without a DOI were lost between sessions: their IDs used Python's
+  per-process `hash()`. They now use a stable hash (older entries for such papers can't be matched)
+
 ## [1.1.0] - 2026-09-26
 
 ### Added

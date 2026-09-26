@@ -16,8 +16,9 @@ core_requirements = [
 
 # Optional dependencies for enhanced features
 extras_requirements = {
-    'tui': ['rich>=13.0.0'],  # Enhanced interactive TUI mode
-    'all': ['rich>=13.0.0'],  # Install all optional features
+    # Full-screen TUI; Textual needs Python 3.9+, older Pythons get the Rich TUI
+    'tui': ['rich>=13.0.0', "textual>=4.0.0; python_version >= '3.9'"],
+    'all': ['rich>=13.0.0', "textual>=4.0.0; python_version >= '3.9'"],
 }
 
 setup(

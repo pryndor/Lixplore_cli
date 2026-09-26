@@ -59,9 +59,11 @@ dependencies = [
 [project.optional-dependencies]
 tui = [
     "rich>=13.0.0",
+    "textual>=4.0.0; python_version >= '3.9'",
 ]
 all = [
     "rich>=13.0.0",
+    "textual>=4.0.0; python_version >= '3.9'",
 ]
 dev = [
     "pytest>=6.0",
@@ -82,7 +84,7 @@ lixplore = "lixplore.cli:main"
 lixplore-alerts = "lixplore.alerts.runner:main"
 
 [tool.setuptools]
-packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts"]
+packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts", "lixplore.tui"]
 
 [tool.setuptools.package-data]
 lixplore = ["py.typed"]

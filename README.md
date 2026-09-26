@@ -62,27 +62,37 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 
 ## 🎯 Two Ways to Use Lixplore
 
-> **📢 IMPORTANT:** TUI mode is currently under active development. While functional, some advanced features are still being refined. **All 95 command-line flags are fully compatible and production-ready in CLI mode.** Future updates will focus on bringing TUI mode to feature parity with CLI mode.
+### 1️⃣ Full-screen TUI - Research Cockpit
 
-### 1️⃣ Interactive TUI Mode - Visual Interface ⚠️ (Under Development)
-
-**Perfect for exploration, learning, and complex workflows**
+**Perfect for exploring, reading and curating papers**
 
 ```bash
-# Launch interactive TUI
+pip install "lixplore-cli[tui]"   # adds Textual (Python 3.9+)
 lixplore --tui
-
-# Navigate with arrow keys, search visually, annotate results, view stats
 ```
 
-**Features (Currently Available):**
-- ✅ Visual search interface with source selection
-- ✅ Browse and select articles interactively
-- ✅ Annotation management with ratings and tags
-- ✅ Statistics dashboard with visualizations
-- ✅ Export functionality with format selection
-- ✅ Beautiful terminal UI with keyboard shortcuts
-- ⚠️ **Note:** Some advanced CLI features are being integrated into TUI mode
+```
+┌ ◆ Lixplore  (semaglutide OR tirzepatide) AND obesity   ● PubMed ● EuropePMC ○ arXiv  [Search] ┐
+├──────────────┬──────────────────────────────────────────────┬─────────────────────────────────┤
+│ Search    ^F │     Title                    Author  Year Src│ GLP-1 Receptor Agonists in      │
+│ Library   ^L │ 4★  GLP-1 Receptor Agonists  Yuan Y  2026 PM │ Heart Failure: A Systematic …   │
+│ Alerts    ^N │ ●   An RNA thermogenic ther… Thorne  2026 PM │ Yuan Y, Chen C, Li X +2         │
+│ Stats     ^T │     Patient characteristics… Tewksb… 2026 EP │ Drugs · 2026 · PubMed           │
+│              │                                              │ ── Your notes ──────────        │
+│ RECENT       │                                              │ ★★★★☆  ○ unread  ▲ medium       │
+│ semaglutide… │ 36 results · 1 selected · sorted by newest   │ ── Abstract ────────────        │
+├──────────────┴──────────────────────────────────────────────┴─────────────────────────────────┤
+│ ⏎ Read  o Browser  a Annotate  space Select  e Export  f Filter  1-5 Rate  esc Back  ? Help   │
+└───────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- ✅ Results stream in per database, with a live preview of the highlighted paper
+- ✅ Rate with `1`–`5`, annotate (status, priority, tags, notes) on one form
+- ✅ Library of everything you've annotated, filterable and searchable
+- ✅ Alerts view: see what's new for your saved alert searches
+- ✅ Export selected / shown / all results in 8 formats
+- ✅ Mouse support, command palette (`Ctrl+P`), themes, works on Linux, macOS and Windows
+- ℹ️ Enrichment, citation styles and PDF download are CLI flags for now
 
 ### 2️⃣ Command Line Mode - Direct Commands ✅ (Fully Production-Ready)
 
@@ -172,12 +182,8 @@ Comprehensive analytics with beautiful ASCII visualizations:
 lixplore -P -q "AI" -m 100 --stat
 ```
 
-### 🎨 Interactive TUI Mode
-Browse results with a rich interactive terminal interface:
-- Navigate pages with keyboard
-- Select articles visually
-- Export selected items
-- View detailed information
+### 🎨 Full-screen TUI
+Open any CLI search in the TUI to read, rate, select and export:
 
 ```bash
 lixplore -P -q "machine learning" -m 50 -i
@@ -290,13 +296,13 @@ cd Lixplore_cli
 pip install -e .
 ```
 
-### Optional: Enhanced TUI Mode
+### Optional: Full-screen TUI
 
-For the rich interactive TUI with colors and formatting:
+For `lixplore --tui` (Textual, Python 3.9+; older Pythons get a simpler Rich TUI):
 
 ```bash
 # With pipx (inject into existing install)
-pipx inject lixplore-cli rich
+pipx inject lixplore-cli rich textual
 
 # With pip
 pip install "lixplore-cli[tui]"
