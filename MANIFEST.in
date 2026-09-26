@@ -6,6 +6,7 @@ include CHANGELOG.md
 
 # Include documentation files
 recursive-include docs *.md *.1
+include lixplore/alerts/env.example
 
 # Exclude unnecessary files
 global-exclude __pycache__

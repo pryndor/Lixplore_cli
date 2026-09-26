@@ -6,6 +6,8 @@ digest by email and/or Telegram.
     lixplore-alerts dry-run     fetch and print the digest, send nothing
     lixplore-alerts test        send a short test message to every channel
     lixplore-alerts check       validate configuration only
+    lixplore-alerts init        create a .env settings template here
+    lixplore-alerts schedule    print the cron / Task Scheduler line for this folder
 """
 
 import argparse
@@ -17,7 +19,7 @@ from datetime import date, timedelta
 from typing import Dict, List
 
 from . import notify, render
-from .config import AlertConfig, ConfigError, load_config, load_dotenv
+from .config import DAY_NAMES, AlertConfig, ConfigError, load_config, load_dotenv, parse_days
 from .state import SeenState
 
 REPORT_DIR = "reports"
@@ -163,18 +165,72 @@ def cmd_test(cfg: AlertConfig) -> int:
     return 1 if errors else 0
 
 
+def cmd_init(path: str, force: bool) -> int:
+    if os.path.exists(path) and not force:
+        print(f"{path} already exists; not overwriting. Use `lixplore-alerts init --force` to replace it.")
+        return 1
+    template = os.path.join(os.path.dirname(os.path.abspath(__file__)), "env.example")
+    with open(template, encoding="utf-8") as src, open(path, "w", encoding="utf-8") as dst:
+        dst.write(src.read())
+    print(f"Created {os.path.abspath(path)}")
+    print("Next: add your searches and one channel's settings, then run:")
+    print("  lixplore --alerts check     # validate")
+    print("  lixplore --alerts test      # test message")
+    print("  lixplore --alerts schedule  # how to run it automatically")
+    return 0
+
+
+def cmd_schedule(hour: int) -> int:
+    """Print (not install) the scheduler entry for running alerts from this folder."""
+    try:
+        days = parse_days(os.environ.get("LIXPLORE_SEND_DAYS", "") or "daily")
+    except ConfigError as e:
+        print(f"Configuration error: {e}")
+        return 2
+    folder = os.getcwd()
+    python = sys.executable
+    every_day = len(days) == 7
+
+    print(f"Run alerts from {folder} at {hour:02d}:00 local time on "
+          f"{'every day' if every_day else ', '.join(DAY_NAMES[d] for d in days)}.")
+    print("(Days come from LIXPLORE_SEND_DAYS; change the hour with --hour.)\n")
+
+    if os.name == "nt":
+        schedule = "/SC DAILY" if every_day else "/SC WEEKLY /D " + ",".join(DAY_NAMES[d].upper() for d in days)
+        action = f'cmd /c cd /d \\"{folder}\\" && \\"{python}\\" -m lixplore.alerts run >> alerts.log 2>&1'
+        print("Windows: run this once in Command Prompt:\n")
+        print(f'  schtasks /Create /TN "Lixplore Alerts" /TR "{action}" {schedule} /ST {hour:02d}:00')
+        print("\nRemove later with:  schtasks /Delete /TN \"Lixplore Alerts\"")
+    else:
+        # cron counts Sunday as 0
+        cron_days = "*" if every_day else ",".join(str((d + 1) % 7) for d in days)
+        print("Linux / macOS: run `crontab -e` and add this line:\n")
+        print(f'  0 {hour} * * {cron_days} cd "{folder}" && "{python}" -m lixplore.alerts run >> alerts.log 2>&1')
+        print("\nThe computer must be on at that time. For delivery without your computer,")
+        print("fork the repository and use GitHub Actions instead (see the alerts guide).")
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="lixplore-alerts",
         description="Send new-paper digests by email, Telegram, Discord, Slack and more. Configured through environment variables.",
     )
-    parser.add_argument("mode", nargs="?", default="run", choices=["run", "dry-run", "test", "check"])
+    parser.add_argument("mode", nargs="?", default="run",
+                        choices=["run", "dry-run", "test", "check", "init", "schedule"])
     parser.add_argument("--queries", help="Override LIXPLORE_QUERIES for this run")
     parser.add_argument("--lookback-days", type=int, help="Override the search window")
     parser.add_argument("--env-file", default=".env", help="Load variables from this file (default: .env)")
+    parser.add_argument("--force", action="store_true", help="init: overwrite an existing .env")
+    parser.add_argument("--hour", type=int, default=8, choices=range(24), metavar="0-23",
+                        help="schedule: local hour to run (default: 8)")
     args = parser.parse_args(argv)
 
+    if args.mode == "init":
+        return cmd_init(args.env_file, args.force)
     load_dotenv(args.env_file)
+    if args.mode == "schedule":
+        return cmd_schedule(args.hour)
     try:
         cfg = load_config(args.queries)
     except ConfigError as e:

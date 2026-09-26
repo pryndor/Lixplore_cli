@@ -86,3 +86,4 @@ packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts"]
 
 [tool.setuptools.package-data]
 lixplore = ["py.typed"]
+"lixplore.alerts" = ["env.example"]

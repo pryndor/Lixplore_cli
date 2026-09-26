@@ -366,10 +366,11 @@ For more information, visit: https://github.com/yourusername/lixplore
     )
     mode_group.add_argument(
         "--alerts", nargs="?", const="run", metavar="MODE",
-        choices=["run", "dry-run", "test", "check"],
-        help="New-paper alerts by email/Telegram, configured via env vars or a .env file. "
-             "MODE: run (default), dry-run, test, check. Same as the 'lixplore-alerts' command. "
-             "Example: lixplore --alerts dry-run"
+        choices=["run", "dry-run", "test", "check", "init", "schedule"],
+        help="New-paper alerts by email, Telegram, Discord, Slack and more, configured via env vars "
+             "or a .env file. MODE: init (create .env), check, test, dry-run, run (default), "
+             "schedule (print cron/Task Scheduler line). Same as the 'lixplore-alerts' command. "
+             "Example: lixplore --alerts init"
     )
     mode_group.add_argument(
         "--install-man", action="store_true",

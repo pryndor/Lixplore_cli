@@ -212,6 +212,8 @@ Get new papers for your searches delivered on a schedule, run free by GitHub Act
 
 Each digest lists only papers new since the last one, with a CSV/BibTeX attachment. Full guide: [docs/guide/alerts.md](docs/guide/alerts.md).
 
+Prefer your own computer? `pip install -U lixplore-cli`, then `lixplore --alerts init` creates the settings file and `lixplore --alerts schedule` prints the cron / Task Scheduler line.
+
 ---
 
 ## 🚀 Quick Start

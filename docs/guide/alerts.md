@@ -158,25 +158,31 @@ Papers already sent are remembered on a small `lixplore-state` branch that the w
 !!! note "Crossref matching is loose"
     Crossref ranks by word overlap and ignores `AND`/`OR`, so filtering it to only new records can surface weak matches. It is not in the default sources for that reason.
 
-## Running locally or on your own server
+## Running on your own computer (pip install)
 
-The same settings work outside GitHub. Put them in a `.env` file (see `.env.example`) and run:
+Alerts also work without GitHub. Use the same settings in a `.env` file:
 
 ```bash
-pip install lixplore-cli
-lixplore-alerts check      # validate settings
-lixplore-alerts dry-run    # preview, send nothing
-lixplore-alerts test       # test message to each channel
-lixplore-alerts run        # fetch, send, remember
+pip install -U lixplore-cli        # 1.1.0 or later
+mkdir ~/lixplore-alerts && cd ~/lixplore-alerts
+lixplore --alerts init             # creates a commented .env template here
+# edit .env: add LIXPLORE_QUERIES and one channel's settings
+lixplore --alerts check            # validate settings
+lixplore --alerts test             # test message to each channel
+lixplore --alerts dry-run          # preview the digest, send nothing
+lixplore --alerts run              # fetch, send, remember
 ```
 
-`lixplore --alerts [run|dry-run|test|check]` does the same from the main command. Normal searches (`lixplore -P -q ...`) are unchanged; alerts are an extra feature you only use if you want them.
+To run it automatically, `lixplore --alerts schedule` prints the exact line for your system, with the right folder and Python path filled in:
 
-Schedule it with cron, for example every weekday at 08:00:
+- **Linux / macOS:** a `crontab -e` line
+- **Windows:** a `schtasks` command for Task Scheduler
 
-```
-0 8 * * 1-5  cd ~/lixplore-alerts && lixplore-alerts run
-```
+It uses `LIXPLORE_SEND_DAYS` from your `.env`, runs at 08:00 local time by default, and accepts `--hour 7` to change that. It only prints the command; nothing is installed for you.
+
+Local runs keep their sent-paper history in `.lixplore-state/` in that folder, so each digest still has only new papers. The computer must be on at the scheduled time; if that's a problem, use a GitHub fork instead.
+
+`lixplore-alerts <mode>` is the same as `lixplore --alerts <mode>`. Normal searches (`lixplore -P -q ...`) are unchanged; alerts are an extra feature you only use if you want them.
 
 ## Troubleshooting
 
