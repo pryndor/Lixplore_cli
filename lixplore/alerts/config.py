@@ -18,6 +18,29 @@ DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 SOURCE_CODES = {"P": "pubmed", "E": "europepmc", "X": "arxiv", "C": "crossref", "J": "doaj"}
 
 
+# Every delivery-related variable the channels in notify.py read
+CHANNEL_VARS = (
+    "EMAIL_SENDER", "EMAIL_PASSWORD", "EMAIL_RECEIVERS", "EMAIL_SENDER_NAME", "SMTP_SERVER", "SMTP_PORT",
+    "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "TELEGRAM_MESSAGE_THREAD_ID",
+    "DISCORD_WEBHOOK_URL", "DISCORD_BOT_TOKEN", "DISCORD_MAIN_CHANNEL_ID",
+    "SLACK_WEBHOOK_URL", "SLACK_BOT_TOKEN", "SLACK_CHANNEL_ID",
+    "TEAMS_WEBHOOK_URL",
+    "GOOGLE_CHAT_WEBHOOK_URL",
+    "MATRIX_HOMESERVER", "MATRIX_ACCESS_TOKEN", "MATRIX_ROOM_ID",
+    "WECHAT_WEBHOOK_URL", "WECHAT_MSG_TYPE",
+    "FEISHU_WEBHOOK_URL", "FEISHU_WEBHOOK_SECRET", "FEISHU_WEBHOOK_KEYWORD",
+    "DINGTALK_WEBHOOK_URL", "DINGTALK_SECRET",
+    "NTFY_URL", "NTFY_TOKEN",
+    "GOTIFY_URL", "GOTIFY_TOKEN",
+    "PUSHOVER_USER_KEY", "PUSHOVER_API_TOKEN",
+    "PUSHPLUS_TOKEN", "PUSHPLUS_TOPIC",
+    "SERVERCHAN3_SENDKEY",
+    "ASTRBOT_URL", "ASTRBOT_TOKEN",
+    "CUSTOM_WEBHOOK_URLS", "CUSTOM_WEBHOOK_BEARER_TOKEN", "CUSTOM_WEBHOOK_BODY_TEMPLATE",
+    "WEBHOOK_VERIFY_SSL",
+)
+
+
 class ConfigError(ValueError):
     pass
 
@@ -38,16 +61,8 @@ class AlertConfig:
     send_when_empty: bool = False
     attach_format: str = "csv"
     state_file: str = ".lixplore-state/seen.json"
-    email: Dict[str, str] = field(default_factory=dict)
-    telegram: Dict[str, str] = field(default_factory=dict)
-
-    @property
-    def email_enabled(self) -> bool:
-        return bool(self.email.get("sender") and self.email.get("password") and self.email.get("receivers"))
-
-    @property
-    def telegram_enabled(self) -> bool:
-        return bool(self.telegram.get("token") and self.telegram.get("chat_ids"))
+    # Raw delivery settings (EMAIL_*, TELEGRAM_*, DISCORD_*, ...); see notify.CHANNELS
+    channel_env: Dict[str, str] = field(default_factory=dict)
 
 
 def load_dotenv(path: str = ".env") -> None:
@@ -218,17 +233,5 @@ def load_config(queries_override: Optional[str] = None) -> AlertConfig:
         send_when_empty=_bool("LIXPLORE_SEND_WHEN_EMPTY", False),
         attach_format=attach,
         state_file=_env("LIXPLORE_STATE_FILE", ".lixplore-state/seen.json"),
-        email={
-            "sender": _env("EMAIL_SENDER"),
-            "password": _env("EMAIL_PASSWORD"),
-            "receivers": _env("EMAIL_RECEIVERS") or _env("EMAIL_SENDER"),
-            "sender_name": _env("EMAIL_SENDER_NAME", "Lixplore Alerts"),
-            "smtp_server": _env("SMTP_SERVER"),
-            "smtp_port": _env("SMTP_PORT"),
-        },
-        telegram={
-            "token": _env("TELEGRAM_BOT_TOKEN"),
-            "chat_ids": _env("TELEGRAM_CHAT_ID"),
-            "thread_id": _env("TELEGRAM_MESSAGE_THREAD_ID"),
-        },
+        channel_env={name: _env(name) for name in CHANNEL_VARS if _env(name)},
     )

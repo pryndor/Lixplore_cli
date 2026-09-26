@@ -14,8 +14,22 @@ SOURCE_LABELS = {
 # (alert name, query, new articles, per-source counts)
 AlertResult = Tuple[str, str, List[Dict], Dict[str, int]]
 
-TELEGRAM_LIMIT = 4000  # API hard limit is 4096
-
+# Inline formatting per chat style: (escape, bold, italic, link)
+_STYLES = {
+    # Telegram and Matrix HTML
+    "html": (html.escape, "<b>{}</b>".format, "<i>{}</i>".format,
+             lambda t, u: f'<a href="{html.escape(u)}">{t}</a>'),
+    # CommonMark: Teams, ntfy, custom webhooks
+    "markdown": (lambda s: s.replace("[", "(").replace("]", ")").replace("*", "\\*"),
+                 "**{}**".format, "_{}_".format, lambda t, u: f"[{t}]({u})"),
+    # Discord: angle brackets stop every link unfurling into a preview
+    "discord": (lambda s: s.replace("[", "(").replace("]", ")").replace("*", "\\*"),
+                "**{}**".format, "*{}*".format, lambda t, u: f"[{t}](<{u}>)"),
+    # Slack mrkdwn, also used by Google Chat
+    "slack": (lambda s: s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"),
+              "*{}*".format, "_{}_".format, lambda t, u: f"<{u}|{t}>"),
+    "plain": (str, str, str, lambda t, u: f"{t}\n    {u}"),
+}
 
 def _authors(article: Dict, limit: int = 3) -> str:
     authors = article.get("authors") or []
@@ -44,38 +58,64 @@ def subject(results: List[AlertResult]) -> str:
     return f"Lixplore: {total} new paper{'s' if total != 1 else ''} ({date.today():%d %b %Y})"
 
 
-def telegram_messages(results: List[AlertResult], failures: List[str]) -> List[str]:
-    """HTML-formatted messages, each under Telegram's size limit."""
-    blocks = [f"<b>📚 {html.escape(subject(results))}</b>"]
+def messages(results: List[AlertResult], failures: List[str], style: str, limit: int) -> List[str]:
+    """Chat-formatted digest split into messages of at most `limit` characters."""
+    esc, bold, italic, link = _STYLES[style]
+    blocks = [bold(esc("📚 " + subject(results)))]
     for name, _query, articles, counts in results:
-        head = f"\n<b>🔎 {html.escape(name)}</b> — {len(articles)} new"
+        head = "\n" + bold(esc(f"🔎 {name}")) + esc(f" — {len(articles)} new")
         if counts:
-            head += f" <i>({html.escape(_counts(counts))})</i>"
+            head += " " + italic(esc(f"({_counts(counts)})"))
         blocks.append(head)
         for i, a in enumerate(articles, 1):
-            title = html.escape(a.get("title") or "Untitled")
-            link = _link(a)
-            line = f'{i}. <a href="{html.escape(link)}">{title}</a>' if link else f"{i}. {title}"
+            title = esc(a.get("title") or "Untitled")
+            url = _link(a)
+            line = f"{i}. " + (link(title, url) if url else title)
             meta = " · ".join(x for x in (_authors(a), a.get("journal") or "", str(a.get("year") or "")) if x)
             if meta:
-                line += f"\n    <i>{html.escape(meta)}</i>"
+                line += "\n    " + italic(esc(meta))
             blocks.append(line)
     if failures:
-        blocks.append("\n⚠️ " + html.escape("Failed: " + "; ".join(failures)))
+        blocks.append("\n" + esc("⚠️ Failed: " + "; ".join(failures)))
+    return chunk(blocks, limit)
 
-    messages, current = [], ""
+
+def _size(s: str) -> int:
+    # Bytes, not characters: several chat APIs (WeCom, DingTalk, Feishu) cap
+    # payloads in UTF-8 bytes, and bytes >= characters keeps the rest safe too
+    return len(s.encode("utf-8"))
+
+
+def _truncate(s: str, limit: int) -> str:
+    while _size(s) > limit - 3:
+        s = s[: max(1, len(s) - max(1, (_size(s) - limit) // 3 + 1))]
+    return s + "…"
+
+
+def chunk(blocks: List[str], limit: int) -> List[str]:
+    out, current = [], ""
     for block in blocks:
-        if len(block) > TELEGRAM_LIMIT:
-            block = block[:TELEGRAM_LIMIT - 1] + "…"
-        if current and len(current) + len(block) + 1 > TELEGRAM_LIMIT:
-            messages.append(current)
+        if _size(block) > limit:
+            block = _truncate(block, limit)
+        if current and _size(current) + _size(block) + 1 > limit:
+            out.append(current)
             current = block
         else:
             current = f"{current}\n{block}" if current else block
     if current:
-        messages.append(current)
-    return messages
+        out.append(current)
+    return out
 
+
+def short_summary(results: List[AlertResult], limit: int) -> str:
+    """Counts plus the first titles, for push services with tiny message limits."""
+    lines = []
+    for name, _query, articles, _counts_ in results:
+        lines.append(f"{name}: {len(articles)} new")
+        for a in articles[:3]:
+            lines.append(f"• {a.get('title') or 'Untitled'}")
+    text = "\n".join(lines)
+    return text if _size(text) <= limit else _truncate(text, limit)
 
 def email_html(results: List[AlertResult], failures: List[str]) -> str:
     parts = [

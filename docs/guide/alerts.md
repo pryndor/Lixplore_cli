@@ -1,6 +1,6 @@
-# Paper Alerts (Email & Telegram)
+# Paper Alerts (Email, Telegram, Discord, Slack & more)
 
-Get new papers matching your searches delivered by email or Telegram on a schedule, run for free by GitHub Actions. You don't need a server, and you don't edit any files: everything is set in your fork's **Settings**.
+Get new papers matching your searches delivered by email, Telegram, Discord, Slack, Teams and 12 other channels on a schedule, run for free by GitHub Actions. You don't need a server, and you don't edit any files: everything is set in your fork's **Settings**.
 
 Each digest lists only papers that are new since the last one, grouped by search, with title, authors, journal and a link. A CSV (or BibTeX/RIS) of the same papers is attached, ready for Zotero or Mendeley.
 
@@ -37,7 +37,7 @@ Sources: `pubmed`, `europepmc`, `arxiv`, `crossref`, `doaj`, or the CLI letters 
 
 ### 3. Add at least one delivery channel
 
-Add these under **Settings → Secrets and variables → Actions → Secrets**.
+Add these under **Settings → Secrets and variables → Actions → Secrets**. Configure as many channels as you like; every configured one receives the digest. Variable names match the daily_stock_analysis project, so the same secrets work in both.
 
 #### Email
 
@@ -58,6 +58,38 @@ For Gmail, create an app password at [myaccount.google.com/apppasswords](https:/
 | `TELEGRAM_MESSAGE_THREAD_ID` | Optional. A topic ID in a forum-style group |
 
 To find your chat ID, send any message to your new bot, then open `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy `"chat":{"id": ...}`. For a group, add the bot to the group first; group IDs start with `-`.
+
+#### Other channels
+
+| Channel | Secrets | Notes |
+|---|---|---|
+| Discord | `DISCORD_WEBHOOK_URL` | Channel → Edit → Integrations → Webhooks. Or bot mode: `DISCORD_BOT_TOKEN` + `DISCORD_MAIN_CHANNEL_ID` |
+| Slack | `SLACK_WEBHOOK_URL` | Incoming Webhooks app. Or bot mode: `SLACK_BOT_TOKEN` + `SLACK_CHANNEL_ID`. The webhook form also works for Mattermost and Rocket.Chat |
+| Microsoft Teams | `TEAMS_WEBHOOK_URL` | Channel → Workflows → "Post to a channel when a webhook request is received" |
+| Google Chat | `GOOGLE_CHAT_WEBHOOK_URL` | Space → Apps & integrations → Webhooks |
+| Matrix / Element | `MATRIX_HOMESERVER`, `MATRIX_ACCESS_TOKEN`, `MATRIX_ROOM_ID` | e.g. `https://matrix.org`, a bot account's token, `!abc:matrix.org` |
+| WeCom (WeChat Work) | `WECHAT_WEBHOOK_URL` | Group robot URL. Variable `WECHAT_MSG_TYPE=text` if markdown doesn't render |
+| Feishu / Lark | `FEISHU_WEBHOOK_URL` | Custom bot. Optional `FEISHU_WEBHOOK_SECRET` (signature check) and `FEISHU_WEBHOOK_KEYWORD` (keyword check) |
+| DingTalk | `DINGTALK_WEBHOOK_URL` | Robot URL. Optional `DINGTALK_SECRET` for signed requests |
+| ntfy | `NTFY_URL` | Full topic URL, e.g. `https://ntfy.sh/my-papers-x7k2`. Optional `NTFY_TOKEN` |
+| Gotify | `GOTIFY_URL`, `GOTIFY_TOKEN` | Your server URL and an application token |
+| Pushover | `PUSHOVER_USER_KEY`, `PUSHOVER_API_TOKEN` | Sends a short summary (Pushover caps messages at 1024 characters) |
+| PushPlus | `PUSHPLUS_TOKEN` | Optional `PUSHPLUS_TOPIC` for group push |
+| ServerChan3 | `SERVERCHAN3_SENDKEY` | |
+| AstrBot | `ASTRBOT_URL` | Optional `ASTRBOT_TOKEN` signs requests |
+| Custom webhook | `CUSTOM_WEBHOOK_URLS` | Comma-separated. See below |
+
+Set `WEBHOOK_VERIFY_SSL=false` only for a self-hosted ntfy, Gotify, AstrBot or custom endpoint with a self-signed certificate.
+
+#### Custom webhook: WhatsApp, SMS and anything else
+
+`CUSTOM_WEBHOOK_URLS` receives a JSON POST with `subject`, `total`, `text`, `markdown`, and `alerts` (each with its `articles`). Point it at n8n, Zapier, Make or IFTTT to forward digests to WhatsApp, SMS, Notion, a spreadsheet or anything those tools support. Add `CUSTOM_WEBHOOK_BEARER_TOKEN` if the endpoint needs auth.
+
+To send a different body shape, set `CUSTOM_WEBHOOK_BODY_TEMPLATE` (a Variable). It can use `$title`, `$title_json`, `$content` and `$content_json`. For example, for Bark:
+
+```
+{"title": $title_json, "body": $content_json}
+```
 
 ### 4. Test it
 
@@ -133,5 +165,6 @@ Schedule it with cron, for example every weekday at 08:00:
 | `LIXPLORE_QUERIES is not set` | Add the variable. The name is case-sensitive |
 | Email `Authentication failed` | Use an app password, not your account password |
 | Telegram `chat not found` | Message the bot first, or add it to the group, then recheck the chat ID |
+| One channel fails | The others still send. The run shows a warning naming the failed channel |
 | No message arrived | Nothing new is not sent unless `LIXPLORE_SEND_WHEN_EMPTY=true`. The run page summary shows what was found |
 | Want to resend everything | Delete the `lixplore-state` branch in your fork |

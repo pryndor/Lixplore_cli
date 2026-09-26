@@ -40,8 +40,9 @@ def print_summary(cfg: AlertConfig) -> None:
     print(f"Window:        {since} -> {date.today()} ({cfg.lookback_days} days)")
     print(f"Max results:   {cfg.max_results} per query per source")
     print(f"Attachment:    {cfg.attach_format}")
-    print(f"Email:         {_mark(cfg.email_enabled)}")
-    print(f"Telegram:      {_mark(cfg.telegram_enabled)}")
+    print("Channels:")
+    for name, on in notify.status(cfg.channel_env):
+        print(f"  {'✅' if on else '⚪'} {name}")
     print(f"PubMed key:    {_mark(bool(os.environ.get('PUBMED_API_KEY')))} (optional)")
     print("=" * 60)
 
@@ -105,27 +106,6 @@ def write_reports(results, failures, all_new, attach_format: str):
     return export_results(all_new, attach_format, path)
 
 
-def deliver(cfg: AlertConfig, subject: str, html_body: str, text_body: str,
-            tg_messages: List[str], attachment=None) -> Dict[str, str]:
-    """Send to every configured channel. Returns {channel: error} for failures."""
-    errors: Dict[str, str] = {}
-    if cfg.email_enabled:
-        try:
-            notify.send_email(cfg.email, subject, html_body, text_body, attachment)
-            print("Email: sent")
-        except Exception as e:
-            errors["email"] = str(e)
-            print(f"Email: FAILED - {e}")
-    if cfg.telegram_enabled:
-        try:
-            notify.send_telegram(cfg.telegram, tg_messages, attachment)
-            print("Telegram: sent")
-        except Exception as e:
-            errors["telegram"] = str(e)
-            print(f"Telegram: FAILED - {e}")
-    return errors
-
-
 def cmd_run(cfg: AlertConfig, dry_run: bool) -> int:
     state = SeenState(cfg.state_file)
     if state.is_first_run:
@@ -141,8 +121,9 @@ def cmd_run(cfg: AlertConfig, dry_run: bool) -> int:
         print("Dry run: nothing sent, history not updated.")
         return 0
 
-    if not (cfg.email_enabled or cfg.telegram_enabled):
-        print("\nWARNING: no delivery channel configured. Add EMAIL_* or TELEGRAM_* secrets.")
+    channels = notify.configured(cfg.channel_env)
+    if not channels:
+        print("\nWARNING: no delivery channel configured. Add e.g. EMAIL_* or TELEGRAM_* secrets.")
         print("The digest is in the workflow run summary and the 'reports' artifact.")
         return 0
 
@@ -150,14 +131,8 @@ def cmd_run(cfg: AlertConfig, dry_run: bool) -> int:
         print("Nothing new; skipping notifications (set LIXPLORE_SEND_WHEN_EMPTY=true to always send).")
         return 0
 
-    errors = deliver(
-        cfg, render.subject(results),
-        render.email_html(results, failures), render.plain_text(results, failures),
-        render.telegram_messages(results, failures), attachment,
-    )
-
-    configured = int(cfg.email_enabled) + int(cfg.telegram_enabled)
-    if len(errors) == configured:
+    errors = notify.deliver(cfg.channel_env, notify.Digest(results, failures, attachment))
+    if len(errors) == len(channels):
         print("All channels failed; history not updated so the next run retries.")
         return 1
 
@@ -172,21 +147,19 @@ def cmd_run(cfg: AlertConfig, dry_run: bool) -> int:
 
 
 def cmd_test(cfg: AlertConfig) -> int:
-    if not (cfg.email_enabled or cfg.telegram_enabled):
-        print("No delivery channel configured. Add EMAIL_* or TELEGRAM_* secrets.")
+    if not notify.configured(cfg.channel_env):
+        print("No delivery channel configured. Add e.g. EMAIL_* or TELEGRAM_* secrets.")
         return 1
     queries = "\n".join(f"• {a.name} [{', '.join(a.sources)}]" for a in cfg.alerts)
     text = f"✅ Lixplore Alerts is set up.\n\nWatching {len(cfg.alerts)} search(es):\n{queries}"
-    html_body = "<p>" + render.html.escape(text).replace("\n", "<br>") + "</p>"
-    errors = deliver(cfg, "Lixplore Alerts: test message", html_body, text,
-                     [render.html.escape(text)])
+    errors = notify.deliver(cfg.channel_env, notify.Digest([], test_text=text))
     return 1 if errors else 0
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         prog="lixplore-alerts",
-        description="Send new-paper digests by email and Telegram. Configured through environment variables.",
+        description="Send new-paper digests by email, Telegram, Discord, Slack and more. Configured through environment variables.",
     )
     parser.add_argument("mode", nargs="?", default="run", choices=["run", "dry-run", "test", "check"])
     parser.add_argument("--queries", help="Override LIXPLORE_QUERIES for this run")

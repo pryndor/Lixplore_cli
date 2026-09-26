@@ -1,6 +1,6 @@
 name: Lixplore Alerts
 
-# New-paper digests by email and Telegram.
+# New-paper digests by email, Telegram, Discord, Slack, Teams and more.
 # Configure everything under Settings -> Secrets and variables -> Actions.
 # No file in this repository needs editing. Setup guide: docs/guide/alerts.md
 
@@ -98,6 +98,10 @@ jobs:
           LIXPLORE_SEND_WHEN_EMPTY: ${{ vars.LIXPLORE_SEND_WHEN_EMPTY || secrets.LIXPLORE_SEND_WHEN_EMPTY }}
           LIXPLORE_ATTACH_FORMAT: ${{ vars.LIXPLORE_ATTACH_FORMAT || secrets.LIXPLORE_ATTACH_FORMAT }}
 
+          # ==========================================
+          # Delivery channels: configure any number; every configured one is sent to.
+          # Names match daily_stock_analysis. Guide: docs/guide/alerts.md
+          # ==========================================
           # Email
           EMAIL_SENDER: ${{ vars.EMAIL_SENDER || secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
@@ -105,11 +109,54 @@ jobs:
           EMAIL_SENDER_NAME: ${{ vars.EMAIL_SENDER_NAME || secrets.EMAIL_SENDER_NAME }}
           SMTP_SERVER: ${{ vars.SMTP_SERVER || secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ vars.SMTP_PORT || secrets.SMTP_PORT }}
-
           # Telegram
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_MESSAGE_THREAD_ID: ${{ secrets.TELEGRAM_MESSAGE_THREAD_ID }}
+          # Discord (webhook, or bot token + channel)
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_MAIN_CHANNEL_ID: ${{ secrets.DISCORD_MAIN_CHANNEL_ID }}
+          # Slack (webhook, or bot token + channel); webhook also fits Mattermost / Rocket.Chat
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          # Microsoft Teams (Workflows webhook)
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          # Google Chat
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          # Matrix / Element
+          MATRIX_HOMESERVER: ${{ vars.MATRIX_HOMESERVER || secrets.MATRIX_HOMESERVER }}
+          MATRIX_ACCESS_TOKEN: ${{ secrets.MATRIX_ACCESS_TOKEN }}
+          MATRIX_ROOM_ID: ${{ vars.MATRIX_ROOM_ID || secrets.MATRIX_ROOM_ID }}
+          # WeCom (WeChat Work) group robot
+          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          WECHAT_MSG_TYPE: ${{ vars.WECHAT_MSG_TYPE || secrets.WECHAT_MSG_TYPE }}
+          # Feishu / Lark custom bot
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+          FEISHU_WEBHOOK_KEYWORD: ${{ vars.FEISHU_WEBHOOK_KEYWORD || secrets.FEISHU_WEBHOOK_KEYWORD }}
+          # DingTalk robot
+          DINGTALK_WEBHOOK_URL: ${{ secrets.DINGTALK_WEBHOOK_URL }}
+          DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
+          # Push notifications
+          NTFY_URL: ${{ secrets.NTFY_URL }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          GOTIFY_URL: ${{ secrets.GOTIFY_URL }}
+          GOTIFY_TOKEN: ${{ secrets.GOTIFY_TOKEN }}
+          PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+          PUSHOVER_API_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          PUSHPLUS_TOPIC: ${{ vars.PUSHPLUS_TOPIC || secrets.PUSHPLUS_TOPIC }}
+          SERVERCHAN3_SENDKEY: ${{ secrets.SERVERCHAN3_SENDKEY }}
+          # AstrBot
+          ASTRBOT_URL: ${{ secrets.ASTRBOT_URL }}
+          ASTRBOT_TOKEN: ${{ secrets.ASTRBOT_TOKEN }}
+          # Custom webhook (n8n, Zapier, Make, IFTTT, Bark, your own service)
+          CUSTOM_WEBHOOK_URLS: ${{ secrets.CUSTOM_WEBHOOK_URLS }}
+          CUSTOM_WEBHOOK_BEARER_TOKEN: ${{ secrets.CUSTOM_WEBHOOK_BEARER_TOKEN }}
+          CUSTOM_WEBHOOK_BODY_TEMPLATE: ${{ vars.CUSTOM_WEBHOOK_BODY_TEMPLATE || secrets.CUSTOM_WEBHOOK_BODY_TEMPLATE }}
+          WEBHOOK_VERIFY_SSL: ${{ vars.WEBHOOK_VERIFY_SSL || secrets.WEBHOOK_VERIFY_SSL || 'true' }}
 
           # PubMed (optional: only raises NCBI's rate limit)
           PUBMED_EMAIL: ${{ secrets.PUBMED_EMAIL }}
