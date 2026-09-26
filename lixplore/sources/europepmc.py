@@ -8,6 +8,10 @@ No authentication required
 
 from typing import List, Dict, Optional
 from datetime import date
+
+# Total matches the API reported for the last date-bounded search (alerts use
+# it to say how many papers were published, beyond the ones fetched)
+last_total: Optional[int] = None
 import requests
 
 
@@ -20,6 +24,8 @@ class EuropePMCSource:
         self.base_url = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
     def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+        global last_total
+        last_total = None
         results = []
         try:
             params = {
@@ -37,6 +43,8 @@ class EuropePMCSource:
 
             data = response.json()
             items = data.get("resultList", {}).get("result", [])
+            if since:
+                last_total = data.get("hitCount")
 
             for item in items:
                 article_data = self.parse_article(item)

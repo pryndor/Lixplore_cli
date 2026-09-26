@@ -4,6 +4,27 @@ Get new papers matching your searches delivered by email, Telegram, Discord, Sla
 
 Each digest lists only papers that are new since the last one, grouped by search, with title, authors, journal and a link. A CSV (or BibTeX/RIS) of the same papers is attached, ready for Zotero or Mendeley.
 
+## What you receive
+
+For each search: how many new papers were published, broken down by source, with the titles listed under each source.
+
+```
+📚 Lixplore: 5 new papers (26 Sep 2026)
+
+🔎 GLP-1 — 5 new (PubMed 3, EuropePMC 2)
+▸ PubMed: 3 new
+1. GLP-1 Receptor Agonists in Heart Failure: A Systematic Review…
+    Yuan Y, Chen C, Li X et al. · Drugs · 2026
+2. …
+▸ EuropePMC: 2 new
+1. Patient characteristics and early experiences with anti-obesity medications…
+▸ arXiv: 0 new
+```
+
+Every title links to the paper. Email adds a CSV (or BibTeX/RIS) attachment of the same papers.
+
+Each source returns at most `LIXPLORE_MAX_RESULTS` papers per search (default 20). If a database found more in the search window, the digest says so, e.g. `PubMed: 20 new (+39 more matches not listed)`. Raise `LIXPLORE_MAX_RESULTS` to list them all. Some of those extra matches may be papers sent in an earlier digest, because the window overlaps the previous run by two days.
+
 ## Setup (about 5 minutes)
 
 ### 1. Fork the repository
@@ -120,7 +141,7 @@ Everything is optional except `LIXPLORE_QUERIES` and one delivery channel.
 |---|---|---|---|
 | `LIXPLORE_QUERIES` | Variable or Secret | — | Searches, as above |
 | `LIXPLORE_SOURCES` | Variable | `pubmed,europepmc,arxiv` | Sources for lines that don't list their own |
-| `LIXPLORE_MAX_RESULTS` | Variable | `20` | Newest papers fetched per search per source |
+| `LIXPLORE_MAX_RESULTS` | Variable | `20` | Newest papers listed per search per source; beyond this the digest shows a "+N more" count |
 | `LIXPLORE_LOOKBACK_DAYS` | Variable | `auto` | Search window. `auto` = longest gap between send days + 2 |
 | `LIXPLORE_DEDUPE` | Variable | `true` | Merge the same paper found in several sources |
 | `LIXPLORE_SEND_WHEN_EMPTY` | Variable | `false` | Send a "0 new papers" digest too |

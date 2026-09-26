@@ -8,6 +8,10 @@ No authentication required
 
 from typing import List, Dict, Optional
 from datetime import date
+
+# Total matches the API reported for the last date-bounded search (alerts use
+# it to say how many papers were published, beyond the ones fetched)
+last_total: Optional[int] = None
 import requests
 import xml.etree.ElementTree as ET
 
@@ -21,6 +25,8 @@ class ArxivSource:
         self.base_url = "https://export.arxiv.org/api/query"
 
     def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+        global last_total
+        last_total = None
         results = []
         try:
             params = {
@@ -49,6 +55,9 @@ class ArxivSource:
             }
 
             entries = root.findall('atom:entry', ns)
+            if since:
+                total = root.find('{http://a9.com/-/spec/opensearch/1.1/}totalResults')
+                last_total = int(total.text) if total is not None and total.text else None
 
             for entry in entries:
                 article_data = self.parse_article(entry, ns)

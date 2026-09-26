@@ -8,6 +8,10 @@ No authentication required
 
 from typing import List, Dict, Optional
 from datetime import date
+
+# Total matches the API reported for the last date-bounded search (alerts use
+# it to say how many papers were published, beyond the ones fetched)
+last_total: Optional[int] = None
 import requests
 
 
@@ -20,6 +24,8 @@ class CrossrefSource:
         self.base_url = "https://api.crossref.org/works"
 
     def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+        global last_total
+        last_total = None
         results = []
         try:
             params = {
@@ -38,6 +44,8 @@ class CrossrefSource:
 
             data = response.json()
             items = data.get("message", {}).get("items", [])
+            if since:
+                last_total = data.get("message", {}).get("total-results")
 
             for item in items:
                 article_data = self.parse_article(item)

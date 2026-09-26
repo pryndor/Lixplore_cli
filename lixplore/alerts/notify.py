@@ -371,13 +371,16 @@ def send_custom_webhook(env: Dict[str, str], digest: Digest) -> None:
     else:
         body = json.dumps({
             "subject": digest.subject,
-            "total": sum(len(r[2]) for r in digest.results),
+            "total": sum(r.total for r in digest.results),
             "text": digest.text(),
             "markdown": content,
             "alerts": [
-                {"name": name, "query": query, "count": len(articles), "by_source": counts,
-                 "articles": articles}
-                for name, query, articles, counts in digest.results
+                {"name": r.name, "query": r.query, "count": r.total,
+                 "sources": {
+                     source: {"new": len(items), "not_shown": r.not_shown.get(source, 0), "articles": items}
+                     for source, items in r.by_source.items()
+                 }}
+                for r in digest.results
             ],
             "failures": digest.failures,
             "test": bool(digest.test_text),

@@ -8,6 +8,10 @@ No authentication required
 
 from typing import List, Dict, Optional
 from datetime import date
+
+# Total matches the API reported for the last date-bounded search (alerts use
+# it to say how many papers were published, beyond the ones fetched)
+last_total: Optional[int] = None
 import requests
 
 
@@ -20,6 +24,8 @@ class DOAJSource:
         self.base_url = "https://doaj.org/api/v3/search/articles"
 
     def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+        global last_total
+        last_total = None
         results = []
         try:
             # DOAJ API v3 - query is part of the URL path
@@ -40,6 +46,7 @@ class DOAJSource:
 
             for item in items:
                 if since and item.get("created_date", "")[:10] < since.isoformat():
+                    last_total = len(results)  # reached the window's end, so this is exact
                     break
                 article_data = self.parse_article(item)
                 results.append(article_data)

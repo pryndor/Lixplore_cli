@@ -6,6 +6,10 @@ PubMed search source using NCBI Entrez API
 
 from typing import List, Dict, Optional
 from datetime import date
+
+# Total matches the API reported for the last date-bounded search (alerts use
+# it to say how many papers were published, beyond the ones fetched)
+last_total: Optional[int] = None
 from Bio import Entrez
 import os
 import json
@@ -48,6 +52,8 @@ class PubMedSource:
        #     Entrez.api_key = api_key
 
     def search(self, query: str, max_results: int = 10, since: Optional[date] = None) -> List[Dict]:
+        global last_total
+        last_total = None
         results = []
         try:
             # Step 1: Search IDs
@@ -60,6 +66,8 @@ class PubMedSource:
             record = Entrez.read(handle)
             handle.close()
             id_list = record.get("IdList", [])
+            if since:
+                last_total = int(record.get("Count", 0))
 
             # Step 2: Fetch details
             if id_list:

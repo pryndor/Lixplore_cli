@@ -58,11 +58,17 @@ def fetch(cfg: AlertConfig, state: SeenState):
 
     for alert in cfg.alerts:
         found: List[Dict] = []
+        not_shown: Dict[str, int] = {}
         for source in alert.sources:
             try:
                 module = importlib.import_module(f"lixplore.sources.{source}")
                 articles = module.search(alert.query, cfg.max_results, since=since)
-                print(f"[{alert.name}] {source}: {len(articles)} in window")
+                total = getattr(module, "last_total", None)
+                print(f"[{alert.name}] {source}: fetched {len(articles)}"
+                      + (f" of {total} in window" if total is not None else ""))
+                # Only a capped fetch hides anything
+                if total and len(articles) >= cfg.max_results and total > len(articles):
+                    not_shown[source] = total - len(articles)
                 found.extend(articles)
             except Exception as e:  # one bad source must not sink the digest
                 print(f"[{alert.name}] {source} failed: {e}")
@@ -73,13 +79,14 @@ def fetch(cfg: AlertConfig, state: SeenState):
         if cfg.dedupe and len(found) > 1:
             found = dispatcher.deduplicate_advanced(found, strategy="auto", keep_preference="most_complete")
 
-        new = [a for a in found if not state.is_seen(a)]
-        counts: Dict[str, int] = {}
-        for a in new:
-            counts[a.get("source", "")] = counts.get(a.get("source", ""), 0) + 1
-        print(f"[{alert.name}] {len(new)} new after dedupe and history check")
-        results.append((alert.name, alert.query, new, counts))
-        all_new.extend(new)
+        result = render.AlertResult(alert.name, alert.query,
+                                    by_source={s: [] for s in alert.sources}, not_shown=not_shown)
+        for a in found:
+            if not state.is_seen(a):
+                result.by_source.setdefault(a.get("source", ""), []).append(a)
+        print(f"[{alert.name}] {result.total} new after dedupe and history check")
+        results.append(result)
+        all_new.extend(result.articles)
 
     return results, failures, all_new
 
