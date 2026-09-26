@@ -72,9 +72,6 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 # Launch interactive TUI
 lixplore --tui
 
-# Or simply run without arguments
-lixplore
-
 # Navigate with arrow keys, search visually, annotate results, view stats
 ```
 
@@ -223,108 +220,211 @@ Each digest lists only papers new since the last one, with a CSV/BibTeX attachme
 
 Before installing Lixplore, ensure you have:
 
-**1. Python Installed:**
+**Python 3.8 or higher:**
 ```bash
-# Check Python version (requires 3.8 or higher)
-python --version
-# or
 python3 --version
 ```
-
-**2. pip Installed:**
-```bash
-# Check pip version
-pip --version
-# or
-pip3 --version
-```
-
-**3. (Windows Only) Microsoft C++ Build Tools:**
-
-If you're on **Windows** and encounter build errors during installation, you need Microsoft C++ Build Tools:
-
-**Option A: Quick Install (Recommended)**
-- Download and install **Microsoft C++ Build Tools**: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-- Select "Desktop development with C++" during installation
-- Restart your terminal after installation
-
-**Option B: Full Visual Studio**
-- Install Visual Studio Community: https://visualstudio.microsoft.com/downloads/
-- Select "Desktop development with C++" workload
-
-> **Why?** The `gensim` package (a dependency) requires C++ compilation on Windows. This is a one-time setup.
 
 ---
 
 ### Installation
 
+#### Method 1: pipx (Recommended)
+
+**Best for most users.** Installs in an isolated environment, no virtual env needed.
+
 ```bash
-# From PyPI (recommended)
+# Install pipx if you don't have it
+# Arch: sudo pacman -S python-pipx
+# Ubuntu/Debian: sudo apt install pipx
+# Fedora: sudo dnf install pipx
+# macOS: brew install pipx
+
+# Then install lixplore
+pipx install lixplore-cli
+
+# Upgrade
+pipx upgrade lixplore-cli
+```
+
+> **Why pipx?** Modern Linux distros (Arch, Fedora 38+, Ubuntu 23.04+, Debian 12+) block system-wide `pip install` (PEP 668). `pipx` handles this automatically by creating isolated environments per tool while keeping the `lixplore` command available globally.
+
+#### Method 2: pip (in virtual environment)
+
+```bash
+# Create and activate a virtual environment
+python3 -m venv ~/.venvs/lixplore
+source ~/.venvs/lixplore/bin/activate
+
+# Install
 pip install lixplore-cli
 
-# Upgrade to latest version
+# Upgrade
 pip install --upgrade lixplore-cli
+```
 
-# From source
+#### Method 3: Arch Linux (AUR)
+
+```bash
+# Using yay
+yay -S lixplore-cli
+
+# Using paru
+paru -S lixplore-cli
+```
+
+#### Method 4: Homebrew (macOS & Linux)
+
+```bash
+brew tap pryndor/lixplore
+brew install lixplore-cli
+```
+
+#### Method 5: From source
+
+```bash
 git clone https://github.com/pryndor/Lixplore_cli.git
 cd Lixplore_cli
 pip install -e .
 ```
 
-### 🐛 Troubleshooting Installation
+### Optional: Enhanced TUI Mode
 
-#### ❌ Error: "Failed to build gensim" (Windows)
+For the rich interactive TUI with colors and formatting:
 
-**Error Message:**
-```
-Failed to build gensim
-error: Microsoft Visual C++ 14.0 or greater is required
-```
-
-**Solution:**
-1. Install Microsoft C++ Build Tools (see Prerequisites above)
-2. Restart your terminal/PowerShell
-3. Try installing again: `pip install lixplore-cli`
-
-**Alternative Solution (if build tools don't work):**
 ```bash
-# Install pre-built binary wheels first
-pip install --upgrade pip setuptools wheel
-pip install gensim --no-cache-dir
-pip install lixplore-cli
+# With pipx (inject into existing install)
+pipx inject lixplore-cli rich
+
+# With pip
+pip install "lixplore-cli[tui]"
+
+# Arch Linux
+sudo pacman -S python-rich
 ```
+
+### ✅ Verify Installation
+
+```bash
+lixplore --version
+lixplore --help
+```
+
+### 🐛 Troubleshooting
+
+#### ❌ Error: "externally-managed-environment" (Linux)
+
+This means your distro blocks system-wide pip installs. Use **pipx** (Method 1) instead.
 
 #### ❌ Error: "command 'pip' not found"
 
-**Solution:**
 ```bash
-# Try using pip3
+# Use pip3 or python module syntax
 pip3 install lixplore-cli
-
-# Or use Python module syntax
 python -m pip install lixplore-cli
 ```
 
-#### ❌ Error: Permission denied
+#### ❌ Error: Permission denied (Linux/macOS)
 
-**Solution (Linux/Mac):**
 ```bash
-# Install for current user only
+# Use pipx (recommended) or install for current user
+pipx install lixplore-cli
+# or
 pip install --user lixplore-cli
 ```
 
-**Solution (Windows - Run as Administrator):**
-- Right-click Command Prompt → "Run as administrator"
-- Then: `pip install lixplore-cli`
+---
 
-#### ✅ Verify Installation
+### 🖥️ TUI Mode Troubleshooting (Linux)
+
+TUI mode requires the `rich` library (≥ 13.0.0). If it fails to launch, follow these steps:
+
+#### Step 1 — Run the built-in diagnostics
 
 ```bash
-# Check if installed correctly
-lixplore --version
+lixplore --check-tui
+```
 
-# Run quick test
-lixplore --help
+This prints your Python version, Rich status, and exact fix instructions.
+
+#### Step 2 — Install / inject Rich
+
+| Installation method | Fix command |
+|---------------------|-------------|
+| **pipx** (most common) | `pipx inject lixplore-cli rich` |
+| **pip + venv** | `pip install rich` (activate venv first) |
+| **pip install 'lixplore-cli[tui]'** | installs Rich in one step |
+| **Arch Linux** | `sudo pacman -S python-rich` |
+
+> **pipx users — common gotcha:** pipx creates an isolated environment per tool. Installing `rich` with plain `pip` or `pacman` puts it in a *different* Python environment that lixplore cannot see. Always use `pipx inject lixplore-cli rich` so Rich lands inside the same isolated env.
+
+#### Step 3 — Check terminal compatibility
+
+Rich needs a terminal that supports ANSI escape codes and Unicode. Verify yours:
+
+```bash
+# Should print "xterm-256color" or similar (not "dumb")
+echo $TERM
+
+# Quick Unicode/color test
+python3 -c "from rich.console import Console; Console().print('[bold cyan]OK[/bold cyan]')"
+```
+
+Known-working terminals on Linux: **GNOME Terminal, Konsole, Alacritty, Kitty, Tilix, Xfce4-terminal, WezTerm**.
+
+#### Step 4 — SSH / remote sessions
+
+When connecting over SSH the `TERM` variable is sometimes lost, disabling Rich:
+
+```bash
+# On your local machine, connect with terminal forwarding
+ssh -t user@host
+
+# Or force 256-color on the remote side
+export TERM=xterm-256color
+lixplore --tui
+```
+
+#### Step 5 — Headless / container environments
+
+Rich will not render correctly in Docker containers, CI runners, or terminals with `NO_COLOR=1` set. In these environments, unset the variable if it was set unintentionally:
+
+```bash
+unset NO_COLOR
+lixplore --tui
+```
+
+#### Step 6 — tmux / screen sessions
+
+Multiplexers like `tmux` and `screen` sometimes set `TERM=screen`, which limits color support. Inside a tmux session:
+
+```bash
+# Quick fix for current session
+export TERM=xterm-256color
+lixplore --tui
+
+# Permanent fix — add to ~/.tmux.conf
+# set -g default-terminal "screen-256color"
+```
+
+For `screen`, launch it with: `screen -T xterm-256color`
+
+#### Step 7 — Linux virtual console (tty without a desktop)
+
+If you are logged in directly on a raw Linux console (not inside GNOME Terminal, Konsole, etc.) your `TERM` will be `linux`, which does not support 256 colors. Rich's TUI will look broken or fail to render.
+
+**Solution:** Log in via SSH from a color-capable terminal, or start a desktop session and use a terminal emulator listed in Step 3 above. Alternatively, use CLI mode (all features work without a terminal emulator).
+
+#### ✅ If TUI still doesn't work — use CLI mode
+
+All 95 flags work perfectly in CLI mode without any extra dependencies. CLI mode is fully production-ready and is what we recommend for scripting, automation, and SSH sessions:
+
+```bash
+# CLI equivalents for common TUI workflows
+lixplore -P -q "your topic" -m 20          # search PubMed
+lixplore -A -q "your topic" -m 50 -D       # search all + deduplication
+lixplore -P -q "topic" -m 20 -X xlsx       # export to Excel
+lixplore -P -q "topic" -m 20 -i            # interactive results browser (Rich optional)
 ```
 
 ### Basic Usage
@@ -566,22 +666,15 @@ Review feature uses cmd.exe
 
 ## 📦 Installation Methods
 
-### Method 1: PyPI (Recommended)
-```bash
-pip install lixplore-cli
-```
+| Method | Command | Best for |
+|--------|---------|----------|
+| **pipx** (recommended) | `pipx install lixplore-cli` | All Linux/macOS users |
+| **pip + venv** | `pip install lixplore-cli` | Virtual environments |
+| **AUR** | `yay -S lixplore-cli` | Arch Linux users |
+| **Homebrew** | `brew tap pryndor/lixplore && brew install lixplore-cli` | macOS & Homebrew users |
+| **From source** | `pip install -e .` | Development |
 
-### Method 2: From Source
-```bash
-git clone https://github.com/pryndor/Lixplore_cli.git
-cd Lixplore_cli
-pip install -e .
-```
-
-### Method 3: Using pipx (Isolated)
-```bash
-pipx install lixplore-cli
-```
+See [Quick Start](#-quick-start) above for detailed instructions.
 
 ---
 
@@ -595,21 +688,32 @@ pipx install lixplore-cli
 
 - `biopython` - PubMed/NCBI API access
 - `requests` - HTTP requests
-- `litstudy` - Literature study support
 - `openpyxl` - Excel export support
+- `rich` (optional) - Enhanced TUI with colors and formatting
 
-All dependencies are automatically installed.
+All core dependencies are automatically installed. For the enhanced TUI experience, install with `pipx inject lixplore-cli rich` or `pip install "lixplore-cli[tui]"`.
 
 ---
 
 ## 📖 Man Page
 
-After installation, install the man page:
+After installation, install the man page using whichever method suits you:
 
+**Option 1 — built-in command (any install method):**
 ```bash
-sudo cp docs/lixplore.1 /usr/local/share/man/man1/
-sudo mandb -q
+lixplore --install-man
 man lixplore
+```
+
+**Option 2 — from a cloned repo:**
+```bash
+bash docs/install_man_page.sh
+man lixplore
+```
+
+The installer automatically finds the right directory, handles sudo when needed, and refreshes the man database. If `man lixplore` still fails after a user-local install, add this to your shell profile:
+```bash
+export MANPATH=$HOME/.local/share/man:$MANPATH
 ```
 
 ---
@@ -674,6 +778,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+---
+
+## 📰 Reviews
+
+Community write-ups, tutorials, and independent reviews of Lixplore:
+
+- **[Lixplore-cli: The Ultimate Command Line Tool Revolutionizing Academic Research](https://www.scribddownload.online/2026/01/lixplore-cli-ultimate-command-line-tool.html)**
+  A detailed overview of Lixplore's strengths as a Python-based CLI for researchers — covering multi-source search, export formats, scripting potential, and why the command-line approach outperforms graphical alternatives for academic workflows.
 
 ---
 

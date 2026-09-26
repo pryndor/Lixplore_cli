@@ -4,6 +4,10 @@
 > Export results in various formats (CSV, Excel, JSON, BibTeX, RIS, EndNote, XML).
 > More information: <https://github.com/yourusername/lixplore>.
 
+- Launch the interactive TUI (arrow-key navigation, no Enter required to move):
+
+`lixplore --tui`
+
 - Search PubMed for a query:
 
 `lixplore -P -q "{{cancer treatment}}" -m {{10}}`

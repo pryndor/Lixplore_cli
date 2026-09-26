@@ -17,38 +17,53 @@ Lixplore offers three interactive modes for easier usage without memorizing comm
 **Syntax:**
 ```bash
 lixplore --tui
-lixplore  # Default when no arguments provided
 ```
+
+> **Note:** Running `lixplore` with no arguments does **not** launch the TUI — it shows a "no source selected" error. The `--tui` flag is always required.
 
 **Type:** Boolean flag
 
 ### Features
-- Visual search interface
-- Browse and select articles
-- Annotation management
+- Split-pane visual interface (article list + detail preview)
+- Real-time arrow-key navigation — no numbered prompts
+- Search across multiple academic databases
+- Browse and annotate articles
 - Statistics dashboard
-- Export functionality
-- Beautiful terminal UI
+- Export to CSV, JSON, BibTeX, RIS, Excel, and EndNote
 
 ### Examples
 
-**Example 1: Launch TUI**
+**Launch TUI:**
 ```bash
 lixplore --tui
 ```
 
-**Example 2: Default Mode**
-```bash
-lixplore
-# Automatically launches TUI if no query provided
-```
+### Main menu navigation
 
-### Navigation
-- **Arrow keys:** Navigate menus
-- **Enter:** Select option
-- **Space:** Mark/unmark items
-- **q:** Quit
-- **h:** Help
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` (arrow keys) | Move highlight |
+| `k` / `j` | Move highlight (vim-style) |
+| `Enter`, `Space`, or `→` | Select highlighted item |
+| `1`–`6` | Jump to and select item directly |
+| `q` / `Esc` | Quit |
+
+### Article browser navigation
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` (arrow keys) | Move cursor through articles |
+| `k` / `j` | Move cursor (vim-style) |
+| `n` / `p` | Next / previous page |
+| `g` | Jump to article by number (prompted) |
+| `Enter` or `v` | View full article detail |
+| `a` | Annotate current article |
+| `s` | Toggle selection |
+| `e` | Export selected articles |
+| `f` | Toggle fullscreen preview |
+| `b` / `q` / `Esc` | Back |
+
+See [Interactive TUI Mode](../guide/interactive.md) for the full guide.
 
 ### TUI Screens
 1. **Search:** Enter query and select sources

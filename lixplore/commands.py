@@ -361,11 +361,19 @@ For more information, visit: https://github.com/yourusername/lixplore
         help="[Deprecated - use --tui instead] Launch wizard mode."
     )
     mode_group.add_argument(
+        "--check-tui", action="store_true",
+        help="Run TUI diagnostics to check if Rich library is properly installed. Use this if TUI mode is not working."
+    )
+    mode_group.add_argument(
         "--alerts", nargs="?", const="run", metavar="MODE",
         choices=["run", "dry-run", "test", "check"],
         help="New-paper alerts by email/Telegram, configured via env vars or a .env file. "
              "MODE: run (default), dry-run, test, check. Same as the 'lixplore-alerts' command. "
              "Example: lixplore --alerts dry-run"
+    )
+    mode_group.add_argument(
+        "--install-man", action="store_true",
+        help="Install the lixplore man page so 'man lixplore' works. Works for any install method (pip, pipx, clone)."
     )
 
     # ===== ANNOTATIONS =====
@@ -871,6 +879,83 @@ def show_examples():
     print(_examples_text(unicode_ok))
 
 
+def _install_man_page():
+    """Install the lixplore man page to a system or user man directory."""
+    import os
+    import shutil
+    import subprocess
+
+    # Locate the bundled man page relative to this file
+    here = os.path.dirname(os.path.abspath(__file__))
+    man_src = os.path.join(here, '..', 'docs', 'lixplore.1')
+    man_src = os.path.normpath(man_src)
+
+    if not os.path.isfile(man_src):
+        print("Error: man page file not found in the package.")
+        print("If you installed via pip/pipx, try cloning the repo and running:")
+        print("  bash docs/install_man_page.sh")
+        return
+
+    # Candidate directories in preference order
+    candidates = [
+        '/usr/local/share/man/man1',
+        '/usr/share/man/man1',
+        os.path.expanduser('~/.local/share/man/man1'),
+    ]
+
+    # Pick first writable dir, or fall back to user-local (created if needed)
+    man_dir = None
+    needs_sudo = False
+    for d in candidates:
+        if os.path.isdir(d) and os.access(d, os.W_OK):
+            man_dir = d
+            break
+        if os.path.isdir(d):
+            man_dir = d
+            needs_sudo = True
+            break
+
+    if man_dir is None:
+        man_dir = os.path.expanduser('~/.local/share/man/man1')
+        os.makedirs(man_dir, exist_ok=True)
+        print(f"Created directory: {man_dir}")
+
+    dest = os.path.join(man_dir, 'lixplore.1')
+
+    try:
+        if needs_sudo:
+            print(f"Installing to {man_dir} (requires sudo)...")
+            subprocess.run(['sudo', 'cp', man_src, dest], check=True)
+            subprocess.run(['sudo', 'chmod', '644', dest], check=True)
+        else:
+            print(f"Installing to {man_dir}...")
+            shutil.copy2(man_src, dest)
+            os.chmod(dest, 0o644)
+
+        # Refresh man database
+        if shutil.which('mandb'):
+            if needs_sudo:
+                subprocess.run(['sudo', 'mandb', '-q'], check=False)
+            else:
+                subprocess.run(['mandb', '-q'], check=False)
+        elif shutil.which('makewhatis'):
+            subprocess.run(['makewhatis'], check=False)
+
+        print("Man page installed successfully!")
+        print("Run:  man lixplore")
+
+        if man_dir == os.path.expanduser('~/.local/share/man/man1'):
+            print("\nNote: if 'man lixplore' still fails, add this to your shell profile:")
+            print("  export MANPATH=$HOME/.local/share/man:$MANPATH")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error during installation: {e}")
+    except PermissionError:
+        print(f"Permission denied writing to {man_dir}.")
+        print("Try running with sudo, or let the installer use ~/.local/share/man:")
+        print("  lixplore --install-man")
+
+
 def run_main(args):
     """Main handler for CLI options."""
 
@@ -885,6 +970,15 @@ def run_main(args):
         # Launch simple interactive TUI standalone
         from lixplore.utils.interactive_tui import launch_interactive_mode
         launch_interactive_mode([])
+        return
+
+    if getattr(args, 'check_tui', False):
+        from lixplore.utils.rich_check import print_diagnostics
+        print_diagnostics()
+        return
+
+    if getattr(args, 'install_man', False):
+        _install_man_page()
         return
 
     if getattr(args, 'alerts', None):

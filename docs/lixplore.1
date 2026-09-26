@@ -169,7 +169,7 @@ Examples: \fB--enrich\fR (all APIs) | \fB--enrich crossref\fR | \fB--enrich cros
 Display abstracts along with titles in the results
 .TP
 .BR \-i ", " \-\-interactive
-Launch interactive TUI mode for browsing results. Navigate with keyboard commands: next/prev pages, view details, select articles, export. Requires 'rich' library for enhanced display (falls back to simple mode).
+Launch interactive TUI mode for browsing results. Uses real-time arrow-key navigation — no numbered prompts, no pressing Enter to move between items. Requires 'rich' library for enhanced display (falls back to simple mode).
 .br
 Example: \fB-P -q "cancer" -m 50 -i\fR
 .TP
@@ -750,9 +750,67 @@ This is free software; see the source for copying conditions.
 .BR arxiv (1),
 .BR crossref (1)
 
+.SH TUI KEYBOARD CONTROLS
+Launch the full-screen TUI with \fBlixplore --tui\fR.
+Running \fBlixplore\fR with no arguments does \fBnot\fR launch the TUI.
+
+All navigation is real-time (no Enter required to move the cursor).
+
+.SS "Main Menu"
+.TP
+.B "Up / Down arrows"
+Move highlight up / down
+.TP
+.B "k / j"
+Move highlight up / down (vim-style)
+.TP
+.B "Enter, Space, or Right arrow"
+Select highlighted item
+.TP
+.B "1 \[en] 6"
+Jump to and select that item directly
+.TP
+.B "q or Esc"
+Quit
+
+.SS "Article Browser"
+.TP
+.B "Up / Down arrows"
+Move cursor through articles
+.TP
+.B "k / j"
+Move cursor up / down (vim-style)
+.TP
+.B n
+Next page
+.TP
+.B p
+Previous page
+.TP
+.B g
+Jump to article by number (shows a prompt)
+.TP
+.B "Enter or v"
+View article in fullscreen detail
+.TP
+.B a
+Annotate current article (rating, tags, notes, priority, status)
+.TP
+.B s
+Toggle selection of current article
+.TP
+.B e
+Export selected articles (prompted for format)
+.TP
+.B f
+Toggle fullscreen preview panel
+.TP
+.B "b / q / Esc"
+Back / quit browser
+
 .SH NOTES
-When searching multiple sources, using the \fB-D\fR flag is recommended to remove 
-duplicate results. The tool caches results for 7 days to improve performance on 
+When searching multiple sources, using the \fB-D\fR flag is recommended to remove
+duplicate results. The tool caches results for 7 days to improve performance on
 repeated searches.
 
 .B Review Window Controls:

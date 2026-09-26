@@ -11,14 +11,16 @@ import shlex
 import sys
 from typing import List, Dict, Optional
 
-try:
+# Use centralized Rich detection
+from lixplore.utils.rich_check import RICH_AVAILABLE as _RICH_CHECK
+
+RICH_AVAILABLE = _RICH_CHECK
+
+if RICH_AVAILABLE:
     from rich.console import Console
     from rich.table import Table
     from rich.panel import Panel
     from rich import print as rprint
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
 
 
 class LixploreShell(cmd.Cmd):
