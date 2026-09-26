@@ -64,7 +64,8 @@ class ArxivSource:
     @staticmethod
     def _and_terms(query: str) -> str:
         """arXiv ORs bare words; AND them unless the user wrote their own syntax."""
-        if ":" in query or any(op in query.split() for op in ("AND", "OR", "ANDNOT")):
+        if any(c in query for c in ':()"') or any(
+                op in query.split() for op in ("AND", "OR", "NOT", "ANDNOT")):
             return query
         return " AND ".join(f"all:{word}" for word in query.split())
 
