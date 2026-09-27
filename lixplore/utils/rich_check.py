@@ -181,28 +181,14 @@ def print_diagnostics():
     print("INSTALLED PACKAGES (relevant)")
     print("-" * 60)
 
-    try:
-        from importlib.metadata import version, PackageNotFoundError
-        relevant = ['rich', 'textual', 'lixplore-cli', 'biopython', 'requests']
-        for pkg in relevant:
-            try:
-                pkg_version = version(pkg)
-                print(f"  {pkg}: {pkg_version}")
-            except PackageNotFoundError:
-                print(f"  {pkg}: NOT INSTALLED")
-    except ImportError:
-        # Fallback for older Python
+    from importlib.metadata import version, PackageNotFoundError
+    relevant = ['rich', 'textual', 'lixplore-cli', 'biopython', 'requests']
+    for pkg in relevant:
         try:
-            import pkg_resources
-            relevant = ['rich', 'textual', 'lixplore-cli', 'biopython', 'requests']
-            for pkg in relevant:
-                try:
-                    pkg_version = pkg_resources.get_distribution(pkg).version
-                    print(f"  {pkg}: {pkg_version}")
-                except pkg_resources.DistributionNotFound:
-                    print(f"  {pkg}: NOT INSTALLED")
-        except ImportError:
-            print("  (package info not available)")
+            pkg_version = version(pkg)
+            print(f"  {pkg}: {pkg_version}")
+        except PackageNotFoundError:
+            print(f"  {pkg}: NOT INSTALLED")
 
     print("\n" + "=" * 60 + "\n")
 
