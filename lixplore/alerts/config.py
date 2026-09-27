@@ -216,9 +216,11 @@ def default_lookback(send_days: List[int]) -> int:
     return max(gaps) + 2
 
 
-def load_config(queries_override: Optional[str] = None) -> AlertConfig:
+def load_config(queries_override: Optional[str] = None, require_queries: bool = True) -> AlertConfig:
+    """require_queries=False lets check/test work before any search is set up."""
     default_sources = parse_sources(_env("LIXPLORE_SOURCES", "pubmed,europepmc,arxiv"), "LIXPLORE_SOURCES")
-    alerts = parse_queries(queries_override or _env("LIXPLORE_QUERIES"), default_sources)
+    queries = queries_override or _env("LIXPLORE_QUERIES")
+    alerts = parse_queries(queries, default_sources) if queries or require_queries else []
 
     send_days = parse_days(_env("LIXPLORE_SEND_DAYS", "daily"))
     lookback_raw = _env("LIXPLORE_LOOKBACK_DAYS", "auto")

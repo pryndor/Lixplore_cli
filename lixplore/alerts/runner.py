@@ -36,6 +36,8 @@ def print_summary(cfg: AlertConfig) -> None:
     print("Lixplore Alerts")
     print("=" * 60)
     print(f"Alerts ({len(cfg.alerts)}):")
+    if not cfg.alerts:
+        print("  (none yet: set LIXPLORE_QUERIES, one search per line)")
     for a in cfg.alerts:
         label = a.query if a.name == a.query else f"{a.name}: {a.query}"
         print(f"  - {label}  [{', '.join(a.sources)}]")
@@ -159,8 +161,12 @@ def cmd_test(cfg: AlertConfig) -> int:
     if not notify.configured(cfg.channel_env):
         print("No delivery channel configured. Add e.g. EMAIL_* or TELEGRAM_* secrets.")
         return 1
-    queries = "\n".join(f"• {a.name} [{', '.join(a.sources)}]" for a in cfg.alerts)
-    text = f"✅ Lixplore Alerts is set up.\n\nWatching {len(cfg.alerts)} search(es):\n{queries}"
+    if cfg.alerts:
+        queries = "\n".join(f"• {a.name} [{', '.join(a.sources)}]" for a in cfg.alerts)
+        watching = f"Watching {len(cfg.alerts)} search(es):\n{queries}"
+    else:
+        watching = "No searches yet: set LIXPLORE_QUERIES to start receiving papers."
+    text = f"✅ Lixplore Alerts is set up.\n\n{watching}"
     errors = notify.deliver(cfg.channel_env, notify.Digest([], test_text=text))
     return 1 if errors else 0
 
@@ -232,7 +238,7 @@ def main(argv=None) -> int:
     if args.mode == "schedule":
         return cmd_schedule(args.hour)
     try:
-        cfg = load_config(args.queries)
+        cfg = load_config(args.queries, require_queries=args.mode in ("run", "dry-run"))
     except ConfigError as e:
         print(f"Configuration error: {e}")
         return 2

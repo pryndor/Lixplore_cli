@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Alerts `.env`: when a variable appears twice, the later line now wins (as in other `.env` tools).
   Before, a `LIXPLORE_QUERIES` line added below the `init` template's example was silently ignored
+- Alerts `test` and `check` work before any search is set, so channels can be tested first
+  (before, both stopped with "LIXPLORE_QUERIES is empty"). `run` and `dry-run` still require it
 
 ## [1.2.1] - 2026-09-27
 
