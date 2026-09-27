@@ -1,4 +1,3 @@
-#!/usr/bin/env
 # search.py
 
 from .sources.pubmed import PubMedSource
