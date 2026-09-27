@@ -1,3 +1,10 @@
+lixplore-cli (1.2.3-1) unstable; urgency=medium
+
+  * New upstream release: PubMed email and API key can be set in
+    ~/.lixplore/config.json.
+
+ -- Balasubramanian Periannan <balathepharmacist@gmail.com>  Sun, 27 Sep 2026 12:30:00 +0530
+
 lixplore-cli (1.2.2-1) unstable; urgency=medium
 
   * New upstream release: more complete PubMed metadata, retries during

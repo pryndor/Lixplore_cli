@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-09-27
+
 ### Added
 - PubMed email and API key can be set in `~/.lixplore/config.json`, which also works for pip,
   AUR and Homebrew installs (before, only `PUBMED_EMAIL` / `PUBMED_API_KEY` did)
