@@ -8,6 +8,7 @@ Build-Depends:
  pybuild-plugin-pyproject,
  python3-all,
  python3-setuptools,
+ python3-wheel,
 Standards-Version: 4.7.2
 Homepage: https://github.com/pryndor/Lixplore_cli
 Vcs-Browser: https://github.com/pryndor/Lixplore_cli
@@ -21,7 +22,8 @@ Depends:
  ${python3:Depends},
 Recommends:
  python3-rich,
- python3-textual,
+Suggests:
+ python3-textual (>= 4),
 Description: academic literature search and export tool
  Lixplore searches PubMed, arXiv, Crossref, DOAJ and Europe PMC from the
  command line, with Boolean queries, deduplication across sources and
@@ -29,6 +31,6 @@ Description: academic literature search and export tool
  .
  Results can be annotated with ratings, tags and notes, formatted as
  APA/MLA/Chicago/IEEE citations, and exported to CSV, JSON, BibTeX, RIS,
- XLSX, EndNote and XML. A full-screen terminal interface is available
- with "lixplore --tui" when python3-textual is installed, and saved
- searches can be run as alerts with lixplore-alerts.
+ XLSX, EndNote and XML. "lixplore --tui" opens a terminal interface
+ (full-screen with Textual 4 or newer, otherwise a simpler Rich one),
+ and saved searches can be run as alerts with lixplore-alerts.
