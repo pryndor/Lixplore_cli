@@ -1,3 +1,10 @@
+lixplore-cli (1.2.2-1) unstable; urgency=medium
+
+  * New upstream release: more complete PubMed metadata, retries during
+    NCBI outages, alerts .env and test fixes. Requires Python 3.9.
+
+ -- Balasubramanian Periannan <balathepharmacist@gmail.com>  Sun, 27 Sep 2026 12:05:00 +0530
+
 lixplore-cli (1.2.1-1) unstable; urgency=medium
 
   * New upstream release: templates packaged, exports go to ./exports,

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lixplore-cli"
-version = "1.2.1"
+version = "1.2.2"
 description = "Unix-inspired CLI for searching PubMed, arXiv, Crossref, DOAJ and Europe PMC, with deduplication, 8 export formats and scheduled paper alerts"
 readme = "README.md"
 requires-python = ">=3.9"

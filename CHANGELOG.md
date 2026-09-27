@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-09-27
+
 ### Changed
 - Python 3.9 or newer is required (3.8 reached end of life in October 2024; source builds on it
   already failed). CI now tests 3.9 to 3.13
