@@ -3,8 +3,8 @@ class LixploreCli < Formula
 
   desc "Academic Literature Search & Export CLI Tool"
   homepage "https://github.com/pryndor/Lixplore_cli"
-  url "https://github.com/pryndor/Lixplore_cli/archive/refs/tags/v1.2.0.tar.gz"
-  sha256 "b76bf31d218d01c05e2b0db4241be1ea9b46c5b85a50129adafd2cbf885d27a0"
+  url "https://github.com/pryndor/Lixplore_cli/archive/refs/tags/v1.2.1.tar.gz"
+  sha256 "e8a926351f0391471ac07b11f9b5a08dd7db3571ca5d13d2db5113c345040189"
   license "MIT"
 
   depends_on "numpy"
