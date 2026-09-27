@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Journal export templates (`--template`, `--list-templates`) were missing when the package was
   built straight from source, as the AUR and Homebrew packages do
+- Exports were written inside the installed package (`site-packages/exports/`), which fails with a
+  permission error for AUR and Homebrew installs. They now go to `exports/` in the current folder
+- `--install-man` could not find the man page in pip, AUR and Homebrew installs
 
 ## [1.2.0] - 2026-09-27
 
