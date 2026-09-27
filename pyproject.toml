@@ -85,11 +85,12 @@ lixplore = "lixplore.cli:main"
 lixplore-alerts = "lixplore.alerts.runner:main"
 
 [tool.setuptools]
-packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts", "lixplore.tui"]
+packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts", "lixplore.tui", "lixplore.templates"]
 
 [tool.setuptools.package-data]
 lixplore = ["py.typed"]
 "lixplore.alerts" = ["env.example"]
+"lixplore.templates" = ["*.json"]
 
 [tool.setuptools.data-files]
 "share/man/man1" = ["docs/lixplore.1"]
