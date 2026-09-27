@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `lixplore --tui` crashed when an older Textual (below 4, as shipped by Debian and Ubuntu) was
+  installed. It now falls back to the Rich TUI, and `--check-tui` reports the version as too old
+
 ## [1.2.3] - 2026-09-27
 
 ### Added

@@ -162,16 +162,18 @@ def print_diagnostics():
     print("\n" + "-" * 60)
     print("TEXTUAL STATUS (full-screen TUI)")
     print("-" * 60)
-    try:
-        import textual  # noqa: F401
-        from importlib.metadata import version as _pkg_version
-        print(f"Status: AVAILABLE ({_pkg_version('textual')})")
+    from lixplore.tui import textual_available, textual_version
+    found = textual_version()
+    if textual_available():
+        print(f"Status: AVAILABLE ({found})")
         print("lixplore --tui opens the full-screen TUI.")
-    except Exception as e:
-        print(f"Status: NOT AVAILABLE ({e})")
-        if sys.version_info < (3, 9):
-            print("Textual needs Python 3.9+; lixplore --tui uses the basic Rich TUI instead.")
-        elif 'pipx' in sys.executable.lower() or '.local/pipx' in sys.prefix:
+    elif found:
+        print(f"Status: TOO OLD ({found}; needs 4.0 or newer)")
+        print("lixplore --tui uses the basic Rich TUI instead.")
+        print("Fix: pip install --upgrade 'textual>=4'  (in the same environment as lixplore)")
+    else:
+        print("Status: NOT AVAILABLE")
+        if 'pipx' in sys.executable.lower() or '.local/pipx' in sys.prefix:
             print("Fix: pipx inject lixplore-cli textual")
         else:
             print("Fix: pip install 'lixplore-cli[tui]'")
