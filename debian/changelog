@@ -1,3 +1,10 @@
+lixplore-cli (1.2.1-1) unstable; urgency=medium
+
+  * New upstream release: templates packaged, exports go to ./exports,
+    --install-man finds the installed man page.
+
+ -- Balasubramanian Periannan <balathepharmacist@gmail.com>  Sun, 27 Sep 2026 11:35:00 +0530
+
 lixplore-cli (1.2.0-1) unstable; urgency=medium
 
   * Initial release.

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-09-27
+
 ### Fixed
 - Journal export templates (`--template`, `--list-templates`) were missing when the package was
   built straight from source, as the AUR and Homebrew packages do
