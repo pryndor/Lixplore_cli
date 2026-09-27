@@ -21,9 +21,9 @@ except ImportError:
     XLSX_AVAILABLE = False
 
 
-# Default export directory within the project
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DEFAULT_EXPORT_DIR = os.path.join(PROJECT_ROOT, "exports")
+# Default export directory: ./exports in the folder lixplore is run from.
+# (Not next to the package: when installed that is site-packages, often read-only.)
+DEFAULT_EXPORT_DIR = os.path.join(os.getcwd(), "exports")
 
 # Define all export format folders (one folder per format type)
 EXPORT_FOLDERS = {
