@@ -69,6 +69,7 @@ def load_dotenv(path: str = ".env") -> None:
     """Minimal .env loader for local runs; real environment variables win."""
     if not os.path.isfile(path):
         return
+    values: Dict[str, str] = {}  # a key repeated later in the file wins, as in other .env tools
     with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -80,7 +81,9 @@ def load_dotenv(path: str = ".env") -> None:
                 value = value[1:-1].replace("\\n", "\n")  # "a\nb" -> two lines
             else:
                 value = value.strip("'")
-            os.environ.setdefault(key.strip(), value)
+            values[key.strip()] = value
+    for key, value in values.items():
+        os.environ.setdefault(key, value)
 
 
 def _env(name: str, default: str = "") -> str:
