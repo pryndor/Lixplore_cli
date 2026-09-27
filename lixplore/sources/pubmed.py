@@ -17,17 +17,26 @@ import time
 
 # Load configuration
 def _load_config():
-    """Load email from config.json, fallback to environment or default"""
-    config_path = os.path.join(os.path.dirname(__file__), "..", "..", "config.json")
-    try:
-        with open(config_path, 'r') as f:
-            config = json.load(f)
+    """Load email from config.json, fallback to environment or default.
+
+    Looks in config.json of a source checkout first, then in
+    ~/.lixplore/config.json (works for pip, AUR and Homebrew installs):
+        {"pubmed": {"email": "you@example.org", "api_key": "..."}}
+    """
+    config_paths = [
+        os.path.join(os.path.dirname(__file__), "..", "..", "config.json"),
+        os.path.join(os.path.expanduser("~"), ".lixplore", "config.json"),
+    ]
+    for config_path in config_paths:
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
             email = config.get("pubmed", {}).get("email", "")
             api_key = config.get("pubmed", {}).get("api_key", "")
             if email and email != "your_email@example.com":
                 return email, api_key
-    except (FileNotFoundError, json.JSONDecodeError):
-        pass
+        except (OSError, ValueError, AttributeError):
+            pass
 
     # Fallback to environment variable or default
     email = os.environ.get("PUBMED_EMAIL", "user@example.com")

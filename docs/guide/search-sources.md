@@ -26,6 +26,32 @@
 lixplore -P -q "diabetes treatment" -m 20
 ```
 
+### Email and API key (optional)
+
+NCBI asks every tool to send a contact email, and an API key raises the rate
+limit from 3 to 10 requests per second. Get a free key under
+[NCBI account settings](https://www.ncbi.nlm.nih.gov/account/settings/). Set either:
+
+```bash
+# Environment variables (e.g. in ~/.bashrc)
+export PUBMED_EMAIL="you@example.org"
+export PUBMED_API_KEY="your-ncbi-key"
+```
+
+or `~/.lixplore/config.json`:
+
+```json
+{"pubmed": {"email": "you@example.org", "api_key": "your-ncbi-key"}}
+```
+
+The config file wins over the environment variables.
+
+### If PubMed reports "temporarily unavailable"
+
+That message comes from NCBI's own servers (for example "Cannot connect to
+SOLR"). Lixplore retries twice; if NCBI is still down, try again a few
+minutes later. Other sources keep working meanwhile.
+
 ### Advanced Search Techniques
 
 **1. MeSH Terms (Medical Subject Headings)**

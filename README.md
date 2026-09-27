@@ -314,6 +314,14 @@ pip install "lixplore-cli[tui]"
 sudo pacman -S python-textual
 ```
 
+### 🔑 Optional: PubMed email and API key
+
+An NCBI API key raises PubMed's rate limit from 3 to 10 requests per second ([get one free](https://www.ncbi.nlm.nih.gov/account/settings/)). Set `PUBMED_EMAIL` / `PUBMED_API_KEY` in your environment, or create `~/.lixplore/config.json`:
+
+```json
+{"pubmed": {"email": "you@example.org", "api_key": "your-ncbi-key"}}
+```
+
 ### ✅ Verify Installation
 
 ```bash
