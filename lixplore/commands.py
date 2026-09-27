@@ -886,12 +886,20 @@ def _install_man_page():
     import shutil
     import subprocess
 
-    # Locate the bundled man page relative to this file
-    here = os.path.dirname(os.path.abspath(__file__))
-    man_src = os.path.join(here, '..', 'docs', 'lixplore.1')
-    man_src = os.path.normpath(man_src)
+    import sys
 
-    if not os.path.isfile(man_src):
+    # Locate the man page: in a source checkout it is in docs/, in an
+    # installed package it is under <prefix>/share/man/man1
+    here = os.path.dirname(os.path.abspath(__file__))
+    man_src = next(
+        (p for p in (
+            os.path.normpath(os.path.join(here, '..', 'docs', 'lixplore.1')),
+            os.path.join(sys.prefix, 'share', 'man', 'man1', 'lixplore.1'),
+        ) if os.path.isfile(p)),
+        None,
+    )
+
+    if man_src is None:
         print("Error: man page file not found in the package.")
         print("If you installed via pip/pipx, try cloning the repo and running:")
         print("  bash docs/install_man_page.sh")
