@@ -27,7 +27,7 @@ Lixplore works on Linux, macOS, and Windows with Python 3.8 or higher.
 ### How do I install Lixplore?
 
 ```bash
-pip install lixplore
+pip install lixplore-cli
 ```
 
 See the [Installation Guide](../getting-started/installation.md) for details.
@@ -45,7 +45,7 @@ Add this to your `~/.bashrc` or `~/.zshrc` to make it permanent.
 ### How do I upgrade to the latest version?
 
 ```bash
-pip install --upgrade lixplore
+pip install --upgrade lixplore-cli
 ```
 
 ---

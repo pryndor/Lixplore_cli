@@ -489,7 +489,7 @@ git commit -m "Added bibliography for Chapter 2"
 # Dockerfile
 FROM python:3.10-slim
 
-RUN pip install lixplore
+RUN pip install lixplore-cli
 
 WORKDIR /workspace
 

@@ -7,7 +7,7 @@ Get started with Lixplore in 5 minutes!
 ## Installation
 
 ```bash
-pip install lixplore
+pip install lixplore-cli
 ```
 
 Verify installation:

@@ -480,7 +480,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Lixplore
-        run: pip install lixplore
+        run: pip install lixplore-cli
 
       - name: Run literature search
         run: |
@@ -520,7 +520,7 @@ literature_search:
   stage: search
   image: python:3.10
   script:
-    - pip install lixplore
+    - pip install lixplore-cli
     - TODAY=$(date +%Y-%m-%d)
     - YESTERDAY=$(date -d "yesterday" +%Y-%m-%d)
     - lixplore -A -q "$TOPIC" -d "$YESTERDAY" "$TODAY" -m 100 -D -X json -o results.json

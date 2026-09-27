@@ -60,7 +60,7 @@ Access open access literature:
 ### Installation
 
 ```bash
-pip install lixplore
+pip install lixplore-cli
 ```
 
 ### Basic Search
@@ -112,6 +112,6 @@ lixplore -A -q "climate change" -m 200 -D -X json -o data.json
 
 **Ready to Get Started?**
 
-Install now: `pip install lixplore`
+Install now: `pip install lixplore-cli`
 
 View all documentation in the menu above.
