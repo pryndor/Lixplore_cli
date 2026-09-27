@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Before, a `LIXPLORE_QUERIES` line added below the `init` template's example was silently ignored
 - Alerts `test` and `check` work before any search is set, so channels can be tested first
   (before, both stopped with "LIXPLORE_QUERIES is empty"). `run` and `dry-run` still require it
+- PubMed: DOIs were missing for many older papers (the DOI was read only from `ELocationID`,
+  not from the article ID list), which weakened deduplication, enrichment and PDF lookup
+- PubMed: year was empty when the record only has a date range such as "2001 May 1-15"
+- PubMed: when NCBI's search backend is temporarily down, requests are retried and a clear
+  "temporarily unavailable" message is shown instead of the raw server error
 
 ## [1.2.1] - 2026-09-27
 

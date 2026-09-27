@@ -13,6 +13,7 @@ last_total: Optional[int] = None
 from Bio import Entrez
 import os
 import json
+import time
 
 # Load configuration
 def _load_config():
@@ -36,8 +37,34 @@ def _load_config():
 # Configure Entrez
 _email, _api_key = _load_config()
 Entrez.email = _email
+Entrez.tool = "lixplore"
 if _api_key:
     Entrez.api_key = _api_key
+
+# NCBI sometimes answers HTTP 200 with an error inside the XML while its search
+# backend is down ("Search Backend failed ... Cannot connect to SOLR").
+# Biopython retries HTTP 5xx itself but not these, so retry them here.
+_TRANSIENT = ("temporarily unavailable", "search backend failed", "solr", "try again later")
+_RETRY_DELAYS = (3, 8)
+
+
+def _is_transient(error: Exception) -> bool:
+    return any(t in str(error).lower() for t in _TRANSIENT)
+
+
+def _entrez(call, **params):
+    """Run an Entrez call and parse it, retrying NCBI's temporary errors."""
+    for delay in _RETRY_DELAYS + (None,):
+        try:
+            handle = call(**params)
+            try:
+                return Entrez.read(handle)
+            finally:
+                handle.close()
+        except RuntimeError as e:
+            if delay is None or not _is_transient(e):
+                raise
+            time.sleep(delay)
 
 
 class PubMedSource:
@@ -62,25 +89,25 @@ class PubMedSource:
                 # Entrez date = when the record was added to PubMed
                 params.update(datetype="edat", mindate=since.strftime("%Y/%m/%d"),
                               maxdate=date.today().strftime("%Y/%m/%d"), sort="pub_date")
-            handle = Entrez.esearch(**params)
-            record = Entrez.read(handle)
-            handle.close()
+            record = _entrez(Entrez.esearch, **params)
             id_list = record.get("IdList", [])
             if since:
                 last_total = int(record.get("Count", 0))
 
             # Step 2: Fetch details
             if id_list:
-                handle = Entrez.efetch(db="pubmed", id=",".join(id_list), retmode="xml")
-                records = Entrez.read(handle)
-                handle.close()
+                records = _entrez(Entrez.efetch, db="pubmed", id=",".join(id_list), retmode="xml")
 
                 for article in records["PubmedArticle"]:
                     article_data = self.parse_article(article)
                     results.append(article_data)
 
         except Exception as e:
-            print(f"[PubMed Error] {e}")
+            if _is_transient(e):
+                print("[PubMed Error] PubMed (NCBI) is temporarily unavailable; "
+                      f"please try again in a few minutes. NCBI said: {e}")
+            else:
+                print(f"[PubMed Error] {e}")
 
         return results
 
@@ -114,7 +141,8 @@ class PubMedSource:
         # Journal & Year
         journal = article_info.get("Journal", {}).get("Title", "")
         pub_date = article_info.get("Journal", {}).get("JournalIssue", {}).get("PubDate", {})
-        year = pub_date.get("Year", "")
+        # Some records only have a free-text date such as "2001 May 1-15"
+        year = pub_date.get("Year", "") or str(pub_date.get("MedlineDate", ""))[:4]
 
         # DOI
         doi = ""
@@ -122,6 +150,12 @@ class PubMedSource:
             for eid in article_info["ELocationID"]:
                 if eid.attributes.get("EIdType") == "doi":
                     doi = str(eid)
+        if not doi:
+            # Older records carry the DOI only in the PubmedData ID list
+            for aid in article.get("PubmedData", {}).get("ArticleIdList", []):
+                if aid.attributes.get("IdType") == "doi":
+                    doi = str(aid)
+                    break
 
         # PubMed URL
         pmid = medline.get("PMID", "")
