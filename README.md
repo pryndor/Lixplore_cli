@@ -281,9 +281,16 @@ yay -S lixplore-cli
 paru -S lixplore-cli
 ```
 
-#### Method 4: Homebrew (macOS & Linux) — coming soon
+#### Method 4: Homebrew (macOS & Linux)
 
-The Homebrew tap is not published yet. Until it is, macOS users should use pipx (Method 1).
+```bash
+brew install pryndor/lixplore/lixplore-cli
+
+# Upgrade
+brew update && brew upgrade lixplore-cli
+```
+
+Works on Apple Silicon and Intel Macs. Includes the full-screen TUI (`lixplore --tui`).
 
 #### Method 5: From source
 
@@ -676,7 +683,7 @@ Review feature uses cmd.exe
 | **pipx** (recommended) | `pipx install lixplore-cli` | All Linux/macOS users |
 | **pip + venv** | `pip install lixplore-cli` | Virtual environments |
 | **AUR** | `yay -S lixplore-cli` | Arch Linux users |
-| **Homebrew** | Coming soon — use pipx for now | macOS & Homebrew users |
+| **Homebrew** | `brew install pryndor/lixplore/lixplore-cli` | macOS & Homebrew users |
 | **From source** | `pip install -e .` | Development |
 
 See [Quick Start](#-quick-start) above for detailed instructions.

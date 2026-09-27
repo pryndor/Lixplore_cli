@@ -58,6 +58,17 @@ If you're on Windows, you need Microsoft C++ Build Tools to avoid installation e
 
 ## Installation Methods
 
+### macOS: Homebrew
+
+On a Mac (Apple Silicon or Intel), Homebrew installs Lixplore with its own Python and the full-screen TUI:
+
+```bash
+brew install pryndor/lixplore/lixplore-cli
+lixplore --help
+```
+
+Upgrade with `brew update && brew upgrade lixplore-cli`. No other prerequisites are needed.
+
 ### Method 1: Install from PyPI (Recommended)
 
 This is the simplest and recommended method:
