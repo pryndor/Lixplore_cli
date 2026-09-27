@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-27
+
 ### Added
 - **New full-screen TUI** (`lixplore --tui`, and `-i` after a search), built on Textual
   - Research-cockpit layout: search bar with database chips, sidebar, results table and live preview
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Esc` goes back from anywhere; views switch with `Ctrl+F/L/N/T` (F1–F4 also work where the terminal allows)
   - Falls back to the Rich TUI on Python 3.8 or without Textual
 - `--check-tui` also reports Textual status
+- Homebrew tap for macOS and Linux: `brew install pryndor/lixplore/lixplore-cli` (includes the TUI)
 
 ### Changed
 - The `tui` / `all` extras now install Textual (Python 3.9+)
@@ -188,6 +191,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated testing across platforms
 
 ## [Unreleased]
+
+## [1.2.0] - 2026-09-27
 
 ### Planned Features
 - PDF download support

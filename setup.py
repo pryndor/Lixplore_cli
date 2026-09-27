@@ -23,7 +23,7 @@ extras_requirements = {
 
 setup(
     name='lixplore-cli',
-    version='1.1.0',
+    version='1.2.0',
     data_files=[
         ('share/man/man1', ['docs/lixplore.1']),
     ],
