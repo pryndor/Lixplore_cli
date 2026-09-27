@@ -18,7 +18,7 @@ No. Lixplore is purely a search and export tool. It has no machine learning depe
 
 ### What platforms does Lixplore support?
 
-Lixplore works on Linux, macOS, and Windows with Python 3.8 or higher.
+Lixplore works on Linux, macOS, and Windows with Python 3.9 or higher.
 
 ---
 

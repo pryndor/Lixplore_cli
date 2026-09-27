@@ -11,7 +11,7 @@ lixplore --tui                           # open the TUI
 lixplore -P -q "CRISPR" -m 50 -i         # run a CLI search, then browse it in the TUI
 ```
 
-On Python 3.8, or without Textual installed, these commands open the older Rich-based TUI instead. `lixplore --check-tui` reports what is installed and how to fix it.
+Without Textual installed, these commands open the older Rich-based TUI instead. `lixplore --check-tui` reports what is installed and how to fix it.
 
 ## Layout
 

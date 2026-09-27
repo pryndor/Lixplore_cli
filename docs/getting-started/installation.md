@@ -4,7 +4,7 @@
 
 Before installing Lixplore, ensure you have:
 
-### 1. Python (Version 3.8 or Higher)
+### 1. Python (Version 3.9 or Higher)
 
 Check your Python version:
 
@@ -252,7 +252,7 @@ Check your Python version:
 python3 --version
 ```
 
-If it's below 3.8, you need to upgrade Python:
+If it's below 3.9, you need to upgrade Python:
 - **Windows**: Download from [python.org](https://www.python.org/downloads/)
 - **Mac**: `brew install python3`
 - **Linux**: `sudo apt install python3.10` (or newer)

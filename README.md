@@ -2,7 +2,7 @@
 
 > **A Unix-inspired command-line tool for searching scientific literature**, built for terminal users who want speed, automation and minimal interfaces.
 
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://pryndor.github.io/Lixplore_cli/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/pryndor/Lixplore_cli)
@@ -227,7 +227,7 @@ Prefer your own computer? `pip install -U lixplore-cli`, then `lixplore --alerts
 
 Before installing Lixplore, ensure you have:
 
-**Python 3.8 or higher:**
+**Python 3.9 or higher:**
 ```bash
 python3 --version
 ```
@@ -301,7 +301,7 @@ pip install -e .
 
 ### Optional: Full-screen TUI
 
-For `lixplore --tui` (Textual, Python 3.9+; older Pythons get a simpler Rich TUI):
+For `lixplore --tui` (Textual; without it you get a simpler Rich TUI):
 
 ```bash
 # With pipx (inject into existing install)
@@ -348,7 +348,7 @@ pip install --user lixplore-cli
 
 ### 🖥️ TUI Mode Troubleshooting (Linux)
 
-`lixplore --tui` uses [Textual](https://textual.textualize.io/) (≥ 4.0, Python 3.9+). Without Textual it falls back to a simpler TUI built on `rich` (≥ 13.0). If it fails to launch, follow these steps:
+`lixplore --tui` uses [Textual](https://textual.textualize.io/) (≥ 4.0). Without Textual it falls back to a simpler TUI built on `rich` (≥ 13.0). If it fails to launch, follow these steps:
 
 #### Step 1 — Run the built-in diagnostics
 
@@ -691,7 +691,7 @@ See [Quick Start](#-quick-start) above for detailed instructions.
 
 ## 🔍 Requirements
 
-- Python 3.8 or higher (3.9+ for the full-screen TUI)
+- Python 3.9 or higher
 - Internet connection for API access
 - Terminal emulator (for review feature)
 

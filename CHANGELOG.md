@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Python 3.9 or newer is required (3.8 reached end of life in October 2024; source builds on it
+  already failed). CI now tests 3.9 to 3.13
+
 ### Fixed
 - Alerts `.env`: when a variable appears twice, the later line now wins (as in other `.env` tools).
   Before, a `LIXPLORE_QUERIES` line added below the `init` template's example was silently ignored
