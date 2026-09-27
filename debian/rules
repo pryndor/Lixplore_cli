@@ -1,0 +1,7 @@
+#!/usr/bin/make -f
+
+# Upstream has no test suite; the smoke tests need network access.
+export PYBUILD_DISABLE=test
+
+%:
+	dh $@ --buildsystem=pybuild
