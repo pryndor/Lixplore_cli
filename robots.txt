@@ -1,0 +1,8 @@
+# robots.txt for Lixplore Documentation
+# Allows all search engines to index the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://pryndor.github.io/Lixplore_cli/sitemap.xml

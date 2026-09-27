@@ -1,0 +1,23 @@
+/* SEO and accessibility improvements */
+
+/* Ensure proper semantic HTML structure */
+article {
+    position: relative;
+}
+
+/* Improve readability */
+.md-typeset {
+    line-height: 1.6;
+}
+
+/* Enhance code block accessibility */
+.md-typeset code {
+    word-wrap: break-word;
+}
+
+/* Mobile optimization */
+@media screen and (max-width: 76.1875em) {
+    .md-typeset {
+        font-size: 0.9rem;
+    }
+}
