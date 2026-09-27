@@ -2,7 +2,7 @@
 
 import argparse
 import sys
-from . import commands
+from . import __version__, commands
 from lixplore.utils.cache import cleanup_cache  # import correctly
 
 
@@ -43,6 +43,7 @@ def main():
         description="Lixplore Literature CLI Tool",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     commands.add_commands(parser)
     args = parser.parse_args()
 
