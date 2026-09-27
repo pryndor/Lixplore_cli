@@ -310,8 +310,7 @@ pipx inject lixplore-cli rich textual
 # With pip
 pip install "lixplore-cli[tui]"
 
-# Arch Linux
-sudo pacman -S python-textual
+# Arch Linux (AUR) and Homebrew: included, nothing to install
 ```
 
 ### 🔑 Optional: PubMed email and API key
@@ -372,7 +371,7 @@ This prints your Python version, Textual and Rich status, and exact fix instruct
 |---------------------|-------------|
 | **pipx** (most common) | `pipx inject lixplore-cli textual rich` |
 | **pip + venv** | `pip install "lixplore-cli[tui]"` (activate venv first) |
-| **Arch Linux (AUR)** | `sudo pacman -S python-textual` |
+| **Arch Linux (AUR)** | included since 1.2.3-2; older installs: `sudo pacman -S python-textual python-rich` |
 | **Homebrew** | included, nothing to install |
 
 > **pipx users — common gotcha:** pipx creates an isolated environment per tool. Installing `textual` with plain `pip` or `pacman` puts it in a *different* Python environment that lixplore cannot see. Always use `pipx inject lixplore-cli textual rich` so it lands inside the same isolated env.
