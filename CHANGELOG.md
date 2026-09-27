@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improved error handling and parameter validation in TUI search workflow
 
-## [2.0.0] - 2024-12-24
+## [1.0.0] - 2025-12-28
 
 ### Added - Major Export Enhancement Update
 
@@ -133,8 +133,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Export field filtering now validates field names
 - Better handling of missing metadata fields
 
-## [1.0.0] - 2024-12-19
-
 ### Added
 - Multi-source search across 5 academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC)
 - Boolean operator support (AND, OR, NOT, parentheses)
@@ -190,15 +188,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions for CI/CD
 - Automated testing across platforms
 
-## [Unreleased]
+## Planned Features
 
-## [1.2.0] - 2026-09-27
-
-### Planned Features
-- PDF download support
 - Citation network visualization
 - Bookmarking system
-- Search profiles
 - Web interface
 - Batch processing from file
 
