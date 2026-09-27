@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "1.2.0"
 description = "Academic Literature Search & Export CLI Tool"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     {name = "Balasubramanian Periannan", email = "balathepharmacist@gmail.com"}
 ]
@@ -37,13 +38,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
     "Topic :: Text Processing :: General",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -89,3 +90,6 @@ packages = ["lixplore", "lixplore.sources", "lixplore.utils", "lixplore.alerts",
 [tool.setuptools.package-data]
 lixplore = ["py.typed"]
 "lixplore.alerts" = ["env.example"]
+
+[tool.setuptools.data-files]
+"share/man/man1" = ["docs/lixplore.1"]
