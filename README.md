@@ -1,8 +1,8 @@
 # Lixplore-cli
 
-> **Academic Literature Search & Export CLI Tool**
+> **A Unix-inspired command-line tool for searching scientific literature**, built for terminal users who want speed, automation and minimal interfaces.
 
-[![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://pryndor.github.io/Lixplore_cli/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/pryndor/Lixplore_cli)
@@ -11,7 +11,7 @@
 [![Issues](https://img.shields.io/github/issues/pryndor/Lixplore_cli)](https://github.com/pryndor/Lixplore_cli/issues)
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
-Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, EuropePMC) with Boolean operators, smart selection, and export to 8 formats including EndNote, Excel, and BibTeX.
+Search PubMed, arXiv, Crossref, DOAJ and Europe PMC in one command with Boolean queries, deduplicate the results, and export to 8 formats including BibTeX, RIS, EndNote and Excel. Browse and annotate papers in a full-screen TUI, and get **new-paper alerts** on email, Telegram, Slack and 14 other channels.
 
 **📚 [Complete Documentation](https://pryndor.github.io/Lixplore_cli/)** | **🐛 [Report Issues](https://github.com/pryndor/Lixplore_cli/issues)**
 
@@ -27,14 +27,15 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 - 💾 **8 Export Formats** - CSV, Excel, JSON, BibTeX, RIS, EndNote, XML
 - 📖 **Review Mode** - View articles in separate terminal windows
 - 🎯 **Deduplication** - Advanced duplicate removal with multiple strategies
-- 📁 **Organized Exports** - Auto-organized folders by format type
+- 📁 **Organized Exports** - Auto-organized folders by format type in `./exports/`
+- 📬 **Paper Alerts** - Scheduled digests of new papers on 17 channels, via GitHub Actions or cron
 
 ### Advanced Features
 - 📥 **PDF Downloads** - Automatic PDF downloads from PMC, arXiv, Unpaywall, and SciHub (optional)
 - 🔗 **PDF Link Display** - Show clickable PDF links for open access articles in terminal (NEW!)
 - 📚 **Reference Manager Integration** - Direct Zotero API integration and Mendeley RIS export
 - 📊 **Statistics Dashboard** - Comprehensive analytics with visualizations (publication trends, top journals, top authors)
-- 🎨 **Interactive TUI Mode** - Browse, select, and export with an interactive terminal UI
+- 🎨 **Full-screen TUI** - Search, read, rate, annotate and export in a Textual interface (`--tui`)
 - 📝 **Citation Export** - Format citations in APA, MLA, Chicago, IEEE styles
 - 🔧 **Custom API Integration** - Plugin architecture for any REST API (Springer, BASE, etc.)
 - 💡 **Metadata Enrichment** - Auto-enrich results from multiple APIs (Crossref, PubMed, arXiv)
@@ -47,7 +48,7 @@ Search across multiple academic databases (PubMed, arXiv, Crossref, DOAJ, Europe
 ### Documentation
 - 📚 **[Complete Documentation Site](https://pryndor.github.io/Lixplore_cli/)** - Comprehensive online documentation
 - 📖 **32+ Documentation Pages** - Getting started, user guides, command reference, examples
-- 🔍 **All 95 Flags Documented** - Detailed examples for every command-line flag
+- 🔍 **All 75 Flags Documented** - Detailed examples for every command-line flag
 - 🎓 **Step-by-Step Tutorials** - From installation to advanced workflows
 - 💡 **Quick Examples** - Built-in examples with `--examples` flag
 - 📄 **Man Page** - Traditional Unix man page included
@@ -98,7 +99,7 @@ lixplore --tui
 
 **Perfect for scripting, automation, and quick searches**
 
-**All 95 flags fully functional and tested!**
+**All 75 flags fully functional and tested!**
 
 ```bash
 # Quick search and export
@@ -115,7 +116,7 @@ lixplore -x -q "quantum computing" -m 25 -X csv,bibtex,ris --zip
 ```
 
 **All Features Available:**
-- ✅ 95 command-line flags fully compatible
+- ✅ 75 command-line flags
 - ✅ Multi-source search (PubMed, arXiv, Crossref, DOAJ, EuropePMC)
 - ✅ Boolean operators and advanced queries
 - ✅ 8 export formats (CSV, Excel, JSON, BibTeX, RIS, EndNote, XML)
@@ -129,9 +130,7 @@ lixplore -x -q "quantum computing" -m 25 -X csv,bibtex,ris --zip
 
 ---
 
-## 🆕 What's New in Version 2.0
-
-Lixplore has been massively upgraded with powerful new features:
+## 🆕 Feature Highlights
 
 ### 📥 PDF Download & Link Display
 **Download PDFs** automatically with smart fallback chain:
@@ -312,7 +311,7 @@ pipx inject lixplore-cli rich textual
 pip install "lixplore-cli[tui]"
 
 # Arch Linux
-sudo pacman -S python-rich
+sudo pacman -S python-textual
 ```
 
 ### ✅ Verify Installation
@@ -349,7 +348,7 @@ pip install --user lixplore-cli
 
 ### 🖥️ TUI Mode Troubleshooting (Linux)
 
-TUI mode requires the `rich` library (≥ 13.0.0). If it fails to launch, follow these steps:
+`lixplore --tui` uses [Textual](https://textual.textualize.io/) (≥ 4.0, Python 3.9+). Without Textual it falls back to a simpler TUI built on `rich` (≥ 13.0). If it fails to launch, follow these steps:
 
 #### Step 1 — Run the built-in diagnostics
 
@@ -357,18 +356,18 @@ TUI mode requires the `rich` library (≥ 13.0.0). If it fails to launch, follow
 lixplore --check-tui
 ```
 
-This prints your Python version, Rich status, and exact fix instructions.
+This prints your Python version, Textual and Rich status, and exact fix instructions.
 
-#### Step 2 — Install / inject Rich
+#### Step 2 — Install / inject Textual
 
 | Installation method | Fix command |
 |---------------------|-------------|
-| **pipx** (most common) | `pipx inject lixplore-cli rich` |
-| **pip + venv** | `pip install rich` (activate venv first) |
-| **pip install 'lixplore-cli[tui]'** | installs Rich in one step |
-| **Arch Linux** | `sudo pacman -S python-rich` |
+| **pipx** (most common) | `pipx inject lixplore-cli textual rich` |
+| **pip + venv** | `pip install "lixplore-cli[tui]"` (activate venv first) |
+| **Arch Linux (AUR)** | `sudo pacman -S python-textual` |
+| **Homebrew** | included, nothing to install |
 
-> **pipx users — common gotcha:** pipx creates an isolated environment per tool. Installing `rich` with plain `pip` or `pacman` puts it in a *different* Python environment that lixplore cannot see. Always use `pipx inject lixplore-cli rich` so Rich lands inside the same isolated env.
+> **pipx users — common gotcha:** pipx creates an isolated environment per tool. Installing `textual` with plain `pip` or `pacman` puts it in a *different* Python environment that lixplore cannot see. Always use `pipx inject lixplore-cli textual rich` so it lands inside the same isolated env.
 
 #### Step 3 — Check terminal compatibility
 
@@ -423,20 +422,20 @@ For `screen`, launch it with: `screen -T xterm-256color`
 
 #### Step 7 — Linux virtual console (tty without a desktop)
 
-If you are logged in directly on a raw Linux console (not inside GNOME Terminal, Konsole, etc.) your `TERM` will be `linux`, which does not support 256 colors. Rich's TUI will look broken or fail to render.
+If you are logged in directly on a raw Linux console (not inside GNOME Terminal, Konsole, etc.) your `TERM` will be `linux`, which does not support 256 colors. The TUI will look broken or fail to render.
 
 **Solution:** Log in via SSH from a color-capable terminal, or start a desktop session and use a terminal emulator listed in Step 3 above. Alternatively, use CLI mode (all features work without a terminal emulator).
 
 #### ✅ If TUI still doesn't work — use CLI mode
 
-All 95 flags work perfectly in CLI mode without any extra dependencies. CLI mode is fully production-ready and is what we recommend for scripting, automation, and SSH sessions:
+All flags work in CLI mode without any extra dependencies. CLI mode is fully production-ready and is what we recommend for scripting, automation, and SSH sessions:
 
 ```bash
 # CLI equivalents for common TUI workflows
 lixplore -P -q "your topic" -m 20          # search PubMed
 lixplore -A -q "your topic" -m 50 -D       # search all + deduplication
 lixplore -P -q "topic" -m 20 -X xlsx       # export to Excel
-lixplore -P -q "topic" -m 20 -i            # interactive results browser (Rich optional)
+lixplore -P -q "topic" -m 20 -i            # open the results in the TUI
 ```
 
 ### Basic Usage
@@ -461,7 +460,7 @@ lixplore -P -q "diabetes" -m 20 -X xlsx -o results.xlsx
 Visit our comprehensive documentation site for:
 - **Getting Started Guides** - Installation and first search tutorial
 - **User Guides** - Search, filtering, export, annotations, PDF management
-- **Command Reference** - All 95 flags with detailed examples
+- **Command Reference** - All 75 flags with detailed examples
 - **Advanced Features** - Automation, AI integration, Zotero, custom APIs
 - **Examples** - Common workflows, use cases, tool integrations
 
@@ -615,7 +614,7 @@ lixplore -P -q "neuroscience" -m 20 -S 2 5 8 -X enw
 
 ## 📊 Export Formats
 
-All exports are automatically organized into folders:
+All exports are automatically organized into folders under `exports/` in the folder you run `lixplore` from (use `-o FILE` to choose a path yourself):
 
 ```
 exports/
@@ -692,7 +691,7 @@ See [Quick Start](#-quick-start) above for detailed instructions.
 
 ## 🔍 Requirements
 
-- Python 3.7 or higher
+- Python 3.8 or higher (3.9+ for the full-screen TUI)
 - Internet connection for API access
 - Terminal emulator (for review feature)
 
@@ -701,9 +700,9 @@ See [Quick Start](#-quick-start) above for detailed instructions.
 - `biopython` - PubMed/NCBI API access
 - `requests` - HTTP requests
 - `openpyxl` - Excel export support
-- `rich` (optional) - Enhanced TUI with colors and formatting
+- `textual` + `rich` (optional) - Full-screen TUI
 
-All core dependencies are automatically installed. For the enhanced TUI experience, install with `pipx inject lixplore-cli rich` or `pip install "lixplore-cli[tui]"`.
+All core dependencies are automatically installed. For the TUI, install with `pip install "lixplore-cli[tui]"` or `pipx inject lixplore-cli textual rich`.
 
 ---
 
@@ -768,16 +767,15 @@ Your support enables:
 ### TUI Mode Enhancement (Active Development)
 We're actively working to bring all CLI features into the TUI mode. Upcoming updates will include:
 
-- 🔄 **All 95 Flags in TUI** - Full integration of all command-line features
+- 🔄 **All CLI Flags in TUI** - Full integration of all command-line features
 - 📊 **Advanced Filtering** - Date ranges, author search, DOI lookup in TUI
-- 🎨 **Enhanced UI** - Improved navigation and visual design
 - 📥 **PDF Integration** - Direct PDF download and viewing from TUI
 - 🔧 **Custom API Support** - GUI for adding custom data sources
 - 📋 **Profile Management** - Visual interface for export profiles
 - 🎯 **Citation Formatting** - Interactive citation style selection
 - 📈 **Advanced Statistics** - More visualization options
 
-**Current Status:** Core TUI features working (search, browse, annotate, export). CLI mode has 100% feature parity with all flags.
+**Current Status:** The Textual TUI covers search, reading, rating, annotation, library, alerts, stats and export. Enrichment, citation styles and PDF download are CLI flags for now.
 
 ---
 
