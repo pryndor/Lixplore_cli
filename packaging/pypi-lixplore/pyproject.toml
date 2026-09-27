@@ -1,0 +1,30 @@
+# Placeholder that keeps the PyPI name "lixplore" with the project, so
+# `pip install lixplore` installs the real package instead of a stranger's.
+# Build and upload by hand: see README.md in this folder.
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lixplore"
+version = "1.0.0"
+description = "Alias for lixplore-cli: installs the Lixplore literature search CLI"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    {name = "Balasubramanian Periannan", email = "balathepharmacist@gmail.com"}
+]
+dependencies = ["lixplore-cli"]
+classifiers = [
+    "Development Status :: 7 - Inactive",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/pryndor/Lixplore_cli"
+"Real package" = "https://pypi.org/project/lixplore-cli/"
+
+[tool.setuptools]
+packages = []
