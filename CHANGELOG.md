@@ -212,4 +212,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-For more details, see the [README](README.md).
+For more details, see the [README](https://github.com/pryndor/Lixplore_cli#readme).

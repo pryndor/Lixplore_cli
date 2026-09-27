@@ -26,7 +26,7 @@ docs/
 │   ├── custom-apis.md                # Custom API integration
 │   └── zotero.md                     # Zotero integration
 ├── reference/                        # Command reference
-│   ├── flags-overview.md             # All 95 flags overview
+│   ├── flags-overview.md             # All flags overview
 │   ├── source-flags.md               # Source selection flags
 │   ├── search-flags.md               # Search parameter flags
 │   ├── filter-flags.md               # Filtering flags

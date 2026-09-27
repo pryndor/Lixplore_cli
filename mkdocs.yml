@@ -123,7 +123,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/pryndor/Lixplore_cli
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/lixplore/
+      link: https://pypi.org/project/lixplore-cli/
 
   # SEO optimization
   analytics:
@@ -143,4 +143,4 @@ extra:
 extra_css:
   - stylesheets/extra.css
 
-copyright: Copyright &copy; 2024 Pryndor
+copyright: Copyright &copy; 2024-2026 Pryndor

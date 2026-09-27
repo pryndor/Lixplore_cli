@@ -1,6 +1,6 @@
 # Lixplore Command-Line Flags - Complete Reference
 
-> **Comprehensive overview of all 95+ command-line flags organized by category**
+> **Comprehensive overview of all 75 command-line flags organized by category**
 
 ## Table of Contents
 
