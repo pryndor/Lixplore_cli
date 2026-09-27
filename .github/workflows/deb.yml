@@ -1,0 +1,94 @@
+name: Debian package
+
+# Builds lixplore-cli_<version>-1_all.deb from debian/, test-installs it on
+# Debian and Ubuntu, and attaches it to the GitHub Release.
+# The package is pure Python, so one .deb built on Debian 13 (the only
+# release with setuptools >= 77) installs on all of them.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    steps:
+    - name: Install build tools
+      run: |
+        apt-get update -qq
+        apt-get install -y -qq --no-install-recommends \
+          build-essential debhelper dh-python pybuild-plugin-pyproject \
+          python3-all python3-setuptools python3-wheel lintian ca-certificates
+
+    - uses: actions/checkout@v7
+
+    - name: Check debian/changelog matches pyproject.toml
+      run: |
+        pkg=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+        deb=$(dpkg-parsechangelog -S Version | sed 's/-[^-]*$//')
+        if [ "$pkg" != "$deb" ]; then
+          echo "::error::debian/changelog is $deb but pyproject.toml is $pkg"
+          exit 1
+        fi
+
+    - name: Build
+      run: |
+        dpkg-buildpackage -us -uc -b
+        mkdir -p out && mv ../*.deb out/
+        dpkg-deb --info out/*.deb
+        dpkg-deb --contents out/*.deb | grep -E 'bin/|templates/|man1/'
+
+    - name: Lintian (informational)
+      run: lintian --info out/*.deb || true
+
+    - uses: actions/upload-artifact@v7
+      with:
+        name: deb
+        path: out/*.deb
+
+  test:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['debian:bookworm', 'debian:trixie', 'ubuntu:22.04', 'ubuntu:24.04']
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: deb
+
+    - name: Install
+      run: |
+        apt-get update -qq
+        apt-get install -y -qq ./lixplore-cli_*.deb
+
+    - name: Smoke test
+      run: |
+        lixplore --version
+        lixplore --check-tui
+        lixplore --list-templates
+        lixplore-alerts --help
+        man -w lixplore || test -f /usr/share/man/man1/lixplore.1.gz
+        cd "$(mktemp -d)"
+        lixplore -x -q "neural networks" -m 2 -X csv
+        ls exports/csv/
+
+  attach:
+    needs: test
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v8
+      with:
+        name: deb
+
+    - name: Attach to the release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release upload "${{ github.event.release.tag_name }}" lixplore-cli_*.deb --clobber -R "${{ github.repository }}"
