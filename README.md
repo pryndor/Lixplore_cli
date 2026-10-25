@@ -9,6 +9,7 @@
 [![PyPI version](https://badge.fury.io/py/lixplore-cli.svg)](https://pypi.org/project/lixplore-cli/)
 [![Downloads](https://static.pepy.tech/badge/lixplore-cli)](https://pepy.tech/project/lixplore-cli)
 [![Issues](https://img.shields.io/github/issues/pryndor/Lixplore_cli)](https://github.com/pryndor/Lixplore_cli/issues)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/pryndor)
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-40DCA5?style=flat&logo=buy-me-a-coffee" alt="Buy Me A Coffee"></a>
 
 Search PubMed, arXiv, Crossref, DOAJ and Europe PMC in one command with Boolean queries, deduplicate the results, and export to 8 formats including BibTeX, RIS, EndNote and Excel. Browse and annotate papers in a full-screen TUI, and get **new-paper alerts** on email, Telegram, Slack and 14 other channels.
@@ -739,6 +740,9 @@ export MANPATH=$HOME/.local/share/man:$MANPATH
 ## ☕ Support the Project
 
 If you find Lixplore useful for your research, consider supporting its development!
+
+- [GitHub Sponsors](https://github.com/sponsors/pryndor), monthly or one-time
+- [Buy Me A Coffee](https://www.buymeacoffee.com/lixplore)
 
 <a href="https://www.buymeacoffee.com/lixplore" target="_blank" rel="noopener noreferrer">
   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
